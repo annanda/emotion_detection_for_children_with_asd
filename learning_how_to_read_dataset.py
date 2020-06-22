@@ -14,14 +14,18 @@ data_label_valence = arff.loadarff('labels/valence/train_1.arff')
 data_label_valence = pd.DataFrame(data_label_valence[0])
 print(data_label_valence)
 
-# merged features + annotation by frametime arousal
-merged = data_train.merge(data_label, how='left', on='frametime')
-print(merged)
+# # merged features + annotation by frametime arousal
+# merged = data_train.merge(data_label, how='left', on='frametime')
+# print(merged)
+#
+# #  merged features + annotation arousal/valence
+# merged_total = merged.merge(data_label_valence, how='left', on='frametime')
+# print(merged_total)
 
-#  merged features + annotation (arousal and valence
-merged_total = merged.merge(data_label_valence, how='left', on='frametime')
-print(merged_total)
-
-
+# merged dataset of annotation - arousal/valence
 merged_annotation = data_label.merge(data_label_valence, how='left', on='frametime')
 print(merged_annotation)
+
+# merged features + annotation by frametime
+merged = data_train.merge(merged_annotation, how='left', on='frametime')
+print(merged)
