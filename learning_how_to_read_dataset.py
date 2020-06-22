@@ -1,3 +1,8 @@
+"""
+Script to learn how to read and work with .arff datasets.
+Read the data, and using Pandas to deal with it (merging, calculating statistics)
+"""
+
 from scipy.io import arff
 import pandas as pd
 
