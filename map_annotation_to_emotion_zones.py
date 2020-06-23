@@ -11,9 +11,11 @@ emotion_zone = {
 }
 
 
-def get_emotion_zone(arousal, valence):
+def get_emotion_zone(valence, arousal):
     """
     each emotion zone is represented by an np array of 4 dimension
+    on each orthogonal the emotion zone is the one located on the right of the orthogonal in question.
+    the point 0,0 corresponds to green zone.
     """
     emotion = None
     if arousal == 0 and valence == 0:
