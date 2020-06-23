@@ -30,6 +30,8 @@ def prepare_dataset():
     merged = data_train.merge(merged_annotation, how='left', on='frametime')
     # print(merged)
 
+    # eliminating rows with nan values
+    merged = merged.dropna()
     merged.to_csv('dataset/train_1.csv')
 
 
