@@ -1,7 +1,12 @@
 """
+author: Annanda Sousa
 Script to map values of arousal and valence into the 4 emotion zones.
 """
 import numpy as np
+import glob
+import pandas as pd
+import pathlib
+import os.path
 
 emotion_zone = {
     'blue': np.array([1, 0, 0, 0]),
@@ -41,3 +46,28 @@ def get_emotion_zone(valence, arousal):
         else:
             emotion = 'blue'
     return emotion
+
+
+def map_emotion_zones(path_to_combined_files):
+    files = glob.glob(f"{path_to_combined_files}/*.csv")
+    new_rows = []
+    for file in files:
+        dataframe_annotation = pd.read_csv(file)
+        for row in dataframe_annotation.itertuples():
+            valence = row.GoldStandardValence
+            arousal = row.GoldStandardArousal
+            emotion = get_emotion_zone(valence, arousal)
+            row = [row.frametime, emotion]
+            new_rows.append(row)
+        new_dataframe = pd.DataFrame(new_rows, columns=['frametime', 'emotion_zone'])
+        path = pathlib.Path(__file__).parent.parent.absolute()
+        path_annotation_emotions = os.path.join(path, 'labels', 'emotion_zones', 'emotion_names')
+        file_name = file.split("/")[-1]
+        new_dataframe.to_csv(f"{path_annotation_emotions}/{file_name}")
+
+
+if __name__ == '__main__':
+    path = pathlib.Path(__file__).parent.parent.absolute()
+    path_annotation_emotions = os.path.join(path, 'labels', 'combined_valence_arousal')
+    map_emotion_zones(path_annotation_emotions)
+    # map_emotion_zones("/Users/user/PycharmProjects/emotion_detection_system/labels/combined_valence_arousal")
