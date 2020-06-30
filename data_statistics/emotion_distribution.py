@@ -27,3 +27,14 @@ for file in files:
 
 print(train_count)
 print(dev_count)
+
+# import matplotlib.pyplot as plt
+# keys = train_count.keys()
+# values = train_count.values()
+#
+# plt.bar(keys, values)
+#
+# keys = dev_count.keys()
+# values = dev_count.values()
+#
+# plt.bar(keys, values)
