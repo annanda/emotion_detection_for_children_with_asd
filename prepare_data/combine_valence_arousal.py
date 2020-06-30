@@ -26,7 +26,7 @@ def merge_annotation_dataset(file_arousal, files_names_valence):
     path = pathlib.Path(__file__).parent.parent.absolute()
     path_arousal = os.path.join(path, 'labels', 'combined_valence_arousal')
     file_name = name.split(".")[0]
-    merged_annotation.to_csv(f"{path_arousal}/{file_name}.csv")
+    merged_annotation.to_csv(f"{path_arousal}/{file_name}.csv", index=False)
 
 
 def merge_valence_arousal():
