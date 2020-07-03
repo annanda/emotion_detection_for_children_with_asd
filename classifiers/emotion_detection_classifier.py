@@ -6,7 +6,7 @@ from sklearn import svm
 from sklearn.model_selection import train_test_split
 
 
-def run_model(video_feature, model):
+def run_model_one_feature_type(video_feature, model):
     x = pd.read_csv(f'{DATASET_VIDEO_FOLDER}/{video_feature}_train.csv').iloc[:, 2:-1]
     y = pd.read_csv(f'{DATASET_VIDEO_FOLDER}/{video_feature}_train.csv')['emotion_zone']
     x_dev_dataset = pd.read_csv(f'{DATASET_VIDEO_FOLDER}/{video_feature}_dev.csv').iloc[:, 2:-1]
@@ -23,5 +23,9 @@ def run_model(video_feature, model):
     print(f'Accuracy of SVM model: {accuracy}')
 
 
+def run_model_more_than_one_feature_type():
+    pass
+
+
 if __name__ == '__main__':
-    run_model('AU', 'SVM')
+    run_model_one_feature_type('appearance', 'SVM')
