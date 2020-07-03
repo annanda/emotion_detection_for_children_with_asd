@@ -1,14 +1,14 @@
 import os.path
 import glob
 import pandas as pd
-from setup.conf import MAIN_FOLDER, DATASET_VIDEO_AU_FOLDER
+from setup.conf import MAIN_FOLDER, DATASET_VIDEO_FOLDER
 
 
-def concatenate_video_au_files(dataset_type):
+def concatenate_video_au_files(dataset_type, features_type):
     """
-    dataset_type can be 'train' or 'dev'
+    dataset_type must be 'train' or 'dev'
     """
-    files = glob.glob(f'{DATASET_VIDEO_AU_FOLDER}/{dataset_type}_*.csv')
+    files = glob.glob(f'{DATASET_VIDEO_FOLDER}/{features_type}/{dataset_type}_*.csv')
 
     dfs = []
     for file in files:
@@ -16,8 +16,9 @@ def concatenate_video_au_files(dataset_type):
         dfs.append(df)
 
     concated = pd.concat(dfs)
-    concated.to_csv(f'{MAIN_FOLDER}/dataset/video/AU_{dataset_type}.csv')
+    concated.to_csv(f'{DATASET_VIDEO_FOLDER}/{features_type}_{dataset_type}.csv')
 
 
 if __name__ == '__main__':
-    concatenate_video_au_files('dev')
+    features_type = 'appearance'
+    concatenate_video_au_files('dev', features_type)
