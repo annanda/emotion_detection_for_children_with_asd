@@ -1,9 +1,11 @@
+import functools
 import pandas as pd
 from setup.conf import DATASET_VIDEO_FOLDER
 from sklearn.metrics import accuracy_score
 from sklearn import svm
 
 from sklearn.model_selection import train_test_split
+from data_preparation.concatenating_datasets import producing_more_than_one_features_type
 
 
 def run_model_one_feature_type(video_feature, model):
@@ -23,9 +25,12 @@ def run_model_one_feature_type(video_feature, model):
     print(f'Accuracy of SVM model: {accuracy}')
 
 
-def run_model_more_than_one_feature_type():
-    pass
+def run_model_more_than_one_feature_type(feature_type_list, model):
+    producing_more_than_one_features_type(feature_type_list)
+    run_model_one_feature_type('temp', model)
 
 
 if __name__ == '__main__':
-    run_model_one_feature_type('appearance', 'SVM')
+    # run_model_one_feature_type('appearance', 'SVM')
+    feature_type_list = ['AU', 'appearance']
+    run_model_more_than_one_feature_type(feature_type_list, 'SVM')
