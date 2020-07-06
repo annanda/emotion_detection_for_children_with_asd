@@ -24,16 +24,24 @@ def concatenate_different_features_type_dataset(dataset_type, features_type_list
     """
     dataset_type must be 'train' or 'dev'
     """
+
     files = glob.glob(f'{DATASET_VIDEO_FOLDER}/{features_type_list[0]}/{dataset_type}_*.csv')
 
-    for file in files:
+    for file in files[:]:
         dfs = []
         file_name = file.split('/')[-1]
-        df = pd.read_csv(file).iloc[:, :-1]
-        other_df_path = f'{DATASET_VIDEO_FOLDER}/{features_type_list[1]}/{file_name}'
-        other_df = pd.read_csv(other_df_path)
-        dfs.append(df)
-        dfs.append(other_df)
+        # df = pd.read_csv(file).iloc[:, :-1]
+        # dfs.append(df)
+        for i, feature_type in enumerate(features_type_list):
+            if i < len(features_type_list) - 1:
+                other_df_path = f'{DATASET_VIDEO_FOLDER}/{features_type_list[i]}/{file_name}'
+                other_df = pd.read_csv(other_df_path).iloc[:, :-1]
+                dfs.append(other_df)
+            else:
+                last_df_path = f'{DATASET_VIDEO_FOLDER}/{features_type_list[-1]}/{file_name}'
+                last_df_path = pd.read_csv(last_df_path)
+                dfs.append(last_df_path)
+
         merged = functools.reduce(lambda df1, df2: pd.merge(df1, df2, on='frametime', how='inner'), dfs)
         # print(merged)
         merged.to_csv(f'{DATASET_VIDEO_FOLDER}/temp/{file_name}', index=False)
@@ -64,7 +72,7 @@ def producing_more_than_one_features_type(feature_type_lst):
 
 
 if __name__ == '__main__':
-    # features_type = 'appearance'
+    features_type = 'BoVW'
     # concatenate_video_au_files('dev', features_type)
-    feature_type_list = ['AU', 'appearance']
+    feature_type_list = ['AU', 'appearance', 'BoVW']
     producing_more_than_one_features_type(feature_type_list)

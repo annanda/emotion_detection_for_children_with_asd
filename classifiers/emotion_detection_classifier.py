@@ -31,6 +31,6 @@ def run_model_more_than_one_feature_type(feature_type_list, model):
 
 
 if __name__ == '__main__':
-    # run_model_one_feature_type('appearance', 'SVM')
-    feature_type_list = ['AU', 'appearance']
+    # run_model_one_feature_type('BoVW', 'SVM')
+    feature_type_list = ['AU', 'appearance', 'BoVW']
     run_model_more_than_one_feature_type(feature_type_list, 'SVM')

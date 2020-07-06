@@ -45,5 +45,5 @@ if __name__ == '__main__':
     list_file_annotation_emotions = glob.glob(f"{path_annotation_emotions}/*.csv")
     # feature_type is part of the set {'AU', 'appearance'}
     # feature_type = 'AU'
-    feature_type = 'appearance'
+    feature_type = 'BoVW'
     call_merge_video_au(list_file_annotation_emotions, feature_type)
