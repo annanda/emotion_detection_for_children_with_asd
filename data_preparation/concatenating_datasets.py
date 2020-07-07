@@ -74,6 +74,6 @@ def producing_more_than_one_features_type(feature_type_lst):
 
 if __name__ == '__main__':
     features_type = 'BoVW'
-    # concatenate_video_au_files('dev', features_type)
+    # concatenate_video_files('dev', features_type)
     feature_type_list = ['AU', 'appearance', 'BoVW']
     producing_more_than_one_features_type(feature_type_list)

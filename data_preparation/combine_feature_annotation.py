@@ -9,6 +9,9 @@ from scipy.io import arff
 import glob
 from setup.conf import MAIN_FOLDER
 
+path_annotation_emotions = os.path.join(MAIN_FOLDER, 'labels', 'emotion_zones', 'emotion_names')
+list_file_annotation_emotions = glob.glob(f"{path_annotation_emotions}/*.csv")
+
 
 def merge_features_with_annotation(file_features, list_file_name_emotions, feature_type):
     file_name_suffix = file_features.split('/')[-1]
@@ -28,7 +31,7 @@ def merge_for_all_files(list_file_features, list_file_annotation, feature_type):
         merge_features_with_annotation(list_train, list_file_annotation, feature_type)
 
 
-def call_merge_video_au(list_file_annotation, feature_type):
+def call_merge_video_files(feature_type, list_file_annotation=list_file_annotation_emotions):
     """
     calling the function merge_for_all_files() for audio modality - features Action Units (AU)
     """
@@ -41,9 +44,9 @@ def call_merge_video_au(list_file_annotation, feature_type):
 
 
 if __name__ == '__main__':
-    path_annotation_emotions = os.path.join(MAIN_FOLDER, 'labels', 'emotion_zones', 'emotion_names')
-    list_file_annotation_emotions = glob.glob(f"{path_annotation_emotions}/*.csv")
+    # path_annotation_emotions = os.path.join(MAIN_FOLDER, 'labels', 'emotion_zones', 'emotion_names')
+    # list_file_annotation_emotions = glob.glob(f"{path_annotation_emotions}/*.csv")
     # feature_type is part of the set {'AU', 'appearance'}
     # feature_type = 'AU'
-    feature_type = 'BoVW'
-    call_merge_video_au(list_file_annotation_emotions, feature_type)
+    feature_type = 'geometric'
+    call_merge_video_files(feature_type, list_file_annotation_emotions)
