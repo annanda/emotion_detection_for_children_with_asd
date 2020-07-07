@@ -5,6 +5,8 @@ from sklearn.metrics import accuracy_score
 from sklearn import svm
 
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix
+
 from data_preparation.concatenating_datasets import producing_more_than_one_features_type
 
 
@@ -22,12 +24,17 @@ def run_model_one_feature_type(video_feature, model):
 
     predictions = clf.predict(x_test)
     accuracy = accuracy_score(y_test, predictions)
-    print(f'Accuracy of SVM model: {accuracy}')
+
+    confusion_mtrx = confusion_matrix(y_test, predictions, labels=["blue", "green", "yellow", "red"])
+    # print(f'Accuracy of {model} model: {accuracy}')
+    # print(confusion_mtrx)
+    return accuracy, confusion_mtrx
 
 
 def run_model_more_than_one_feature_type(feature_type_list, model):
     producing_more_than_one_features_type(feature_type_list)
-    run_model_one_feature_type('temp', model)
+    accuracy, confusion_mtrx = run_model_one_feature_type('temp', model)
+    return accuracy, confusion_mtrx
 
 
 if __name__ == '__main__':

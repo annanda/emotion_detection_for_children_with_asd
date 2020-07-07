@@ -5,8 +5,9 @@ import pandas as pd
 from setup.conf import MAIN_FOLDER, DATASET_VIDEO_FOLDER
 
 
-def concatenate_video_au_files(dataset_type, features_type):
+def concatenate_video_files(dataset_type, features_type):
     """
+    concatenate all train or dev files into one big dataset file
     dataset_type must be 'train' or 'dev'
     """
     files = glob.glob(f'{DATASET_VIDEO_FOLDER}/{features_type}/{dataset_type}_*.csv')
@@ -67,8 +68,8 @@ def concatenate_different_features_type_dataset(dataset_type, features_type_list
 def producing_more_than_one_features_type(feature_type_lst):
     concatenate_different_features_type_dataset('train', feature_type_lst)
     concatenate_different_features_type_dataset('dev', feature_type_lst)
-    concatenate_video_au_files('train', 'temp')
-    concatenate_video_au_files('dev', 'temp')
+    concatenate_video_files('train', 'temp')
+    concatenate_video_files('dev', 'temp')
 
 
 if __name__ == '__main__':
