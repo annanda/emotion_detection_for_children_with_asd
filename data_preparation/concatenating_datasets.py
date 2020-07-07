@@ -2,15 +2,17 @@ import os.path
 import functools
 import glob
 import pandas as pd
-from setup.conf import MAIN_FOLDER, DATASET_VIDEO_FOLDER
+from setup.conf import MAIN_FOLDER, DATASET_FOLDER
 
 
-def concatenate_video_files(dataset_type, features_type):
+def concatenate_dataset_files(modality, dataset_type, features_type):
     """
     concatenate all train or dev files into one big dataset file
     dataset_type must be 'train' or 'dev'
     """
-    files = glob.glob(f'{DATASET_VIDEO_FOLDER}/{features_type}/{dataset_type}_*.csv')
+    if dataset_type not in ['train', 'dev']:
+        raise TypeError('dataset_type must be train or dev')
+    files = glob.glob(f'{DATASET_FOLDER}/{modality}/{features_type}/{dataset_type}_*.csv')
 
     dfs = []
     for file in files:
@@ -18,7 +20,7 @@ def concatenate_video_files(dataset_type, features_type):
         dfs.append(df)
 
     concated = pd.concat(dfs)
-    concated.to_csv(f'{DATASET_VIDEO_FOLDER}/{features_type}_{dataset_type}.csv')
+    concated.to_csv(f'{DATASET_FOLDER}/{modality}/{features_type}_{dataset_type}.csv')
 
 
 def concatenate_different_features_type_dataset(dataset_type, features_type_list):
@@ -68,8 +70,8 @@ def concatenate_different_features_type_dataset(dataset_type, features_type_list
 def producing_more_than_one_features_type(feature_type_lst):
     concatenate_different_features_type_dataset('train', feature_type_lst)
     concatenate_different_features_type_dataset('dev', feature_type_lst)
-    concatenate_video_files('train', 'temp')
-    concatenate_video_files('dev', 'temp')
+    concatenate_dataset_files('train', 'temp')
+    concatenate_dataset_files('dev', 'temp')
 
 
 if __name__ == '__main__':
