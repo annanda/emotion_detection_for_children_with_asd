@@ -23,12 +23,12 @@ def concatenate_dataset_files(modality, dataset_type, features_type):
     concated.to_csv(f'{DATASET_FOLDER}/{modality}/{features_type}_{dataset_type}.csv')
 
 
-def concatenate_different_features_type_dataset(dataset_type, features_type_list):
+def concatenate_different_features_type_dataset(modality, dataset_type, features_type_list):
     """
     dataset_type must be 'train' or 'dev'
     """
 
-    files = glob.glob(f'{DATASET_VIDEO_FOLDER}/{features_type_list[0]}/{dataset_type}_*.csv')
+    files = glob.glob(f'{DATASET_FOLDER}/{modality}/{features_type_list[0]}/{dataset_type}_*.csv')
 
     for file in files[:]:
         dfs = []
@@ -37,17 +37,17 @@ def concatenate_different_features_type_dataset(dataset_type, features_type_list
         # dfs.append(df)
         for i, feature_type in enumerate(features_type_list):
             if i < len(features_type_list) - 1:
-                other_df_path = f'{DATASET_VIDEO_FOLDER}/{features_type_list[i]}/{file_name}'
+                other_df_path = f'{DATASET_FOLDER}/{modality}/{features_type_list[i]}/{file_name}'
                 other_df = pd.read_csv(other_df_path).iloc[:, :-1]
                 dfs.append(other_df)
             else:
-                last_df_path = f'{DATASET_VIDEO_FOLDER}/{features_type_list[-1]}/{file_name}'
+                last_df_path = f'{DATASET_FOLDER}/{modality}/{features_type_list[-1]}/{file_name}'
                 last_df_path = pd.read_csv(last_df_path)
                 dfs.append(last_df_path)
 
         merged = functools.reduce(lambda df1, df2: pd.merge(df1, df2, on='frametime', how='inner'), dfs)
         # print(merged)
-        merged.to_csv(f'{DATASET_VIDEO_FOLDER}/temp/{file_name}', index=False)
+        merged.to_csv(f'{DATASET_FOLDER}/{modality}/temp/{file_name}', index=False)
 
 
 # def concatenate_annotated_datasets(feature_type_list):
@@ -67,11 +67,11 @@ def concatenate_different_features_type_dataset(dataset_type, features_type_list
 #     # return working_dataset
 
 
-def producing_more_than_one_features_type(feature_type_lst):
-    concatenate_different_features_type_dataset('train', feature_type_lst)
-    concatenate_different_features_type_dataset('dev', feature_type_lst)
-    concatenate_dataset_files('train', 'temp')
-    concatenate_dataset_files('dev', 'temp')
+def producing_more_than_one_features_type(modality, feature_type_lst):
+    concatenate_different_features_type_dataset(modality, 'train', feature_type_lst)
+    concatenate_different_features_type_dataset(modality, 'dev', feature_type_lst)
+    concatenate_dataset_files(modality, 'train', 'temp')
+    concatenate_dataset_files(modality, 'dev', 'temp')
 
 
 if __name__ == '__main__':

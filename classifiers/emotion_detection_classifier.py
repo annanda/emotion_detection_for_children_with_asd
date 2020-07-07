@@ -31,9 +31,9 @@ def run_model_one_feature_type(modality, feature_type, model):
     return accuracy, confusion_mtrx
 
 
-def run_model_more_than_one_feature_type(feature_type_list, model):
-    producing_more_than_one_features_type(feature_type_list)
-    accuracy, confusion_mtrx = run_model_one_feature_type('temp', model)
+def run_model_more_than_one_feature_type(modality, feature_type_list, model):
+    producing_more_than_one_features_type(modality, feature_type_list)
+    accuracy, confusion_mtrx = run_model_one_feature_type(modality, 'temp', model)
     return accuracy, confusion_mtrx
 
 
