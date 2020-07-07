@@ -8,6 +8,8 @@ from data_preparation.concatenating_datasets import concatenate_video_files
 
 
 def run_system(features_type, model):
+    if modality not in ['video', 'audio']:
+        raise TypeError('Modality must be video or audio')
     if len(features_type) == 1:
         accuracy, confusion_mtrx = run_model_one_feature_type(features_type[0], model)
     else:
@@ -17,20 +19,24 @@ def run_system(features_type, model):
     print(confusion_mtrx)
 
 
-def prepare_data(features_type):
-    call_merge_video_files(features_type[0])
-    concatenate_video_files('dev', features_type[0])
-    concatenate_video_files('train', features_type[0])
+def prepare_data(modality, features_type):
+    if modality not in ['video', 'audio']:
+        raise TypeError('Modality must be video or audio')
+    call_merge_video_files(modality, features_type[0])
+    # concatenate_video_files(modality, 'dev', features_type[0])
+    # concatenate_video_files(modality, 'train', features_type[0])
 
 
 if __name__ == '__main__':
     # configurations I want to use when running the system
-    features_type = ['geometric']
+    features_type = ['BoAW']
+    # features_type = ['AU', 'appearance', 'BoVW', 'geometric']
+    # features_type = ['AU', 'geometric']
     model = 'SVM'
-    # modality = 'video'
+    modality = 'audio'
 
     # run first prepare_data() if you are running one feature type only and for the first time
-    # prepare_data(features_type)
+    prepare_data(modality, features_type)
 
     # then run run_system()
-    run_system(features_type, model)
+    # run_system(modality, features_type, model)
