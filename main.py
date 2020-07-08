@@ -45,13 +45,24 @@ def system_entry(modality, features_type, model):
         run_system(modality, features_type, model)
 
 
+def prepare_systems_input(input_data):
+    if input_data['video']:
+        features_type_video = [key for key in input_data['features_type_video'].keys() if
+                               input_data['features_type_video'][key] is True]
+        system_entry('video', features_type_video, input_data['model_video'])
+    elif input_data['audio']:
+        features_type_audio = [key for key in input_data['features_type_audio'].keys() if
+                               input_data['features_type_audio'][key] is True]
+        system_entry('audio', features_type_audio, input_data['model_audio'])
+
+
 if __name__ == '__main__':
     # configurations I want to use when running the system
-    features_type = ['BoAW']
+    # features_type = ['BoAW']
     # features_type = ['AU', 'appearance', 'BoVW', 'geometric']
-    features_type = ['AU', 'geometric']
-    model = 'SVM'
-    modality = 'video'
+    # features_type = ['AU', 'geometric']
+    # model = 'SVM'
+    # modality = 'video'
 
     # run first prepare_data() if you are running one feature type only and for the first time
     # prepare_data(modality, features_type)
@@ -59,4 +70,16 @@ if __name__ == '__main__':
     # then run run_system()
     # run_system(modality, features_type, model)
 
-    system_entry(modality, features_type, model)
+    input_data = {
+        'video': True,
+        'audio': None,
+        'fusion_type': None,
+        'features_type_video': {'AU': True, 'appearance': True, 'BoVW': None, 'geometric': None},
+        'features_type_audio': {'BoAW': None},
+        'model_audio': None,
+        'model_video': 'SVM'
+    }
+    prepare_systems_input(input_data)
+
+#  so the idea is to transform the user's request into this dictionary that the system will use,
+#  So, from this point, I can deal with the data in this format - inside the ED system.
