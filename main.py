@@ -24,33 +24,32 @@ def run_system(modality, features_type, model):
 
     #  to not break the code yet.
     #####################################
-    accuracy_1 = accuracy_score(y_test, predictions)
 
-    confusion_mtrx_1 = confusion_matrix(y_test, predictions, labels=["blue", "green", "yellow", "red"])
-
-    print(f'Accuracy of {model} model for {modality} modality using {features_type} as features: {accuracy_1}')
-    print('Confusion matrix: labels=["blue", "green", "yellow", "red"]')
-    print(confusion_mtrx_1)
     #####################################
 
     return predictions, y_test
 
 
-def computing_modalities(modality, features_type, model):
-    predictions_1, y_test_1 = run_system(modality, features_type, model)
-    predictions_2, y_test_2 = run_system(modality, features_type, model)
+def computing_modalities(modalities, features_type, model):
+    predictions = []
+    y_tests = []
+    for modality in modalities:
+        prediction, y_test = run_system(modality, features_type, model)
+        predictions.append(prediction)
+        y_tests.append(y_test)
+    # predictions_2, y_test_2 = run_system(modality, features_type, model)
 
-    predictions = late_fusion(predictions_1, predictions_2)
-
-    accuracy_1 = accuracy_score(y_test_1, predictions)
-    accuracy_2 = accuracy_score(y_test_2, predictions)
-
-    confusion_mtrx_1 = confusion_matrix(y_test_1, predictions, labels=["blue", "green", "yellow", "red"])
-    confusion_mtrx_2 = confusion_matrix(y_test_2, predictions, labels=["blue", "green", "yellow", "red"])
-
-    print(f'Accuracy of {model} model for {modality} modality using {features_type} as features: {accuracy_1}')
-    print('Confusion matrix: labels=["blue", "green", "yellow", "red"]')
-    print(confusion_mtrx_1)
+    predictions_multimodality = late_fusion(predictions[0], predictions[1])
+    print(predictions_multimodality)
+    # accuracy_1 = accuracy_score(y_test_1, predictions)
+    # accuracy_2 = accuracy_score(y_test_2, predictions)
+    #
+    # confusion_mtrx_1 = confusion_matrix(y_test_1, predictions, labels=["blue", "green", "yellow", "red"])
+    # confusion_mtrx_2 = confusion_matrix(y_test_2, predictions, labels=["blue", "green", "yellow", "red"])
+    #
+    # print(f'Accuracy of {model} model for {modality} modality using {features_type} as features: {accuracy_1}')
+    # print('Confusion matrix: labels=["blue", "green", "yellow", "red"]')
+    # print(confusion_mtrx_1)
 
 
 def prepare_data(modality, features_type):
@@ -61,42 +60,80 @@ def prepare_data(modality, features_type):
     concatenate_dataset_files(modality, 'train', features_type)
 
 
-def system_entry(modality, features_type, model):
-    if modality not in ['video', 'audio']:
-        raise TypeError('Modality must be video or audio')
+# def system_entry(modality, features_type, model, fusion_type):
+def call_multimodal_ed_system(data_entry):
+    pass
+
+
+def system_entry(data_entry):
+    if not set(list(data_entry['modalities'].keys())).issubset(['video', 'audio']):
+        raise TypeError('Modality must be video and/or audio')
+
+    fusion_type = data_entry['fusion_type']
+    if len(data_entry['modalities']) < 2:
+        fusion_type = False
+
+    if not fusion_type:
+        modality, features_type, model = prepate_entry_data(data_entry)
+        predictions, y_test = call_unimodal_ed_system(modality, features_type, model)
+    else:
+        predictions, y_test = call_multimodal_ed_system(data_entry)
+
+    accuracy = accuracy_score(y_test, predictions)
+
+    confusion_mtrx = confusion_matrix(y_test, predictions, labels=["blue", "green", "yellow", "red"])
+
+    print(f'Accuracy of {model} model for {modality} modality using {features_type} as features: {accuracy}')
+    print('Confusion matrix: labels=["blue", "green", "yellow", "red"]')
+    print(confusion_mtrx)
+
+
+def call_unimodal_ed_system(modality, features_type, model):
     if len(features_type) == 1:
         path_to_check = f'{DATASET_FOLDER}/{modality}/{features_type[0]}_dev.csv'
-        if os.path.isfile(path_to_check):
-            run_system(modality, features_type, model)
-        else:
+        if not os.path.isfile(path_to_check):
             prepare_data(modality, features_type[0])
-            run_system(modality, features_type, model)
-    else:
-        run_system(modality, features_type, model)
+    predictions, y_test = run_system(modality, features_type, model)
+    return predictions, y_test
 
 
-def prepare_systems_input(input_data):
-    if input_data['video']:
-        features_type_video = [key for key in input_data['features_type_video'].keys() if
-                               input_data['features_type_video'][key] is True]
-        system_entry('video', features_type_video, input_data['model_video'])
-    elif input_data['audio']:
-        features_type_audio = [key for key in input_data['features_type_audio'].keys() if
-                               input_data['features_type_audio'][key] is True]
-        system_entry('audio', features_type_audio, input_data['model_audio'])
+#   computing modalities come here, if the number of modalities is bigger than one.
+
+
+def prepate_entry_data(input_data):
+    for modality in input_data['modalities'].keys():
+        features_type = [key for key in input_data['modalities'][modality]['features_type'].keys() if
+                         input_data['modalities'][modality]['features_type'][key] is True]
+        model = input_data['modalities'][modality]['model']
+        modality = modality
+
+    return modality, features_type, model
 
 
 if __name__ == '__main__':
+    # input_data = {
+    #     'modalities': {
+    #         'video': {
+    #             'features_type': {'AU': True, 'appearance': True, 'BoVW': False, 'geometric': False},
+    #             'model': 'SVM'
+    #         },
+    #         'audio': {
+    #             'features_type': {'BoAW': True},
+    #             'model': 'SVM'
+    #         }
+    #
+    #     },
+    #     'fusion_type': 'late_fusion'}
     input_data = {
-        'video': True,
-        'audio': None,
-        'fusion_type': None,
-        'features_type_video': {'AU': True, 'appearance': False, 'BoVW': None, 'geometric': False},
-        'features_type_audio': {'BoAW': None},
-        'model_audio': None,
-        'model_video': 'SVM'
-    }
-    prepare_systems_input(input_data)
+        'modalities': {
+            'video': {
+                'features_type': {'AU': True, 'appearance': False, 'BoVW': False, 'geometric': False},
+                'model': 'SVM'
+            }
+
+        },
+        'fusion_type': 'late_fusion'}
+    system_entry(input_data)
 
 #  so the idea is to transform the user's request into this dictionary that the system will use,
 #  So, from this point, I can deal with the data in this format - inside the ED system.

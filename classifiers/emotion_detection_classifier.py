@@ -21,12 +21,6 @@ def run_model_one_feature_type(modality, feature_type, model):
     clf.fit(x, y)
 
     predictions = clf.predict(x_test)
-    # accuracy = accuracy_score(y_test, predictions)
-
-    # confusion_mtrx = confusion_matrix(y_test, predictions, labels=["blue", "green", "yellow", "red"])
-    # print(f'Accuracy of {model} model: {accuracy}')
-    # print(confusion_mtrx)
-    # return accuracy, confusion_mtrx
     return predictions, y_test
 
 
