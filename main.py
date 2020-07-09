@@ -61,8 +61,22 @@ def prepare_data(modality, features_type):
 
 
 # def system_entry(modality, features_type, model, fusion_type):
+def concatenate_annotation_test_predictions(predictions_multimodal, y_test_list):
+    y_test = None
+    return y_test
+
+
 def call_multimodal_ed_system(data_entry):
-    pass
+    y_test_list = []
+    #  TODO: get information of each modality to compute separetely
+    prediction_1, y_test_1 = call_unimodal_ed_system()
+    prediction_2, y_test_2 = call_unimodal_ed_system()
+    y_test_list.append(y_test_1)
+    y_test_list.append(y_test_2)
+    predictions_multimodal = late_fusion(prediction_1, prediction_2)
+    y_test = concatenate_annotation_test_predictions(predictions_multimodal, y_test_list)
+
+    return predictions_multimodal, y_test
 
 
 def system_entry(data_entry):
