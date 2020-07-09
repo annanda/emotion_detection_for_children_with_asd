@@ -22,6 +22,8 @@ def merge_features_with_annotation(modality, file_features, list_file_name_emoti
     data_emotion_annotation_df = pd.read_csv(file_emotions)
     merged = pd.merge(data_features_df, data_emotion_annotation_df, how='inner', on='frametime')
     merged.dropna(inplace=True)
+    merged['frametime'] = file_name_suffix + '___' + merged['frametime'].astype(str)
+    # df['col'] = 'str' + df['col'].astype(str)
     path_dataset = os.path.join(MAIN_FOLDER, 'dataset', f'{modality}', f'{feature_type}')
     merged.to_csv(f"{path_dataset}/{file_name_suffix}.csv", index=False)
 
@@ -33,7 +35,7 @@ def merge_for_all_files(modality, list_file_features, list_file_annotation, feat
 
 def call_merge_video_files(modality, feature_type, list_file_annotation=list_file_annotation_emotions):
     """
-    calling the function merge_for_all_files() for audio modality - features Action Units (AU)
+    calling the function merge_for_all_files() for video modality - features Action Units (AU)
     """
     path_features_train = os.path.join(MAIN_FOLDER, 'features', f'{modality}', f'{feature_type}')
     list_file_features_train = glob.glob(f"{path_features_train}/*.arff")
@@ -49,4 +51,5 @@ if __name__ == '__main__':
     # feature_type is part of the set {'AU', 'appearance'}
     # feature_type = 'AU'
     feature_type = 'geometric'
-    call_merge_video_files(feature_type, list_file_annotation_emotions)
+    modality = 'video'
+    call_merge_video_files(modality, feature_type, list_file_annotation_emotions)
