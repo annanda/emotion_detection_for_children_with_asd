@@ -20,7 +20,7 @@ def concatenate_dataset_files(modality, dataset_type, features_type):
         dfs.append(df)
 
     concated = pd.concat(dfs)
-    concated.to_csv(f'{DATASET_FOLDER}/{modality}/{features_type}_{dataset_type}.csv')
+    concated.to_csv(f'{DATASET_FOLDER}/{modality}/{features_type}_{dataset_type}.csv', index=False)
 
 
 def concatenate_different_features_type_dataset(modality, dataset_type, features_type_list):
