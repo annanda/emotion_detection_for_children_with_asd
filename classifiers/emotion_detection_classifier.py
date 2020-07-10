@@ -25,7 +25,7 @@ def run_model_one_feature_type(modality, feature_type, model):
     # predictions_df_merged = pd.merge(predictions_df, y_test, left_on='prediction', right_on='emotion_zone')
     y_test['predictions'] = predictions
 
-    # TODO fix the return of this function - make the next one work with the y_test df intead of two different
+    # TODO fix the return of this function - make the next one work with the y_test df instead of two different
     # variables.
     return predictions, y_test
 

@@ -88,6 +88,8 @@ def call_multimodal_ed_system(data_entry):
     # y_test_list.append(y_test_1)
     # y_test_list.append(y_test_2)
 
+    # TODO work with receiving df, not two arrays
+
     merged = functools.reduce(lambda df1, df2: pd.merge(df1, df2, on='frametime', how='inner'), dfs)
     y_test = merged.iloc[:, 2:3]
     prediction_1 = merged.iloc[:, :1]
