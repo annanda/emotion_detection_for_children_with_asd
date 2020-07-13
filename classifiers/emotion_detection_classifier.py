@@ -11,7 +11,7 @@ from data_preparation.concatenating_datasets import producing_more_than_one_feat
 def run_model_one_feature_type(modality, feature_type, model):
     x = pd.read_csv(f'{DATASET_FOLDER}/{modality}/{feature_type}_train.csv').iloc[:, 1:-1]
     y = pd.read_csv(f'{DATASET_FOLDER}/{modality}/{feature_type}_train.csv')['emotion_zone']
-    x_dev_dataset = pd.read_csv(f'{DATASET_FOLDER}/{modality}/{feature_type}_dev.csv').iloc[:, 1:-1]
+    x_dev_dataset = pd.read_csv(f'{DATASET_FOLDER}/{modality}/{feature_type}_dev.csv').iloc[:, :-1]
     y_dev_dataset = pd.read_csv(f'{DATASET_FOLDER}/{modality}/{feature_type}_dev.csv')[['frametime', 'emotion_zone']]
 
     x_dev, x_test, y_dev, y_test = train_test_split(x_dev_dataset, y_dev_dataset, test_size=0.2)
@@ -20,9 +20,8 @@ def run_model_one_feature_type(modality, feature_type, model):
         clf = svm.SVC()
     clf.fit(x, y)
 
-    predictions = clf.predict(x_test)
-    predictions_df = pd.DataFrame(predictions, columns=['prediction'])
-    # predictions_df_merged = pd.merge(predictions_df, y_test, left_on='prediction', right_on='emotion_zone')
+    x_test_features = x_test.iloc[:, 1:]
+    predictions = clf.predict(x_test_features)
     y_test['predictions'] = predictions
     prediction_and_true_value = y_test
 
@@ -31,8 +30,8 @@ def run_model_one_feature_type(modality, feature_type, model):
 
 def run_model_more_than_one_feature_type(modality, feature_type_list, model):
     producing_more_than_one_features_type(modality, feature_type_list)
-    predictions, y_test = run_model_one_feature_type(modality, 'temp', model)
-    return predictions, y_test
+    prediction_and_true_value = run_model_one_feature_type(modality, 'temp', model)
+    return prediction_and_true_value
 
 
 if __name__ == '__main__':

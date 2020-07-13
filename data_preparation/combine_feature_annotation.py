@@ -23,7 +23,6 @@ def merge_features_with_annotation(modality, file_features, list_file_name_emoti
     merged = pd.merge(data_features_df, data_emotion_annotation_df, how='inner', on='frametime')
     merged.dropna(inplace=True)
     merged['frametime'] = file_name_suffix + '___' + merged['frametime'].astype(str)
-    # df['col'] = 'str' + df['col'].astype(str)
     path_dataset = os.path.join(MAIN_FOLDER, 'dataset', f'{modality}', f'{feature_type}')
     merged.to_csv(f"{path_dataset}/{file_name_suffix}.csv", index=False)
 
