@@ -110,14 +110,14 @@ if __name__ == '__main__':
     #     'fusion_type': 'late_fusion'}
     input_data = {
         'modalities': {
-            # 'video': {
-            #     'features_type': {'AU': True, 'appearance': False, 'BoVW': False, 'geometric': False},
-            #     'model': 'SVM'
-            # },
-            'audio': {
-                'features_type': {'BoAW': False, 'DeepSpectrum': True, 'eGeMAPSfunct': False },
+            'video': {
+                'features_type': {'AU': True, 'appearance': False, 'BoVW': False, 'geometric': False},
                 'model': 'SVM'
             },
+            # 'audio': {
+            #     'features_type': {'BoAW': False, 'DeepSpectrum': True, 'eGeMAPSfunct': False },
+            #     'model': 'SVM'
+            # },
         },
         'fusion_type': 'late_fusion'}
     system_entry(input_data)

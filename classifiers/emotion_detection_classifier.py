@@ -6,11 +6,16 @@ from sklearn import svm
 from sklearn.model_selection import train_test_split
 
 from data_preparation.concatenating_datasets import producing_more_than_one_features_type
+from data_preparation.balancing_dataset import balance_dataset
 
 
 def run_model_one_feature_type(modality, feature_type, model):
-    x = pd.read_csv(f'{DATASET_FOLDER}/{modality}/{feature_type}_train.csv').iloc[:, 1:-1]
-    y = pd.read_csv(f'{DATASET_FOLDER}/{modality}/{feature_type}_train.csv')['emotion_zone']
+    train_dataset = pd.read_csv(f'{DATASET_FOLDER}/{modality}/{feature_type}_train.csv')
+    balanced_data = balance_dataset(train_dataset)
+    # x = pd.read_csv(f'{DATASET_FOLDER}/{modality}/{feature_type}_train.csv').iloc[:, 1:-1]
+    # y = pd.read_csv(f'{DATASET_FOLDER}/{modality}/{feature_type}_train.csv')['emotion_zone']
+    x = balanced_data.iloc[:, 1:-1]
+    y = balanced_data['emotion_zone']
     x_dev_dataset = pd.read_csv(f'{DATASET_FOLDER}/{modality}/{feature_type}_dev.csv').iloc[:, :-1]
     y_dev_dataset = pd.read_csv(f'{DATASET_FOLDER}/{modality}/{feature_type}_dev.csv')[['frametime', 'emotion_zone']]
 
