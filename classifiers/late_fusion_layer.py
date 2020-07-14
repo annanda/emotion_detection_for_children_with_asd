@@ -8,7 +8,7 @@ import random
 
 
 def late_fusion(prediction_1, prediction_2):
-    prediction_2 = ['red' for _ in range(len(prediction_1))]
+    # prediction_2 = ['red' for _ in range(len(prediction_1))]
     if len(prediction_1) != len(prediction_2):
         raise TypeError('The two prediction vectors must be the same length')
     result_prediction = []

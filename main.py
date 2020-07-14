@@ -113,7 +113,11 @@ if __name__ == '__main__':
             'video': {
                 'features_type': {'AU': True, 'appearance': False, 'BoVW': False, 'geometric': False},
                 'model': 'SVM'
-            }
+            },
+            'audio': {
+                'features_type': {'BoAW': True},
+                'model': 'SVM'
+            },
         },
         'fusion_type': 'late_fusion'}
     system_entry(input_data)
