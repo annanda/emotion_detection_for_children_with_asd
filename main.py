@@ -110,12 +110,12 @@ if __name__ == '__main__':
     #     'fusion_type': 'late_fusion'}
     input_data = {
         'modalities': {
-            'video': {
-                'features_type': {'AU': True, 'appearance': False, 'BoVW': False, 'geometric': False},
-                'model': 'SVM'
-            },
+            # 'video': {
+            #     'features_type': {'AU': True, 'appearance': False, 'BoVW': False, 'geometric': False},
+            #     'model': 'SVM'
+            # },
             'audio': {
-                'features_type': {'BoAW': True},
+                'features_type': {'BoAW': False, 'DeepSpectrum': True, 'eGeMAPSfunct': False },
                 'model': 'SVM'
             },
         },
