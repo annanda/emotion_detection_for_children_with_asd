@@ -19,14 +19,18 @@ def run_model_one_feature_type(modality, feature_type, model):
     x_dev, x_test, y_dev, y_test = train_test_split(x_dev_dataset, y_dev_dataset, test_size=0.2)
 
     if model == 'SVM':
-        clf = svm.SVC()
+        clf = svm.SVC(probability=True)
     clf.fit(x, y)
 
     x_test_features = x_test.iloc[:, 1:]
+
+    # TODO: develop the option of dealing with the probability instead of classes
+    # prediction_probability = clf.predict_proba(x_test_features)
+
     predictions = clf.predict(x_test_features)
     y_test['predictions'] = predictions
     prediction_and_true_value = y_test
-
+    # ['blue' 'green' 'red' 'yellow']
     return prediction_and_true_value
 
 
