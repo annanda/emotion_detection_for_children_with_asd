@@ -41,7 +41,7 @@ def call_multimodal_ed_system(data_entry):
         prediction_and_true_value = call_unimodal_ed_system(modality, features_type, model)
         dfs.append(prediction_and_true_value)
 
-    merged = functools.reduce(lambda df1, df2: pd.merge(df1, df2, on='frametime', how='inner'), dfs)
+    merged = functools.reduce(lambda df1, df2: pd.merge(df1, df2, on='frametime', how='outer'), dfs)
     y_test = merged['emotion_zone_x'].tolist()
     prediction_1 = merged['predictions_x'].tolist()
     prediction_2 = merged['predictions_y'].tolist()
@@ -114,10 +114,10 @@ if __name__ == '__main__':
                 'features_type': {'AU': True, 'appearance': False, 'BoVW': False, 'geometric': False},
                 'model': 'SVM'
             },
-            # 'audio': {
-            #     'features_type': {'BoAW': False, 'DeepSpectrum': True, 'eGeMAPSfunct': False },
-            #     'model': 'SVM'
-            # },
+            'audio': {
+                'features_type': {'BoAW': False, 'DeepSpectrum': False, 'eGeMAPSfunct': True},
+                'model': 'SVM'
+            },
         },
         'fusion_type': 'late_fusion'}
     system_entry(input_data)
