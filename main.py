@@ -114,10 +114,14 @@ if __name__ == '__main__':
                 'features_type': {'AU': True, 'appearance': False, 'BoVW': False, 'geometric': False},
                 'model': 'SVM'
             },
-            'audio': {
-                'features_type': {'BoAW': False, 'DeepSpectrum': False, 'eGeMAPSfunct': True},
-                'model': 'SVM'
-            },
+            # 'audio': {
+            #     'features_type': {'BoAW': True, 'DeepSpectrum': True, 'eGeMAPSfunct': False},
+            #     'model': 'SVM'
+            # },
+            # 'physio': {
+            #     'features_type': {},
+            #     'model': 'SVM'
+            # }
         },
         'fusion_type': 'late_fusion'}
     system_entry(input_data)
