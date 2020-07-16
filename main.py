@@ -15,8 +15,8 @@ import pandas as pd
 
 
 def run_system(modality, features_type, model):
-    if modality not in ['video', 'audio']:
-        raise TypeError('Modality must be video or audio')
+    if modality not in ['video', 'audio', 'physio']:
+        raise TypeError('Modality must be video, physio or audio')
     if len(features_type) == 1:
         prediction_and_true_value = run_model_one_feature_type(modality, features_type[0], model)
     else:
@@ -26,8 +26,8 @@ def run_system(modality, features_type, model):
 
 
 def prepare_data(modality, features_type):
-    if modality not in ['video', 'audio']:
-        raise TypeError('Modality must be video or audio')
+    if modality not in ['video', 'audio', 'physio']:
+        raise TypeError('Modality must be video, audio or physio')
     call_merge_video_files(modality, features_type)
     concatenate_dataset_files(modality, 'dev', features_type)
     concatenate_dataset_files(modality, 'train', features_type)
@@ -51,8 +51,8 @@ def call_multimodal_ed_system(data_entry):
 
 
 def system_entry(data_entry):
-    if not set(list(data_entry['modalities'].keys())).issubset(['video', 'audio']):
-        raise TypeError('Modality must be video and/or audio')
+    if not set(list(data_entry['modalities'].keys())).issubset(['video', 'audio', 'physio']):
+        raise TypeError('Modality must be video, physio and/or audio')
 
     fusion_type = data_entry['fusion_type']
     if len(data_entry['modalities']) < 2:
@@ -110,18 +110,18 @@ if __name__ == '__main__':
     #     'fusion_type': 'late_fusion'}
     input_data = {
         'modalities': {
-            'video': {
-                'features_type': {'AU': True, 'appearance': False, 'BoVW': False, 'geometric': False},
-                'model': 'SVM'
-            },
+            # 'video': {
+            #     'features_type': {'AU': True, 'appearance': False, 'BoVW': False, 'geometric': False},
+            #     'model': 'SVM'
+            # },
             # 'audio': {
             #     'features_type': {'BoAW': True, 'DeepSpectrum': True, 'eGeMAPSfunct': False},
             #     'model': 'SVM'
             # },
-            # 'physio': {
-            #     'features_type': {},
-            #     'model': 'SVM'
-            # }
+            'physio': {
+                'features_type': {'HRHRV': True},
+                'model': 'SVM'
+            }
         },
         'fusion_type': 'late_fusion'}
     system_entry(input_data)

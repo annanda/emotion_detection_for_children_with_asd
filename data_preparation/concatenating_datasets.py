@@ -50,23 +50,6 @@ def concatenate_different_features_type_dataset(modality, dataset_type, features
         merged.to_csv(f'{DATASET_FOLDER}/{modality}/temp/{file_name}', index=False)
 
 
-# def concatenate_annotated_datasets(feature_type_list):
-#     # esse chama a funcao acima
-#     dfs = []
-#     for i, feature_type in enumerate(feature_type_list):
-#         if i < len(feature_type_list) - 1:
-#             df = pd.read_csv(f'{DATASET_VIDEO_FOLDER}/{feature_type}_train.csv').iloc[:, 1:-1]
-#             dfs.append(df)
-#         else:
-#             last_df = pd.read_csv(f'{DATASET_VIDEO_FOLDER}/{feature_type}_train.csv').iloc[:, 1:]
-#             dfs.append(last_df)
-#     # merged = pd.merge(data_features_df, data_emotion_annotation_df, how='inner', on='frametime')
-#     # merged = pd.concat(dfs, axis=1)
-#     merged = functools.reduce(lambda df1, df2: pd.merge(df1, df2, on='frametime', how='inner'), dfs)
-#     working_dataset = merged
-#     # return working_dataset
-
-
 def producing_more_than_one_features_type(modality, feature_type_lst):
     concatenate_different_features_type_dataset(modality, 'train', feature_type_lst)
     concatenate_different_features_type_dataset(modality, 'dev', feature_type_lst)

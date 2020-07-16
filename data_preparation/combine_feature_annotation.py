@@ -19,6 +19,8 @@ def merge_features_with_annotation(modality, file_features, list_file_name_emoti
         file_name_suffix = file_name_suffix.split('_3.0_0')[0]
     elif '_0.0_0' in file_name_suffix:
         file_name_suffix = file_name_suffix.split('_0.0_0')[0]
+    elif '_2.0_0' in file_name_suffix:
+        file_name_suffix = file_name_suffix.split('_2.0_0')[0]
     data_features = arff.loadarff(file_features)
     data_features_df = pd.DataFrame(data_features[0])
     file_emotions = [file for file in list_file_name_emotions if file_name_suffix in file][0]
