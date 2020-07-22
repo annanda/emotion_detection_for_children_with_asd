@@ -5,7 +5,7 @@ script to serve as an entry point to run the system with different configuration
 import functools
 import os.path
 from classifiers.emotion_detection_classifier import run_model_more_than_one_feature_type, run_model_one_feature_type
-from data_preparation.combine_feature_annotation import call_merge_video_files
+from data_preparation.combine_feature_annotation import call_merge_modality_files
 from data_preparation.concatenating_datasets import concatenate_dataset_files
 from setup.conf import DATASET_FOLDER
 from classifiers.late_fusion_layer import late_fusion
@@ -28,7 +28,7 @@ def run_system(modality, features_type, model):
 def prepare_data(modality, features_type):
     if modality not in ['video', 'audio', 'physio']:
         raise TypeError('Modality must be video, audio or physio')
-    call_merge_video_files(modality, features_type)
+    call_merge_modality_files(modality, features_type)
     concatenate_dataset_files(modality, 'dev', features_type)
     concatenate_dataset_files(modality, 'train', features_type)
 
@@ -43,9 +43,14 @@ def call_multimodal_ed_system(data_entry):
 
     merged = functools.reduce(lambda df1, df2: pd.merge(df1, df2, on='frametime', how='outer'), dfs)
     y_test = merged['emotion_zone_x'].tolist()
-    prediction_1 = merged['predictions_x'].tolist()
-    prediction_2 = merged['predictions_y'].tolist()
-    predictions_multimodal = late_fusion(prediction_1, prediction_2)
+    list_of_predictions = []
+    list_of_predictions.append(merged['predictions_x'].tolist())
+    list_of_predictions.append(merged['predictions_z'].tolist())
+    if merged['predictions_z']:
+        list_of_predictions.append(merged['predictions_z'].tolist())
+    # predictions_multimodal = late_fusion(prediction_1, prediction_2)
+
+    predictions_multimodal = late_fusion(list_of_predictions)
 
     return predictions_multimodal, y_test
 
@@ -110,18 +115,18 @@ if __name__ == '__main__':
     #     'fusion_type': 'late_fusion'}
     input_data = {
         'modalities': {
-            # 'video': {
-            #     'features_type': {'AU': True, 'appearance': False, 'BoVW': False, 'geometric': False},
-            #     'model': 'SVM'
-            # },
-            # 'audio': {
-            #     'features_type': {'BoAW': True, 'DeepSpectrum': True, 'eGeMAPSfunct': False},
-            #     'model': 'SVM'
-            # },
-            'physio': {
-                'features_type': {'HRHRV': True},
+            'video': {
+                'features_type': {'AU': True, 'appearance': False, 'BoVW': False, 'geometric': False},
                 'model': 'SVM'
-            }
+            },
+            # 'audio': {
+            #     'features_type': {'BoAW': True, 'DeepSpectrum': False, 'eGeMAPSfunct': False},
+            #     'model': 'SVM'
+            # },
+            # 'physio': {
+            #     'features_type': {'HRHRV': True},
+            #     'model': 'SVM'
+            # }
         },
         'fusion_type': 'late_fusion'}
     system_entry(input_data)
