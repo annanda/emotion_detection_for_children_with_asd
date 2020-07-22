@@ -5,6 +5,7 @@
 # baby steps: starting with two predictions - two modalities.
 
 import random
+import numpy as np
 
 
 def select_one_prediction_three_values(prediction_1, prediction_2, prediction_3):
@@ -18,31 +19,34 @@ def select_one_prediction_three_values(prediction_1, prediction_2, prediction_3)
 
 
 def late_fusion(list_of_predictions_by_modality):
+    result_predictions = []
     if len(list_of_predictions_by_modality) == 2:
         result_predictions = late_fusion_two_modalities(list_of_predictions_by_modality[0],
                                                         list_of_predictions_by_modality[1])
     elif len(list_of_predictions_by_modality) == 3:
-        result_predictions = []
         for i in range(len(list_of_predictions_by_modality[0])):
             current_result = None
-            if not list_of_predictions_by_modality[0][i]:
+            if value_is_nan(list_of_predictions_by_modality[0][i]):
+                # if not list_of_predictions_by_modality[0][i]:
                 current_result = select_one_prediction(list_of_predictions_by_modality[1][i],
                                                        list_of_predictions_by_modality[2][i])
                 result_predictions.append(current_result)
                 continue
-            if not list_of_predictions_by_modality[1][i]:
+            if value_is_nan(list_of_predictions_by_modality[1][i]):
+                # if not list_of_predictions_by_modality[1][i]:
                 current_result = select_one_prediction(list_of_predictions_by_modality[0][i],
                                                        list_of_predictions_by_modality[2][i])
                 result_predictions.append(current_result)
                 continue
-            if not list_of_predictions_by_modality[2][i]:
+            if value_is_nan(list_of_predictions_by_modality[2][i]):
+                # if not list_of_predictions_by_modality[2][i]:
                 current_result = select_one_prediction(list_of_predictions_by_modality[0][i],
                                                        list_of_predictions_by_modality[1][i])
                 result_predictions.append(current_result)
                 continue
-            current_result = select_one_prediction_three_values(list_of_predictions_by_modality[0],
-                                                                list_of_predictions_by_modality[1],
-                                                                list_of_predictions_by_modality[2])
+            current_result = select_one_prediction_three_values(list_of_predictions_by_modality[0][i],
+                                                                list_of_predictions_by_modality[1][i],
+                                                                list_of_predictions_by_modality[2][i])
             result_predictions.append(current_result)
     return result_predictions
 
@@ -57,15 +61,24 @@ def late_fusion_two_modalities(predictions_1, predictions_2):
 
 
 def select_one_prediction(prediction_1, prediction_2):
-    if not prediction_1:
+    if value_is_nan(prediction_1):
         return prediction_2
-    if not prediction_2:
-        return prediction_2
-    pick = random.choice([1, 2])
-    if pick == 1:
+    if value_is_nan(prediction_2):
         return prediction_1
     else:
-        return prediction_2
+        pick = random.choice([1, 2])
+        if pick == 1:
+            return prediction_1
+        else:
+            return prediction_2
+
+
+def value_is_nan(value):
+    try:
+        if np.isnan(value):
+            return True
+    except TypeError:
+        return False
 
 # def late_fusion(prediction_1, prediction_2):
 #     # prediction_2 = ['red' for _ in range(len(prediction_1))]

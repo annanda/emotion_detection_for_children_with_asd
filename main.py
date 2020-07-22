@@ -5,9 +5,8 @@ script to serve as an entry point to run the system with different configuration
 import functools
 import os.path
 from classifiers.emotion_detection_classifier import run_model_more_than_one_feature_type, run_model_one_feature_type
-from data_preparation.combine_feature_annotation import call_merge_modality_files
-from data_preparation.concatenating_datasets import concatenate_dataset_files
-from setup.conf import DATASET_FOLDER
+from data_preparation.preparing_datasets import prepare_data
+from setup.conf import DATASET_FOLDER, EMOTION_ANNOTATION_FILE
 from classifiers.late_fusion_layer import late_fusion
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
@@ -25,14 +24,6 @@ def run_system(modality, features_type, model):
     return prediction_and_true_value
 
 
-def prepare_data(modality, features_type):
-    if modality not in ['video', 'audio', 'physio']:
-        raise TypeError('Modality must be video, audio or physio')
-    call_merge_modality_files(modality, features_type)
-    concatenate_dataset_files(modality, 'dev', features_type)
-    concatenate_dataset_files(modality, 'train', features_type)
-
-
 def call_multimodal_ed_system(data_entry):
     dfs = []
     modalities = list(data_entry['modalities'].keys())
@@ -42,13 +33,16 @@ def call_multimodal_ed_system(data_entry):
         dfs.append(prediction_and_true_value)
 
     merged = functools.reduce(lambda df1, df2: pd.merge(df1, df2, on='frametime', how='outer'), dfs)
-    y_test = merged['emotion_zone_x'].tolist()
+    emotion_annotation = pd.read_csv(EMOTION_ANNOTATION_FILE)
+    merged = pd.merge(merged, emotion_annotation, on='frametime', how='inner')
+    y_test = merged.iloc[:, -1:]
     list_of_predictions = []
     list_of_predictions.append(merged['predictions_x'].tolist())
-    list_of_predictions.append(merged['predictions_z'].tolist())
-    if merged['predictions_z']:
-        list_of_predictions.append(merged['predictions_z'].tolist())
-    # predictions_multimodal = late_fusion(prediction_1, prediction_2)
+    list_of_predictions.append(merged['predictions_y'].tolist())
+    try:
+        list_of_predictions.append(merged['predictions'].tolist())
+    except KeyError:
+        pass
 
     predictions_multimodal = late_fusion(list_of_predictions)
 
@@ -119,14 +113,14 @@ if __name__ == '__main__':
                 'features_type': {'AU': True, 'appearance': False, 'BoVW': False, 'geometric': False},
                 'model': 'SVM'
             },
-            # 'audio': {
-            #     'features_type': {'BoAW': True, 'DeepSpectrum': False, 'eGeMAPSfunct': False},
-            #     'model': 'SVM'
-            # },
-            # 'physio': {
-            #     'features_type': {'HRHRV': True},
-            #     'model': 'SVM'
-            # }
+            'audio': {
+                'features_type': {'BoAW': True, 'DeepSpectrum': False, 'eGeMAPSfunct': False},
+                'model': 'SVM'
+            },
+            'physio': {
+                'features_type': {'HRHRV': True},
+                'model': 'SVM'
+            }
         },
         'fusion_type': 'late_fusion'}
     system_entry(input_data)

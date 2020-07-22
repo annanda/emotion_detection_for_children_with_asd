@@ -4,7 +4,7 @@ from sklearn import svm
 
 from sklearn.model_selection import train_test_split
 
-from data_preparation.concatenating_datasets import producing_more_than_one_features_type
+from data_preparation.preparing_datasets import producing_more_than_one_features_type
 from data_preparation.balancing_dataset import balance_dataset
 
 

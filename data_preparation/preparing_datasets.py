@@ -3,6 +3,7 @@ import functools
 import glob
 import pandas as pd
 from setup.conf import MAIN_FOLDER, DATASET_FOLDER
+from data_preparation.combine_feature_annotation import call_merge_modality_files, merge_for_all_files
 
 
 def concatenate_dataset_files(modality, dataset_type, features_type):
@@ -27,6 +28,11 @@ def concatenate_different_features_type_dataset(modality, dataset_type, features
     """
     dataset_type must be 'train' or 'dev'
     """
+
+    for features_type in features_type_list:
+        path_to_check = f'{DATASET_FOLDER}/{modality}/{features_type}_dev.csv'
+        if not os.path.isfile(path_to_check):
+            prepare_data(modality, features_type)
 
     files = glob.glob(f'{DATASET_FOLDER}/{modality}/{features_type_list[0]}/{dataset_type}_*.csv')
 
@@ -55,6 +61,14 @@ def producing_more_than_one_features_type(modality, feature_type_lst):
     concatenate_different_features_type_dataset(modality, 'dev', feature_type_lst)
     concatenate_dataset_files(modality, 'train', 'temp')
     concatenate_dataset_files(modality, 'dev', 'temp')
+
+
+def prepare_data(modality, features_type):
+    if modality not in ['video', 'audio', 'physio']:
+        raise TypeError('Modality must be video, audio or physio')
+    call_merge_modality_files(modality, features_type)
+    concatenate_dataset_files(modality, 'dev', features_type)
+    concatenate_dataset_files(modality, 'train', features_type)
 
 
 if __name__ == '__main__':
