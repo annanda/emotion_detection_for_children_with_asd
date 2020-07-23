@@ -19,7 +19,7 @@ def run_system(data_entry):
 
     if not fusion_type:
         modality = list(data_entry['modalities'].keys())[0]
-        features_type, model = get_features_and_model(modality)
+        features_type, model = get_features_and_model(modality, data_entry)
         predictions_and_y_test = call_unimodal_ed_system(modality, features_type, model)
         predictions = predictions_and_y_test['predictions'].tolist()
         y_test = predictions_and_y_test['emotion_zone'].tolist()
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     input_data = {
         'modalities': {
             'video': {
-                'features_type': {'AU': True, 'appearance': True, 'BoVW': False, 'geometric': False},
+                'features_type': {'AU': False, 'appearance': False, 'BoVW': False, 'geometric': True},
                 'model': 'SVM'
             },
             # 'audio': {
