@@ -32,7 +32,7 @@ def concatenate_different_features_type_dataset(modality, dataset_type, features
     for features_type in features_type_list:
         path_to_check = f'{DATASET_FOLDER}/{modality}/{features_type}_dev.csv'
         if not os.path.isfile(path_to_check):
-            prepare_data(modality, features_type)
+            create_dataset_files(modality, features_type)
 
     files = glob.glob(f'{DATASET_FOLDER}/{modality}/{features_type_list[0]}/{dataset_type}_*.csv')
 
@@ -63,7 +63,7 @@ def producing_more_than_one_features_type(modality, feature_type_lst):
     concatenate_dataset_files(modality, 'dev', 'temp')
 
 
-def prepare_data(modality, features_type):
+def create_dataset_files(modality, features_type):
     if modality not in ['video', 'audio', 'physio']:
         raise TypeError('Modality must be video, audio or physio')
     call_merge_modality_files(modality, features_type)

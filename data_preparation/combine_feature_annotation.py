@@ -23,9 +23,6 @@ def generating_features_in_csv(modality, file_features, list_file_name_emotions,
         file_name_suffix = file_name_suffix.split('_2.0_0')[0]
     data_features = arff.loadarff(file_features)
     data_features_df = pd.DataFrame(data_features[0])
-    # file_emotions = [file for file in list_file_name_emotions if file_name_suffix in file][0]
-    # data_emotion_annotation_df = pd.read_csv(file_emotions)
-    # merged = pd.merge(data_features_df, data_emotion_annotation_df, how='inner', on='frametime')
     data_features_df.dropna(inplace=True)
     data_features_df['frametime'] = file_name_suffix + '___' + data_features_df['frametime'].astype(str)
     path_dataset = os.path.join(MAIN_FOLDER, 'dataset', f'{modality}', f'{feature_type}')

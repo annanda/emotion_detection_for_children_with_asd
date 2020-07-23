@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 
-def balance_dataset(dataframe):
+def balance_dataset_undersampling(dataframe):
     annotation_value = dataframe.groupby(['emotion_zone'])['frametime'].count()
     min_value = annotation_value.min()
     zones = ['blue', 'green', 'red', 'yellow']
@@ -23,4 +23,4 @@ def balance_dataset(dataframe):
 if __name__ == '__main__':
     df = pd.read_csv(
         '/Users/user/OneDrive - National University of Ireland, Galway/From-macbook /PycharmProjects/emotion_detection_system/dataset/video/AU_train.csv')
-    balance_dataset(df)
+    balance_dataset_undersampling(df)
