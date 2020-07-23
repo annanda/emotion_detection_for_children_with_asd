@@ -44,17 +44,17 @@ if __name__ == '__main__':
     input_data = {
         'modalities': {
             'video': {
-                'features_type': {'AU': True, 'appearance': False, 'BoVW': False, 'geometric': False},
+                'features_type': {'AU': True, 'appearance': True, 'BoVW': False, 'geometric': False},
                 'model': 'SVM'
             },
-            'audio': {
-                'features_type': {'BoAW': True, 'DeepSpectrum': False, 'eGeMAPSfunct': False},
-                'model': 'SVM'
-            },
-            'physio': {
-                'features_type': {'HRHRV': True},
-                'model': 'SVM'
-            }
+            # 'audio': {
+            #     'features_type': {'BoAW': True, 'DeepSpectrum': False, 'eGeMAPSfunct': False},
+            #     'model': 'SVM'
+            # },
+            # 'physio': {
+            #     'features_type': {'HRHRV': True},
+            #     'model': 'SVM'
+            # }
         },
         'fusion_type': 'late_fusion'}
     run_system(input_data)

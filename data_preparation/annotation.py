@@ -3,11 +3,16 @@ author: Annanda Sousa
 Script to map values of arousal and valence into the 4 emotion zones.
 """
 import numpy as np
+import os.path
 import glob
-import pandas as pd
 import pathlib
 import os.path
+from scipy.io import arff
+import pandas as pd
+from setup.conf import MAIN_FOLDER
 
+path_annotation_emotions = os.path.join(MAIN_FOLDER, 'labels', 'emotion_zones', 'emotion_names')
+list_file_annotation_emotions = glob.glob(f"{path_annotation_emotions}/*.csv")
 emotion_zone = {
     'blue': np.array([1, 0, 0, 0]),
     'green': np.array([0, 1, 0, 0]),
@@ -64,6 +69,48 @@ def map_emotion_zones(path_to_combined_files):
         path_annotation_emotions = os.path.join(path, 'labels', 'emotion_zones', 'emotion_names')
         file_name = file.split("/")[-1]
         new_dataframe.to_csv(f"{path_annotation_emotions}/{file_name}", index=False)
+
+
+def create_single_annotation_file():
+    dfs_emotions = []
+    for file in list_file_annotation_emotions:
+        file_name_suffix = file.split('/')[-1]
+        file_name_suffix = file_name_suffix.split('.csv')[0]
+        data_emotion_annotation_df = pd.read_csv(file)
+        data_emotion_annotation_df['frametime'] = file_name_suffix + '___' + data_emotion_annotation_df[
+            'frametime'].astype(str)
+        dfs_emotions.append(data_emotion_annotation_df)
+    result = pd.concat(dfs_emotions)
+    result.to_csv(path_annotation_emotions + '/emotions_annotation.csv', index=False)
+
+
+def merge_annotation_dataset(file_arousal, files_names_valence):
+    name = file_arousal.split("/")[-1]
+    file_valence = [file for file in files_names_valence if name in file][0]
+
+    data_arousal = arff.loadarff(file_arousal)
+    data_arousal = pd.DataFrame(data_arousal[0])
+
+    data_valence = arff.loadarff(file_valence)
+    data_valence = pd.DataFrame(data_valence[0])
+
+    merged_annotation = data_valence.merge(data_arousal, how='left', on='frametime')
+    path = pathlib.Path(__file__).parent.parent.absolute()
+    path_arousal = os.path.join(path, 'labels', 'combined_valence_arousal')
+    file_name = name.split(".")[0]
+    merged_annotation.to_csv(f"{path_arousal}/{file_name}.csv", index=False)
+
+
+def merge_valence_arousal():
+    path = pathlib.Path(__file__).parent.parent.absolute()
+    path_arousal = os.path.join(path, 'labels', 'arousal')
+    path_valence = os.path.join(path, 'labels', 'valence')
+
+    files_names_arousal = glob.glob(f"{path_arousal}/*.arff")
+    files_names_valence = glob.glob(f"{path_valence}/*.arff")
+
+    for file_arousal in files_names_arousal:
+        merge_annotation_dataset(file_arousal, files_names_valence)
 
 
 if __name__ == '__main__':

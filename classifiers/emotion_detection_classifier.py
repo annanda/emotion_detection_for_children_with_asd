@@ -7,10 +7,10 @@ from sklearn import svm
 
 from sklearn.model_selection import train_test_split
 
-from data_preparation.preparing_datasets import producing_more_than_one_features_type
-from data_preparation.balancing_dataset import balance_dataset_undersampling
+from data_preparation.dataset_preparation import produce_more_than_one_features_type
+from data_preparation.dataset_balancing import balance_dataset_undersampling
 from classifiers.late_fusion_layer import late_fusion
-from data_preparation.preparing_datasets import create_dataset_files
+from data_preparation.dataset_preparation import produce_one_feature_type
 
 
 def run_model_one_feature_type(modality, feature_type, model):
@@ -43,17 +43,8 @@ def run_model_one_feature_type(modality, feature_type, model):
 
 
 def run_model_more_than_one_feature_type(modality, feature_type_list, model):
-    producing_more_than_one_features_type(modality, feature_type_list)
+    produce_more_than_one_features_type(modality, feature_type_list)
     prediction_and_true_value = run_model_one_feature_type(modality, 'temp', model)
-    return prediction_and_true_value
-
-
-def call_unimodal_ed_system(modality, features_type, model):
-    if len(features_type) == 1:
-        path_to_check = f'{DATASET_FOLDER}/{modality}/{features_type[0]}_dev.csv'
-        if not os.path.isfile(path_to_check):
-            create_dataset_files(modality, features_type[0])
-    prediction_and_true_value = call_unimodal_model(modality, features_type, model)
     return prediction_and_true_value
 
 
@@ -90,8 +81,12 @@ def get_features_and_model(modality, input_data):
     return features_type, model
 
 
-def call_unimodal_model(modality, features_type, model):
+def call_unimodal_ed_system(modality, features_type, model):
     if len(features_type) == 1:
+        path_to_check = f'{DATASET_FOLDER}/{modality}/{features_type[0]}_dev.csv'
+        feature_exist = os.path.isfile(path_to_check)
+        if not feature_exist:
+            produce_one_feature_type(modality, features_type[0])
         prediction_and_true_value = run_model_one_feature_type(modality, features_type[0], model)
     else:
         prediction_and_true_value = run_model_more_than_one_feature_type(modality, features_type, model)
