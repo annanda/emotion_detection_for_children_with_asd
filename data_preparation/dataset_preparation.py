@@ -45,15 +45,9 @@ def merge_different_features_type_together(modality, dataset_type, features_type
         dfs = []
         file_name = file.split('/')[-1]
         for i, feature_type in enumerate(features_type_list):
-            if i < len(features_type_list) - 1:
-                other_df_path = f'{DATASET_FOLDER}/{modality}/{features_type_list[i]}/{file_name}'
-                other_df = pd.read_csv(other_df_path).iloc[:, :-1]
-                dfs.append(other_df)
-            else:
-                last_df_path = f'{DATASET_FOLDER}/{modality}/{features_type_list[-1]}/{file_name}'
-                last_df_path = pd.read_csv(last_df_path)
-                dfs.append(last_df_path)
-
+            other_df_path = f'{DATASET_FOLDER}/{modality}/{features_type_list[i]}/{file_name}'
+            other_df = pd.read_csv(other_df_path)
+            dfs.append(other_df)
         merged = functools.reduce(lambda df1, df2: pd.merge(df1, df2, on='frametime', how='inner'), dfs)
         merged.to_csv(f'{DATASET_FOLDER}/{modality}/temp/{file_name}', index=False)
 
