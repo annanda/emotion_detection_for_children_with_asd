@@ -29,19 +29,19 @@ def run_model_one_feature_type(modality, feature_type, model):
     if model == 'SVM':
         clf = svm.SVC(probability=True)
     clf.fit(x, y)
-
-    # x_test_features = x_test
-
-    # TODO: develop the option of dealing with the probability instead of classes
-    # prediction_probability = clf.predict_proba(x_test_features)
-
-    predictions_array = clf.predict(x_test)
-    prediction_and_true_value = y_test.assign(predictions=predictions_array)
-    # y_test.iloc[:, 'predictions'] = predictions
-    # y_test['predictions'] = predictions
-    # prediction_and_true_value = y_test
-    # ['blue' 'green' 'red' 'yellow']
+    # clf.classes_ return the labels - blue, green, red, yellow
+    prediction_probability = clf.predict_proba(x_test)
+    indexes = list(y_test.index)
+    prediction_probability_df = pd.DataFrame(prediction_probability, columns=['blue', 'green', 'red', 'yellow'], index=indexes)
+    prediction_and_true_value = y_test.assign(blue=prediction_probability_df['blue'],
+                                              green=prediction_probability_df['green'],
+                                              red=prediction_probability_df['red'],
+                                              yellow=prediction_probability_df['yellow'])
     return prediction_and_true_value
+
+    # predictions_array = clf.predict(x_test)
+    # prediction_and_true_value = y_test.assign(predictions=predictions_array)
+    # return prediction_and_true_value
 
 
 def run_model_more_than_one_feature_type(modality, feature_type_list, model):
