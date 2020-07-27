@@ -44,15 +44,16 @@ if __name__ == '__main__':
     input_data = {
         'modalities': {
             'video': {
-                'features_type': {'AU': False, 'appearance': False, 'BoVW': False, 'geometric': True},
+                'features_type': {'AU': True, 'appearance': True, 'BoVW': False, 'geometric': False},
                 'model': 'SVM'
             },
-            # 'audio': {
-            #     'features_type': {'BoAW': True, 'DeepSpectrum': False, 'eGeMAPSfunct': False},
-            #     'model': 'SVM'
-            # },
+            'audio': {
+                'features_type': {'BoAW': False, 'DeepSpectrum': False, 'eGeMAPSfunct': True},
+                # eGeMAPSfunct feature_type can only be used alone
+                'model': 'SVM'
+            },
             # 'physio': {
-            #     'features_type': {'HRHRV': True},
+            #     'features_type': {'HRHRV': False},
             #     'model': 'SVM'
             # }
         },

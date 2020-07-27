@@ -35,9 +35,11 @@ def run_model_one_feature_type(modality, feature_type, model):
     # TODO: develop the option of dealing with the probability instead of classes
     # prediction_probability = clf.predict_proba(x_test_features)
 
-    predictions = clf.predict(x_test)
-    y_test['predictions'] = predictions
-    prediction_and_true_value = y_test
+    predictions_array = clf.predict(x_test)
+    prediction_and_true_value = y_test.assign(predictions=predictions_array)
+    # y_test.iloc[:, 'predictions'] = predictions
+    # y_test['predictions'] = predictions
+    # prediction_and_true_value = y_test
     # ['blue' 'green' 'red' 'yellow']
     return prediction_and_true_value
 
