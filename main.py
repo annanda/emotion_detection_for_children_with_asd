@@ -54,11 +54,10 @@ if __name__ == '__main__':
                 # eGeMAPSfunct feature_type can only be used alone
                 'model': 'SVM'
             },
-            # 'physio': {
-            #     'features_type': {'HRHRV': False},
-            #     'model': 'SVM'
-            # }
+            'physio': {
+                'features_type': {'HRHRV': True},
+                'model': 'SVM'
+            }
         },
         'fusion_type': 'late_fusion'}
     run_system(input_data)
-    # print(get_predicted_class(np.array([0.1, 0.3, 0.756, 0.03])))

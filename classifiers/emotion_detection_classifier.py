@@ -64,7 +64,7 @@ def call_multimodal_ed_system(data_entry):
     emotion_annotation = pd.read_csv(EMOTION_ANNOTATION_FILE)
     merged = pd.merge(merged, emotion_annotation, on='frametime', how='inner')
     y_test = merged.iloc[:, -1:]
-
+    y_test.columns = ['emotion_zone']
     predictions_multimodal = late_fusion(merged)
     predictions_multimodal_and_true_value = y_test.assign(
         blue=predictions_multimodal['blue'],
