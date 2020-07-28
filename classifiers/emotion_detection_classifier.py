@@ -2,6 +2,7 @@ import functools
 import os
 
 import pandas as pd
+import numpy as np
 from setup.conf import DATASET_FOLDER, EMOTION_ANNOTATION_FILE
 from sklearn import svm
 
@@ -32,7 +33,8 @@ def run_model_one_feature_type(modality, feature_type, model):
     # clf.classes_ return the labels - blue, green, red, yellow
     prediction_probability = clf.predict_proba(x_test)
     indexes = list(y_test.index)
-    prediction_probability_df = pd.DataFrame(prediction_probability, columns=['blue', 'green', 'red', 'yellow'], index=indexes)
+    prediction_probability_df = pd.DataFrame(prediction_probability, columns=['blue', 'green', 'red', 'yellow'],
+                                             index=indexes)
     prediction_and_true_value = y_test.assign(blue=prediction_probability_df['blue'],
                                               green=prediction_probability_df['green'],
                                               red=prediction_probability_df['red'],
@@ -62,17 +64,18 @@ def call_multimodal_ed_system(data_entry):
     emotion_annotation = pd.read_csv(EMOTION_ANNOTATION_FILE)
     merged = pd.merge(merged, emotion_annotation, on='frametime', how='inner')
     y_test = merged.iloc[:, -1:]
-    list_of_predictions = []
-    list_of_predictions.append(merged['predictions_x'].tolist())
-    list_of_predictions.append(merged['predictions_y'].tolist())
-    try:
-        list_of_predictions.append(merged['predictions'].tolist())
-    except KeyError:
-        pass
 
-    predictions_multimodal = late_fusion(list_of_predictions)
-
-    return predictions_multimodal, y_test
+    predictions_multimodal = late_fusion(merged)
+    # O late_fusion() tem que me retornar um df com as colunas certas do nome de cada emocao
+    # e a probabilidade de cada uma, para eu poder adicionar em um mesmo df do y_test, sendo consistente
+    # com como é no unimodality
+    predictions_multimodal_and_true_value = y_test.assign(
+        blue=predictions_multimodal['blue'],
+        green=predictions_multimodal['green'],
+        red=predictions_multimodal['red'],
+        yellow=predictions_multimodal['yellow']
+    )
+    return predictions_multimodal_and_true_value
 
 
 def get_features_and_model(modality, input_data):
@@ -94,3 +97,18 @@ def call_unimodal_ed_system(modality, features_type, model):
         prediction_and_true_value = run_model_more_than_one_feature_type(modality, features_type, model)
 
     return prediction_and_true_value
+
+
+def get_predicted_class(probability_vector):
+    emotion_class = {0: 'blue', 1: 'green', 2: 'red', 3: 'yellow'}
+    result = np.where(probability_vector == np.amax(probability_vector))
+    emotion_index = result[0][0]
+    return emotion_class[emotion_index]
+
+
+def get_final_label_prediction_array(predictions_and_y_test):
+    predictions = []
+    for index, row in predictions_and_y_test.iterrows():
+        label = get_predicted_class(np.array(row[['blue', 'green', 'red', 'yellow']]))
+        predictions.append(label)
+    return predictions
