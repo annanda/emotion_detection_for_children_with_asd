@@ -43,8 +43,8 @@ def print_results(accuracy, confusion_mtrx, data_entry, is_mean=False, times=Non
     print(f'Processing the input: {data_entry}')
     print('###########################################')
     if is_mean:
-        print(f'Average of accuracy by running system {times} times: {accuracy:.4f}')
-        print(f'Std of accuracy by running system {times} times: {std:.4f}')
+        print(f'Average of accuracy by running the system {times} times: {accuracy:.4f}')
+        print(f'Std of accuracy by running the system {times} times: {std:.4f}')
         print('Last computed Confusion matrix: labels=["blue", "green", "yellow", "red"]')
     else:
         print(f'Accuracy: {accuracy:.4f}')
@@ -54,12 +54,13 @@ def print_results(accuracy, confusion_mtrx, data_entry, is_mean=False, times=Non
 
 def run_x_times(times, data_entry):
     accuracy_values = []
-    for _ in range(times):
+    for i in range(times):
         accuracy, confusion_mtrx = run_system(data_entry)
         accuracy_values.append(accuracy)
+        print(f'Executed {i} times now.')
 
     accuracy_values = np.array(accuracy_values)
-    print(accuracy_values)
+    # print(accuracy_values)
     mean_accuracy = np.mean(accuracy_values)
     std_accuracy = np.std(accuracy_values)
     print_results(mean_accuracy, confusion_mtrx, data_entry, is_mean=True, times=times, std=std_accuracy)
@@ -72,17 +73,17 @@ if __name__ == '__main__':
                 'features_type': {'AU': True, 'appearance': False, 'BoVW': False, 'geometric': False},
                 'model': 'SVM'
             },
-            # 'audio': {
-            #     'features_type': {'BoAW': True, 'DeepSpectrum': False, 'eGeMAPSfunct': False},
-            #     # eGeMAPSfunct feature_type can only be used alone
-            #     'model': 'SVM'
-            # },
-            # 'physio': {
-            #     'features_type': {'HRHRV': True},
-            #     'model': 'SVM'
-            # }
+            'audio': {
+                'features_type': {'BoAW': True, 'DeepSpectrum': False, 'eGeMAPSfunct': False},
+                # eGeMAPSfunct feature_type can only be used alone
+                'model': 'SVM'
+            },
+            'physio': {
+                'features_type': {'HRHRV': True},
+                'model': 'SVM'
+            }
         },
         'fusion_type': 'late_fusion'}
     # accuracy, confusion_mtrx = run_system(input_data)
     # print_results(accuracy, confusion_mtrx, input_data)
-    run_x_times(5, input_data)
+    run_x_times(50, input_data)
