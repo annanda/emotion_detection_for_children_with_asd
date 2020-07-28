@@ -39,14 +39,15 @@ def calculate_evaluation_metrics(predictions, y_test):
     return accuracy, confusion_mtrx
 
 
-def print_results(accuracy, confusion_mtrx, data_entry, is_mean=False, times=None):
+def print_results(accuracy, confusion_mtrx, data_entry, is_mean=False, times=None, std=None):
     print(f'Processing the input: {data_entry}')
     print('###########################################')
     if is_mean:
-        print(f'Average of accuracy by running system {times} times: {accuracy}')
+        print(f'Average of accuracy by running system {times} times: {accuracy:.4f}')
+        print(f'Std of accuracy by running system {times} times: {std:.4f}')
         print('Last computed Confusion matrix: labels=["blue", "green", "yellow", "red"]')
     else:
-        print(f'Accuracy: {accuracy}')
+        print(f'Accuracy: {accuracy:.4f}')
         print('Confusion matrix: labels=["blue", "green", "yellow", "red"]')
     print(confusion_mtrx)
 
@@ -60,7 +61,8 @@ def run_x_times(times, data_entry):
     accuracy_values = np.array(accuracy_values)
     print(accuracy_values)
     mean_accuracy = np.mean(accuracy_values)
-    print_results(mean_accuracy, confusion_mtrx, data_entry, is_mean=True, times=times)
+    std_accuracy = np.std(accuracy_values)
+    print_results(mean_accuracy, confusion_mtrx, data_entry, is_mean=True, times=times, std=std_accuracy)
 
 
 if __name__ == '__main__':
