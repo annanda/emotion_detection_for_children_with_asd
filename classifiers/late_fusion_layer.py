@@ -6,6 +6,7 @@
 
 import random
 import numpy as np
+import pandas as pd
 
 
 def select_one_prediction_three_values(prediction_1, prediction_2, prediction_3):
@@ -24,45 +25,44 @@ def late_fusion(merged_df):
     merged_df: a df with the merged values of prediction for each modality.
     predictions_multimodal = a df with 4 columns representing the probability of each emotion class.
     """
-    result_predictions = []
-    if len(list_of_predictions_by_modality) == 2:
-        result_predictions = late_fusion_two_modalities(list_of_predictions_by_modality[0],
-                                                        list_of_predictions_by_modality[1])
-    elif len(list_of_predictions_by_modality) == 3:
-        for i in range(len(list_of_predictions_by_modality[0])):
-            current_result = None
-            if value_is_nan(list_of_predictions_by_modality[0][i]):
-                # if not list_of_predictions_by_modality[0][i]:
-                current_result = select_one_prediction(list_of_predictions_by_modality[1][i],
-                                                       list_of_predictions_by_modality[2][i])
-                result_predictions.append(current_result)
-                continue
-            if value_is_nan(list_of_predictions_by_modality[1][i]):
-                # if not list_of_predictions_by_modality[1][i]:
-                current_result = select_one_prediction(list_of_predictions_by_modality[0][i],
-                                                       list_of_predictions_by_modality[2][i])
-                result_predictions.append(current_result)
-                continue
-            if value_is_nan(list_of_predictions_by_modality[2][i]):
-                # if not list_of_predictions_by_modality[2][i]:
-                current_result = select_one_prediction(list_of_predictions_by_modality[0][i],
-                                                       list_of_predictions_by_modality[1][i])
-                result_predictions.append(current_result)
-                continue
-            current_result = select_one_prediction_three_values(list_of_predictions_by_modality[0][i],
-                                                                list_of_predictions_by_modality[1][i],
-                                                                list_of_predictions_by_modality[2][i])
-            result_predictions.append(current_result)
-    return result_predictions
+    multimodal_predictions = pd.DataFrame(columns=['blue', 'green', 'red', 'yellow'])
+
+    if len(merged_df.columns) == 12:
+        # case of two modalities
+        for index, row in merged_df.iterrows():
+            predict_1 = row[['blue_x', 'green_x', 'red_x', 'yellow_x']]
+            predict_2 = row[['blue_y', 'green_y', 'red_y', 'yellow_y']]
+            result_predictions = late_fusion_multi_modalities(predict_1, predict_2)
+            # result_predictions = np.array([1, 2, 4, 5])
+            multimodal_predictions.loc[index] = result_predictions
+
+    if len(merged_df.columns) == 17:
+        # case for three modalities
+        for index, row in merged_df.iterrows():
+            predict_1 = row[['blue_x', 'green_x', 'red_x', 'yellow_x']]
+            predict_2 = row[['blue_y', 'green_y', 'red_y', 'yellow_y']]
+            predict_3 = row[['blue', 'green', 'red', 'yellow']]
+            result_predictions = late_fusion_multi_modalities(predict_1, predict_2, predict_3)
+            # result_predictions = np.array([1, 2, 4, 5])
+            multimodal_predictions.loc[index] = result_predictions
+    return multimodal_predictions
 
 
 def late_fusion_two_modalities(predictions_1, predictions_2):
-    result_predictions = []
-    for i in range(len(predictions_1)):
-        current_prediction = select_one_prediction(predictions_1[i],
-                                                   predictions_2[i])
-        result_predictions.append(current_prediction)
+    result_predictions = np.array([1, 2, 4, 5])
     return result_predictions
+
+
+def late_fusion_three_modalities(predictions_1, predictions_2, predictions_3):
+    result_predictions = np.array([1, 2, 4, 5])
+    return result_predictions
+
+
+def late_fusion_multi_modalities(*args):
+    if len(args) == 2:
+        return late_fusion_two_modalities(*args)
+    else:
+        return late_fusion_three_modalities(*args)
 
 
 def select_one_prediction(prediction_1, prediction_2):

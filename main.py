@@ -7,7 +7,6 @@ from classifiers.emotion_detection_classifier import get_features_and_model, cal
 
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
-import numpy as np
 
 
 def run_system(data_entry):
@@ -22,13 +21,13 @@ def run_system(data_entry):
         modality = list(data_entry['modalities'].keys())[0]
         features_type, model = get_features_and_model(modality, data_entry)
         predictions_and_y_test = call_unimodal_ed_system(modality, features_type, model)
-        y_test = predictions_and_y_test['emotion_zone'].tolist()
         # predictions = predictions_and_y_test['predictions'].tolist()
         predictions = get_final_label_prediction_array(predictions_and_y_test)
     else:
-        predictions, y_test = call_multimodal_ed_system(data_entry)
-        predictions = get_final_label_prediction_array(predictions)
+        predictions_and_y_test = call_multimodal_ed_system(data_entry)
+        predictions = get_final_label_prediction_array(predictions_and_y_test)
 
+    y_test = predictions_and_y_test['emotion_zone'].tolist()
     calculate_evaluation_metrics(predictions, y_test, data_entry)
 
 

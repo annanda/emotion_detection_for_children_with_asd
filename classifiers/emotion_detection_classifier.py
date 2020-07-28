@@ -66,9 +66,6 @@ def call_multimodal_ed_system(data_entry):
     y_test = merged.iloc[:, -1:]
 
     predictions_multimodal = late_fusion(merged)
-    # O late_fusion() tem que me retornar um df com as colunas certas do nome de cada emocao
-    # e a probabilidade de cada uma, para eu poder adicionar em um mesmo df do y_test, sendo consistente
-    # com como é no unimodality
     predictions_multimodal_and_true_value = y_test.assign(
         blue=predictions_multimodal['blue'],
         green=predictions_multimodal['green'],
