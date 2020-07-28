@@ -18,7 +18,12 @@ def select_one_prediction_three_values(prediction_1, prediction_2, prediction_3)
         return prediction_3
 
 
-def late_fusion(list_of_predictions_by_modality):
+def late_fusion(merged_df):
+    """"
+    late_fusion() receive a df as input and return a df.
+    merged_df: a df with the merged values of prediction for each modality.
+    predictions_multimodal = a df with 4 columns representing the probability of each emotion class.
+    """
     result_predictions = []
     if len(list_of_predictions_by_modality) == 2:
         result_predictions = late_fusion_two_modalities(list_of_predictions_by_modality[0],
