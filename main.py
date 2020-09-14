@@ -70,7 +70,9 @@ if __name__ == '__main__':
     input_data = {
         'modalities': {
             'video': {
-                'features_type': {'AU': True, 'appearance': False, 'BoVW': False, 'geometric': False},
+                'features_type': {'AU': False, 'appearance': False, 'BoVW': False, 'geometric': False,
+                                  'gaze': True,
+                                  '2d_eye_landmark': True, '3d_eye_landmark': True, 'head_pose': True},
                 'model': 'SVM'
             },
             'audio': {
@@ -84,6 +86,6 @@ if __name__ == '__main__':
             }
         },
         'fusion_type': 'late_fusion'}
-    # accuracy, confusion_mtrx = run_system(input_data)
-    # print_results(accuracy, confusion_mtrx, input_data)
-    run_x_times(50, input_data)
+    accuracy, confusion_mtrx = run_system(input_data)
+    print_results(accuracy, confusion_mtrx, input_data)
+    # run_x_times(50, input_data)

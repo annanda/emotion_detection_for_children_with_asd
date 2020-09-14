@@ -14,9 +14,9 @@ def balance_dataset_undersampling(dataframe):
     rows_number = np.concatenate(rows_selection, axis=None)
     balanced_df = dataframe.iloc[rows_number]
     balanced_df_2 = balanced_df.sort_index()
-    # print(
-    #     f'Using balanced training set of total of {len(rows_number)} examples. '
-    #     f'\n{len(rows_number) // 4} examples of each class')
+    print(
+        f'Using balanced training set of total of {len(rows_number)} examples. '
+        f'\n{len(rows_number) // 4} examples of each class')
     return balanced_df_2
 
 
