@@ -54,10 +54,12 @@ def get_emotion_zone(valence, arousal):
 
 
 def get_emotion_zone_advanced(valence, arousal):
-    threshold = 0.25
-    if threshold > valence >= threshold:
+    threshold = 0.1
+    if valence > (-threshold) and valence < threshold:
+        print('None returned for valence')
         return None
-    if threshold > arousal >= threshold:
+    if arousal > (-threshold) and arousal < threshold:
+        print('None returned for arousal')
         return None
     return get_emotion_zone(valence, arousal)
 
