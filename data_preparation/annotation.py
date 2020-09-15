@@ -72,15 +72,16 @@ def map_emotion_zones(path_to_combined_files):
         for row in dataframe_annotation.itertuples():
             valence = row.GoldStandardValence
             arousal = row.GoldStandardArousal
-            # emotion = get_emotion_zone(valence, arousal)
-            emotion = get_emotion_zone_advanced(valence, arousal)
+            emotion = get_emotion_zone(valence, arousal)
+            # to use only if I want to change the emotion mapping
+            # emotion = get_emotion_zone_advanced(valence, arousal)
             row = [row.frametime, emotion]
             new_rows.append(row)
         new_dataframe = pd.DataFrame(new_rows, columns=['frametime', 'emotion_zone'])
         path = pathlib.Path(__file__).parent.parent.absolute()
         path_annotation_emotions = os.path.join(path, 'labels', 'emotion_zones', 'emotion_names')
         file_name = file.split("/")[-1]
-        file_name = 'advanced_annotation_' + file_name
+        # file_name = 'advanced_annotation_' + file_name
         new_dataframe.to_csv(f"{path_annotation_emotions}/{file_name}", index=False)
 
 
