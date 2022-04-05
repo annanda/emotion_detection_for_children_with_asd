@@ -18,6 +18,9 @@ def concatenate_dataset_files(modality, dataset_type, features_type):
         raise TypeError('dataset_type must be train or dev')
     files = glob.glob(f'{DATASET_FOLDER}/{modality}/{features_type}/{dataset_type}_*.csv')
 
+    if not files:
+        raise ValueError('You do not have train/dev files. You need to define Train and Dev division for your dataset.')
+
     dfs = []
     for file in files:
         df = pd.read_csv(file)

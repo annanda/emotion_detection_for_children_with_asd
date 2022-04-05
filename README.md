@@ -2,16 +2,16 @@
 
 An end-to-end multimodal system to classify emotion zones. It supports three different type of input modalities, i.e. video, audio and physiological signals. 
 
-This system does not extract features from raw files, the user needs to provide a dataset of extracted features. 
+This system does not extract features from raw files, the user needs to provide a dataset of extracted features. The other system ```features extraction``` does the part of extracting features, generating an output to be used as input by this system. 
 
 The system supports any combination of features and inputs listed below. 
 
-## Modalities of input
+### Modalities of input
 - video
 - audio
 - physio
 
-## Visual features list
+### Visual features list
 - AU
 - appearance
 - BoVW
@@ -21,10 +21,17 @@ The system supports any combination of features and inputs listed below.
 - 3d_eye_landmark
 - head_pose
 
-## Audio features list
+### Audio features list
 - BoAW
 - DeepSpectrum
 - eGeMAPSfunct
 
-## Physiological signals features list
+### Physiological signals features list
 - HRHRV
+
+
+## How to use the system
+1. Use the system Features Extraction to preprocess the features into groups. The output of that system will serve as input to this system.
+2. Put the features CSVs files into the folder `/dataset/video` or `/dataset/audio` depending on the modality you want to use.
+3. Change the `input_data` variable on file `main.py` to include the modality and features you want to use. The modalities and features you want to include need to have `True` valeu. 
+4. Run `main.py`
