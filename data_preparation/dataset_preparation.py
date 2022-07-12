@@ -33,7 +33,7 @@ def concatenate_dataset_files(modality, dataset_type, features_type):
 def merge_different_features_type_together(modality, dataset_type, features_type_list):
     """
     dataset_type must be 'train' or 'dev'
-    In here, for each train/dev file, I create one train/dev file with different features type mergeg together,
+    In here, for each train/dev file, I create one train/dev file with different features type merged together,
      i.e. a dataset with more features.
     """
 

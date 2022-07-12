@@ -31,7 +31,8 @@ The system supports any combination of features and inputs listed below.
 
 
 ## How to use the system
-1. Use the system Features Extraction to preprocess the features into groups. The output of that system will serve as input to this system.
-2. Put the features CSVs files into the folder `/dataset/video` or `/dataset/audio` depending on the modality you want to use.
-3. Change the `input_data` variable on file `main.py` to include the modality and features you want to use. The modalities and features you want to include need to have `True` valeu. 
-4. Run `main.py`
+1. Use the system ```annotation_tool``` to create the labels 
+2. Use the system ```Features_Extraction``` to preprocess the features into groups. The output of that system will serve as input to this system.
+3. Put the features CSVs files into the folder `/dataset/video` or `/dataset/audio` depending on the modality you want to use.
+4. Change the `input_data` variable on file `main.py` to include the modality and features you want to use. The modalities and features you want to include need to have `True` valeu. 
+5. Run `main.py`
