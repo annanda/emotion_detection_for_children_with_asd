@@ -2,8 +2,10 @@
 author: Annanda Dandi Sousa
 script to serve as an entry point to run the system with different configurations
 """
-from classifiers.emotion_detection_classifier import get_features_and_model, call_multimodal_ed_system, \
-    call_unimodal_ed_system, get_final_label_prediction_array
+from classifiers.emotion_detection_classifier import get_features_model_and_modality, \
+    call_multimodal_ed_system, \
+    call_unimodal_ed_system, \
+    get_final_label_prediction_array
 
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
@@ -11,19 +13,37 @@ import numpy as np
 
 
 def run_system(data_entry):
-    if not set(list(data_entry['modalities'].keys())).issubset(['video', 'audio', 'physio']):
-        raise TypeError('Modality must be video, physio and/or audio')
+    # Validating the modality type
+    if not set(list(data_entry['modalities'].keys())).issubset(['video', 'audio']):
+        raise TypeError('Modality must be video, and/or audio')
 
     fusion_type = data_entry['fusion_type']
     if len(data_entry['modalities']) < 2:
         fusion_type = False
 
+    dataset_split_type = data_entry['dataset_split_type']
+    individual_model = data_entry['individual_model']
+
+    # case of  single modality
     if not fusion_type:
-        modality = list(data_entry['modalities'].keys())[0]
-        features_type, model = get_features_and_model(modality, data_entry)
-        predictions_and_y_test = call_unimodal_ed_system(modality, features_type, model)
-        # predictions = predictions_and_y_test['predictions'].tolist()
+        features_type, model, modality = get_features_model_and_modality(data_entry)
+        session_number = [data_entry['session_number']]
+        all_participant_data = data_entry['all_participant_data']
+
+        # To run for all participant data, i.e. two sessions
+        participant_number = int(data_entry['session_number'].split('_')[1])
+
+        if all_participant_data and participant_number != 1:
+            session_prefix = data_entry['session_number'].split('_')[:2]
+            session_01 = f'{session_prefix[0]}_{session_prefix[1]}_01'
+            session_02 = f'{session_prefix[0]}_{session_prefix[1]}_02'
+            session_number = [session_01, session_02]
+
+        predictions_and_y_test = call_unimodal_ed_system(session_number, dataset_split_type, individual_model, modality,
+                                                         features_type, model)
         predictions = get_final_label_prediction_array(predictions_and_y_test)
+
+    # case of multimodality
     else:
         predictions_and_y_test = call_multimodal_ed_system(data_entry)
         predictions = get_final_label_prediction_array(predictions_and_y_test)
@@ -68,7 +88,8 @@ def run_x_times(times, data_entry):
 
 if __name__ == '__main__':
     configure_data = {
-        'session_number': 'session_01_01',
+        'session_number': 'session_02_01',
+        'all_participant_data': True,
         'dataset_split_type': 'non_sequential',
         'individual_model': True,
         'modalities': {

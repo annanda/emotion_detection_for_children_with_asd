@@ -14,17 +14,35 @@ from classifiers.late_fusion_layer import late_fusion
 from data_preparation.dataset_preparation import produce_one_feature_type
 
 
-def run_model_one_feature_type(modality, feature_type, model):
-    train_dataset = pd.read_csv(f'{DATASET_FOLDER}/{modality}/{feature_type}_train.csv')
-    emotion_annotation = pd.read_csv(EMOTION_ANNOTATION_FILE)
-    train_annotated = pd.merge(train_dataset, emotion_annotation, how='inner', on='frametime')
-    balanced_data = balance_dataset_undersampling(train_annotated)
-    x = balanced_data.iloc[:, 1:-1]
-    y = balanced_data['emotion_zone']
+def run_model_one_feature_type(session_number, dataset_split_type, individual_model, modality, feature_type, model):
+    if individual_model:
+        individual_model = 'individuals'
+    else:
+        individual_model = 'cross_individuals'
+    feature_folder = os.path.join(DATASET_FOLDER, dataset_split_type, individual_model, modality,
+                                  feature_type)
+    # Data from a specific session
+    if len(session_number) == 1:
+        folder_dataset = os.path.join(feature_folder, session_number[0])
+    else:
+        folder_dataset_01 = os.path.join(feature_folder, session_number[0])
+        folder_dataset_02 = os.path.join(feature_folder, session_number[1])
+        folder_dataset = [folder_dataset_01, folder_dataset_02]
+    train_dataset = get_dataset(folder_dataset, 'train')
+    dev_dataset = get_dataset(folder_dataset, 'dev')
+    test_dataset = get_dataset(folder_dataset, 'test')
+
+###################################################################
+    # I STOPPED HERE
+
+    x = train_dataset.iloc[:, 1:-1]
+    y = train_dataset['emotion_zone']
+
     x_dev_dataset = pd.read_csv(f'{DATASET_FOLDER}/{modality}/{feature_type}_dev.csv')
     x_dev_dataset_annotated = pd.merge(x_dev_dataset, emotion_annotation, how='inner', on='frametime')
     y_dev_dataset = x_dev_dataset_annotated[['frametime', 'emotion_zone']]
     x_dev_dataset = x_dev_dataset_annotated.iloc[:, 1:-1]
+    # the model is not currently using dev set!
     x_dev, x_test, y_dev, y_test = train_test_split(x_dev_dataset, y_dev_dataset, test_size=0.2)
 
     if model == 'SVM':
@@ -41,9 +59,42 @@ def run_model_one_feature_type(modality, feature_type, model):
                                               yellow=prediction_probability_df['yellow'])
     return prediction_and_true_value
 
-    # predictions_array = clf.predict(x_test)
-    # prediction_and_true_value = y_test.assign(predictions=predictions_array)
-    # return prediction_and_true_value
+
+def get_dataset(dataset_folder, split_type):
+    # Data from a specific session
+    # if len(session_number) == 1:
+    #     folder_dataset = os.path.join(feature_folder, session_number[0])
+    #     train_files_in_folder = [train_file for train_file in os.listdir(folder_dataset) if 'train' in train_file]
+    #     train_dfs = []
+    #     for train_file in train_files_in_folder:
+    #         train_dataset_df = pd.read_pickle(os.path.join(folder_dataset, train_file))
+    #         train_dfs.append(train_dataset_df)
+    #     # train_dataset = pd.concat(train_dfs)
+    # # All data for a participant, i.e., two sessions
+    # else:
+    #     folder_dataset_01 = os.path.join(feature_folder, session_number[0])
+    #     folder_dataset_02 = os.path.join(feature_folder, session_number[1])
+    #     train_files_in_folder_01 = [train_file for train_file in os.listdir(folder_dataset_01) if 'train' in train_file]
+    #     train_files_in_folder_02 = [train_file for train_file in os.listdir(folder_dataset_02) if
+    #                                 'train' in train_file]
+    #     train_dfs = []
+    #     for train_file in train_files_in_folder_01:
+    #         train_dataset_df = pd.read_pickle(os.path.join(folder_dataset_01, train_file))
+    #         train_dfs.append(train_dataset_df)
+    #     for train_file in train_files_in_folder_02:
+    #         train_dataset_df = pd.read_pickle(os.path.join(folder_dataset_02, train_file))
+    #         train_dfs.append(train_dataset_df)
+    # train_dataset = pd.concat(train_dfs)
+    dataframe = [None]
+    if dataset_folder is str:
+        pass
+
+    return dataframe
+
+
+# predictions_array = clf.predict(x_test)
+# prediction_and_true_value = y_test.assign(predictions=predictions_array)
+# return prediction_and_true_value
 
 
 def run_model_more_than_one_feature_type(modality, feature_type_list, model):
@@ -75,21 +126,29 @@ def call_multimodal_ed_system(data_entry):
     return predictions_multimodal_and_true_value
 
 
-def get_features_and_model(modality, input_data):
+def get_features_model_and_modality(input_data):
+    modality = list(input_data['modalities'].keys())[0]
+
+    # Getting all features types that are set to True on the configuration_data
     features_type = [key for key in input_data['modalities'][modality]['features_type'].keys() if
                      input_data['modalities'][modality]['features_type'][key] is True]
+
     model = input_data['modalities'][modality]['model']
 
-    return features_type, model
+    return features_type, model, modality
 
 
-def call_unimodal_ed_system(modality, features_type, model):
+def call_unimodal_ed_system(session_number, dataset_split_type, individual_model, modality, features_type, model):
+    """
+    :param session_number: a list of strings, with the sessions to consider the data
+    :param modality: a string with the modality type for the model
+    :param features_type: a list of strings, with the feature types to consider
+    :param model: a string with the type of the model to consider
+    :return:
+    """
     if len(features_type) == 1:
-        path_to_check = f'{DATASET_FOLDER}/{modality}/{features_type[0]}_dev.csv'
-        feature_exist = os.path.isfile(path_to_check)
-        if not feature_exist:
-            produce_one_feature_type(modality, features_type[0])
-        prediction_and_true_value = run_model_one_feature_type(modality, features_type[0], model)
+        prediction_and_true_value = run_model_one_feature_type(session_number, dataset_split_type, individual_model,
+                                                               modality, features_type[0], model)
     else:
         prediction_and_true_value = run_model_more_than_one_feature_type(modality, features_type, model)
 
