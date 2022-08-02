@@ -67,7 +67,10 @@ def run_x_times(times, data_entry):
 
 
 if __name__ == '__main__':
-    input_data = {
+    configure_data = {
+        'session_number': 'session_01_01',
+        'dataset_split_type': 'non_sequential',
+        'individual_model': True,
         'modalities': {
             'video': {
                 'features_type': {'AU': True, 'appearance': False, 'BoVW': False, 'geometric': False,
@@ -76,9 +79,11 @@ if __name__ == '__main__':
                 'model': 'SVM'
             }
         },
-        'fusion_type': 'late_fusion'}
+        'fusion_type': 'late_fusion',
+    }
 
-    # input_data = {
+    # Example of how to use configure_data variable to set up the model configuration.
+    # configure_data = {
     #     'modalities': {
     #         'video': {
     #             'features_type': {'AU': True, 'appearance': False, 'BoVW': False, 'geometric': False,
@@ -90,13 +95,12 @@ if __name__ == '__main__':
     #             'features_type': {'BoAW': False, 'DeepSpectrum': False, 'eGeMAPSfunct': False},
     #             # eGeMAPSfunct feature_type can only be used alone
     #             'model': 'SVM'
-    #         },
-    #         'physio': {
-    #             'features_type': {'HRHRV': False},
-    #             'model': 'SVM'
     #         }
     #     },
     #     'fusion_type': 'late_fusion'}
-    accuracy, confusion_mtrx = run_system(input_data)
-    print_results(accuracy, confusion_mtrx, input_data)
-    # run_x_times(50, input_data)
+
+    accuracy, confusion_mtrx = run_system(configure_data)
+    print_results(accuracy, confusion_mtrx, configure_data)
+
+    # To run the system multiple times
+    # run_x_times(50, configure_data)
