@@ -28,11 +28,11 @@ def run_model_one_feature_type(session_number, dataset_split_type, individual_mo
         folder_dataset_01 = os.path.join(feature_folder, session_number[0])
         folder_dataset_02 = os.path.join(feature_folder, session_number[1])
         folder_dataset = [folder_dataset_01, folder_dataset_02]
-    train_dataset = get_dataset(folder_dataset, 'train')
-    dev_dataset = get_dataset(folder_dataset, 'dev')
-    test_dataset = get_dataset(folder_dataset, 'test')
+    train_dataset = get_dataset_split(folder_dataset, 'train')
+    dev_dataset = get_dataset_split(folder_dataset, 'dev')
+    test_dataset = get_dataset_split(folder_dataset, 'test')
 
-###################################################################
+    ###################################################################
     # I STOPPED HERE
 
     x = train_dataset.iloc[:, 1:-1]
@@ -60,36 +60,25 @@ def run_model_one_feature_type(session_number, dataset_split_type, individual_mo
     return prediction_and_true_value
 
 
-def get_dataset(dataset_folder, split_type):
-    # Data from a specific session
-    # if len(session_number) == 1:
-    #     folder_dataset = os.path.join(feature_folder, session_number[0])
-    #     train_files_in_folder = [train_file for train_file in os.listdir(folder_dataset) if 'train' in train_file]
-    #     train_dfs = []
-    #     for train_file in train_files_in_folder:
-    #         train_dataset_df = pd.read_pickle(os.path.join(folder_dataset, train_file))
-    #         train_dfs.append(train_dataset_df)
-    #     # train_dataset = pd.concat(train_dfs)
-    # # All data for a participant, i.e., two sessions
-    # else:
-    #     folder_dataset_01 = os.path.join(feature_folder, session_number[0])
-    #     folder_dataset_02 = os.path.join(feature_folder, session_number[1])
-    #     train_files_in_folder_01 = [train_file for train_file in os.listdir(folder_dataset_01) if 'train' in train_file]
-    #     train_files_in_folder_02 = [train_file for train_file in os.listdir(folder_dataset_02) if
-    #                                 'train' in train_file]
-    #     train_dfs = []
-    #     for train_file in train_files_in_folder_01:
-    #         train_dataset_df = pd.read_pickle(os.path.join(folder_dataset_01, train_file))
-    #         train_dfs.append(train_dataset_df)
-    #     for train_file in train_files_in_folder_02:
-    #         train_dataset_df = pd.read_pickle(os.path.join(folder_dataset_02, train_file))
-    #         train_dfs.append(train_dataset_df)
-    # train_dataset = pd.concat(train_dfs)
-    dataframe = [None]
-    if dataset_folder is str:
-        pass
-
-    return dataframe
+def get_dataset_split(dataset_folder, split_type):
+    split_dfs = []
+    if isinstance(dataset_folder, list):
+        type_files_in_folder_01 = [type_file for type_file in os.listdir(dataset_folder[0]) if split_type in type_file]
+        type_files_in_folder_02 = [type_file for type_file in os.listdir(dataset_folder[1]) if
+                                   split_type in type_file]
+        for type_file in type_files_in_folder_01:
+            train_dataset_df = pd.read_pickle(os.path.join(dataset_folder[0], type_file))
+            split_dfs.append(train_dataset_df)
+        for type_file in type_files_in_folder_02:
+            train_dataset_df = pd.read_pickle(os.path.join(dataset_folder[1], type_file))
+            split_dfs.append(train_dataset_df)
+    else:
+        type_files_in_folder = [type_file for type_file in os.listdir(dataset_folder) if split_type in type_file]
+        for type_file in type_files_in_folder:
+            train_dataset_df = pd.read_pickle(os.path.join(dataset_folder, type_file))
+            split_dfs.append(train_dataset_df)
+    concated_split_dataset = pd.concat(split_dfs)
+    return concated_split_dataset
 
 
 # predictions_array = clf.predict(x_test)
