@@ -13,6 +13,9 @@ import numpy as np
 
 
 def run_system(data_entry):
+    print(f'Processing the input: {data_entry}')
+    print('###########################################')
+
     # Validating the modality type
     if not set(list(data_entry['modalities'].keys())).issubset(['video', 'audio']):
         raise TypeError('Modality must be video, and/or audio')
@@ -32,13 +35,14 @@ def run_system(data_entry):
 
         # To run for all participant data, i.e. two sessions
         participant_number = int(data_entry['session_number'].split('_')[1])
-
         if all_participant_data and participant_number != 1:
             session_prefix = data_entry['session_number'].split('_')[:2]
             session_01 = f'{session_prefix[0]}_{session_prefix[1]}_01'
             session_02 = f'{session_prefix[0]}_{session_prefix[1]}_02'
             session_number = [session_01, session_02]
 
+        # STOPPED HERE
+        # MAKE IT RETURN TWO DIFFERENT VARIABLES WITH PREDICTIONS AND Y_TEST SEPARATED
         predictions_and_y_test = call_unimodal_ed_system(session_number, dataset_split_type, individual_model, modality,
                                                          features_type, model)
         predictions = get_final_label_prediction_array(predictions_and_y_test)
@@ -60,8 +64,6 @@ def calculate_evaluation_metrics(predictions, y_test):
 
 
 def print_results(accuracy, confusion_mtrx, data_entry, is_mean=False, times=None, std=None):
-    print(f'Processing the input: {data_entry}')
-    print('###########################################')
     if is_mean:
         print(f'Average of accuracy by running the system {times} times: {accuracy:.4f}')
         print(f'Std of accuracy by running the system {times} times: {std:.4f}')

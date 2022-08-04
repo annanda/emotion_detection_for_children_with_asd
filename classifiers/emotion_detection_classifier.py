@@ -57,7 +57,7 @@ def run_model_one_feature_type(session_number, dataset_split_type, individual_mo
     prediction_probability_df = pd.DataFrame(prediction_probability, columns=['blue', 'green', 'red', 'yellow'],
                                              index=indexes)
     # appending the true value to the df of predictions
-    prediction_and_true_value = prediction_probability_df.assign(y_test=y_test)
+    prediction_and_true_value = prediction_probability_df.assign(emotion_zone=y_test)
     return prediction_and_true_value
 
 
@@ -154,7 +154,7 @@ def get_predicted_class(probability_vector):
 
 def get_final_label_prediction_array(predictions_and_y_test):
     predictions = []
-    for index, row in predictions_and_y_test.iterrows():
+    for _, row in predictions_and_y_test.iterrows():
         label = get_predicted_class(np.array(row[['blue', 'green', 'red', 'yellow']]))
         predictions.append(label)
     return predictions
