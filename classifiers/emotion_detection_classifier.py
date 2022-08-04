@@ -15,8 +15,10 @@ from data_preparation.dataset_preparation import produce_one_feature_type
 
 
 def run_model_one_feature_type(session_number, dataset_split_type, individual_model, modality, feature_type, model):
+    # for person specific model
     if individual_model:
         individual_model = 'individuals'
+    # for person-independent model
     else:
         individual_model = 'cross_individuals'
     feature_folder = os.path.join(DATASET_FOLDER, dataset_split_type, individual_model, modality,
@@ -24,6 +26,7 @@ def run_model_one_feature_type(session_number, dataset_split_type, individual_mo
     # Data from a specific session
     if len(session_number) == 1:
         folder_dataset = os.path.join(feature_folder, session_number[0])
+    # all the data from one participant, i.e., two sessions
     else:
         folder_dataset_01 = os.path.join(feature_folder, session_number[0])
         folder_dataset_02 = os.path.join(feature_folder, session_number[1])
@@ -32,31 +35,29 @@ def run_model_one_feature_type(session_number, dataset_split_type, individual_mo
     dev_dataset = get_dataset_split(folder_dataset, 'dev')
     test_dataset = get_dataset_split(folder_dataset, 'test')
 
-    ###################################################################
-    # I STOPPED HERE
-
-    x = train_dataset.iloc[:, 1:-1]
+    # getting each of the splits for the dataset
+    x = train_dataset.iloc[:, 4:]
     y = train_dataset['emotion_zone']
 
-    x_dev_dataset = pd.read_csv(f'{DATASET_FOLDER}/{modality}/{feature_type}_dev.csv')
-    x_dev_dataset_annotated = pd.merge(x_dev_dataset, emotion_annotation, how='inner', on='frametime')
-    y_dev_dataset = x_dev_dataset_annotated[['frametime', 'emotion_zone']]
-    x_dev_dataset = x_dev_dataset_annotated.iloc[:, 1:-1]
     # the model is not currently using dev set!
-    x_dev, x_test, y_dev, y_test = train_test_split(x_dev_dataset, y_dev_dataset, test_size=0.2)
+    x_dev = dev_dataset.iloc[:, 4:]
+    y_dev = dev_dataset['emotion_zone']
 
+    x_test = test_dataset.iloc[:, 4:]
+    y_test = test_dataset['emotion_zone']
+
+    # Selecting the model and training it
     if model == 'SVM':
         clf = svm.SVC(probability=True)
     clf.fit(x, y)
     # clf.classes_ return the labels - blue, green, red, yellow
     prediction_probability = clf.predict_proba(x_test)
     indexes = list(y_test.index)
+    # organising the prediction results with the labels
     prediction_probability_df = pd.DataFrame(prediction_probability, columns=['blue', 'green', 'red', 'yellow'],
                                              index=indexes)
-    prediction_and_true_value = y_test.assign(blue=prediction_probability_df['blue'],
-                                              green=prediction_probability_df['green'],
-                                              red=prediction_probability_df['red'],
-                                              yellow=prediction_probability_df['yellow'])
+    # appending the true value to the df of predictions
+    prediction_and_true_value = prediction_probability_df.assign(y_test=y_test)
     return prediction_and_true_value
 
 
