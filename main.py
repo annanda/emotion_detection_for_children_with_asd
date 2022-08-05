@@ -43,17 +43,23 @@ def run_system(data_entry):
 
         # STOPPED HERE
         # MAKE IT RETURN TWO DIFFERENT VARIABLES WITH PREDICTIONS AND Y_TEST SEPARATED
-        predictions_and_y_test = call_unimodal_ed_system(session_number, dataset_split_type, individual_model, modality,
+        predictions_probability, y_test = call_unimodal_ed_system(session_number, dataset_split_type, individual_model, modality,
                                                          features_type, model)
-        predictions = get_final_label_prediction_array(predictions_and_y_test)
+
+        # predictions_and_y_test = call_unimodal_ed_system(session_number, dataset_split_type, individual_model, modality,
+        #                                                  features_type, model)
+
+        predictions_labels = get_final_label_prediction_array(predictions_probability)
 
     # case of multimodality
     else:
         predictions_and_y_test = call_multimodal_ed_system(data_entry)
         predictions = get_final_label_prediction_array(predictions_and_y_test)
 
-    y_test = predictions_and_y_test['emotion_zone'].tolist()
-    accuracy, confusion_mtrx = calculate_evaluation_metrics(predictions, y_test)
+    print('Calculating Accuracy and Confusion Matrix')
+    print('.\n.\n.\n.')
+
+    accuracy, confusion_mtrx = calculate_evaluation_metrics(predictions_labels, y_test)
     return accuracy, confusion_mtrx
 
 
