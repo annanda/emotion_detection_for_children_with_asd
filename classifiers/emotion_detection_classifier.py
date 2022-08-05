@@ -61,10 +61,7 @@ def run_model_one_feature_type(session_number, dataset_split_type, individual_mo
     # organising the prediction results with the labels
     prediction_probability_df = pd.DataFrame(prediction_probability, columns=['blue', 'green', 'red', 'yellow'],
                                              index=indexes)
-    # appending the true value to the df of predictions
-    # prediction_and_true_value = prediction_probability_df.assign(emotion_zone=y_test)
     return prediction_probability_df, y_test
-    # return prediction_and_true_value
 
 
 def get_dataset_split(dataset_folder, split_type):
@@ -143,14 +140,12 @@ def call_unimodal_ed_system(session_number, dataset_split_type, individual_model
     :return:
     """
     if len(features_type) == 1:
-        # prediction_and_true_value = run_model_one_feature_type(session_number, dataset_split_type, individual_model,
-        #                                                        modality, features_type[0], model)
-        predictions_probability, y_test = run_model_one_feature_type(session_number, dataset_split_type, individual_model,
-                                                         modality, features_type[0], model)
+        predictions_probability, y_test = run_model_one_feature_type(session_number, dataset_split_type,
+                                                                     individual_model,
+                                                                     modality, features_type[0], model)
     else:
         prediction_and_true_value = run_model_more_than_one_feature_type(modality, features_type, model)
 
-    # return prediction_and_true_value
     return predictions_probability, y_test
 
 

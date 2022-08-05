@@ -41,13 +41,9 @@ def run_system(data_entry):
             session_02 = f'{session_prefix[0]}_{session_prefix[1]}_02'
             session_number = [session_01, session_02]
 
-        # STOPPED HERE
-        # MAKE IT RETURN TWO DIFFERENT VARIABLES WITH PREDICTIONS AND Y_TEST SEPARATED
-        predictions_probability, y_test = call_unimodal_ed_system(session_number, dataset_split_type, individual_model, modality,
-                                                         features_type, model)
-
-        # predictions_and_y_test = call_unimodal_ed_system(session_number, dataset_split_type, individual_model, modality,
-        #                                                  features_type, model)
+        predictions_probability, y_test = call_unimodal_ed_system(session_number, dataset_split_type, individual_model,
+                                                                  modality,
+                                                                  features_type, model)
 
         predictions_labels = get_final_label_prediction_array(predictions_probability)
 
