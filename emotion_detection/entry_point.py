@@ -18,4 +18,5 @@ if __name__ == '__main__':
     }
 
     classifier = EmotionDetectionClassifier(configure_data)
-    classifier.show_results()
+    # classifier.show_results()
+    # classifier._setup_values()
