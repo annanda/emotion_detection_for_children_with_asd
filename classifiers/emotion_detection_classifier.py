@@ -90,9 +90,17 @@ def get_dataset_split(dataset_folder, split_type):
 # return prediction_and_true_value
 
 
-def run_model_more_than_one_feature_type(modality, feature_type_list, model):
-    produce_more_than_one_features_type(modality, feature_type_list)
-    prediction_and_true_value = run_model_one_feature_type(modality, 'temp', model)
+# def run_model_more_than_one_feature_type(modality, feature_type_list, model):
+def run_model_more_than_one_feature_type(session_number, dataset_split_type, individual_model,
+                                         modality, features_type_list, model):
+    produce_more_than_one_features_type(session_number, dataset_split_type, individual_model, modality,
+                                        features_type_list)
+    # produce_more_than_one_features_type(modality, features_type_list)
+
+    prediction_and_true_value = run_model_one_feature_type(session_number, dataset_split_type, individual_model,
+                                                           modality, features_type_list, model)
+    # prediction_and_true_value = run_model_one_feature_type(modality, 'temp', model)
+
     return prediction_and_true_value
 
 
@@ -144,6 +152,9 @@ def call_unimodal_ed_system(session_number, dataset_split_type, individual_model
                                                                      individual_model,
                                                                      modality, features_type[0], model)
     else:
+        predictions_probability, y_test = run_model_more_than_one_feature_type(session_number, dataset_split_type,
+                                                                               individual_model,
+                                                                               modality, features_type, model)
         prediction_and_true_value = run_model_more_than_one_feature_type(modality, features_type, model)
 
     return predictions_probability, y_test
