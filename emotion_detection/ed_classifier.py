@@ -6,12 +6,15 @@ class EmotionDetectionClassifier:
         self.all_participant_data = self.configuration['all_participant_data']
         self.dataset_split_type = self.configuration['dataset_split_type']
         self.individual_model = self.configuration['individual_model']
-        self.balance_dataset = None
-        self.classifier_model = {}
+        self.balance_dataset = self.configuration['balanced_dataset']
+        self.balance_dataset_technique = self.configuration['balance_dataset_technique']
+        self.classifier_model = self.configuration['classifier_model']
         self.fusion_type = self.configuration['fusion_type']
         self.modalities = []
         self.features_types = {}
+        self.models = {}
         self._setup_modalities_features_type_values()
+        self._setup_classifier_models()
         # Results of processing
         self.x = None
         self.y = None
@@ -24,6 +27,7 @@ class EmotionDetectionClassifier:
 
     def _setup_modalities_features_type_values(self):
         """
+        To set up the modalities and features type of each modality
         """
         self.modalities = list(self.configuration['modalities'].keys())
         features_type = {}
@@ -34,6 +38,15 @@ class EmotionDetectionClassifier:
                                        if self.configuration['modalities'][modality]['features_type'][feature] is True]
 
         self.features_types = features_type
+
+    def _setup_classifier_models(self):
+        """
+        To Set up the classifier model for each modality
+        """
+        models = {}
+        for modality in self.modalities:
+            models[modality] = self.configuration['modalities'][modality]['model_for_modality']
+        self.models = models
 
     def prepare_dataset(self):
         """
