@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
     classifier = EmotionDetectionClassifier(configure_data)
     classifier.prepare_dataset()
-    # classifier.train_model_get_predictions()
+    # classifier.train_model_produce_predictions()
     # classifier.show_results()
 
     ############################################################

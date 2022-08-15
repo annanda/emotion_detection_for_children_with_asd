@@ -104,7 +104,7 @@ class EmotionDetectionClassifier:
         concated_split_dataset = pd.concat(split_dfs)
         return concated_split_dataset
 
-    def train_model_get_predictions(self):
+    def train_model_produce_predictions(self):
         """
         To train the model and get predictions for x_test
         """
