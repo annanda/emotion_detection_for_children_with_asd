@@ -22,6 +22,8 @@ class EmotionDetectionClassifier:
         self.session_number = self.configuration['session_number']
         self.all_participant_data = self.configuration['all_participant_data']
         self.sessions_to_consider = []
+        self._folders_to_read_for_dataset = {}
+        self._setup_folders_to_read_for_dataset()
         self.dataset_split_type = self.configuration['dataset_split_type']
         self.person_independent_model = self.configuration['person_independent_model']
         self.balance_dataset = self.configuration['balanced_dataset']
@@ -79,20 +81,20 @@ class EmotionDetectionClassifier:
         print('Preparing the dataset according to the configuration:')
         # Get the right path to the expected dataset
         if len(self.modalities) == 1:
-            folder_read = self._prepare_dataset_path_one_modality()
+            folders_to_read = self._prepare_dataset_path_one_modality()
         else:
             raise ValueError('Just One modality supported')
 
         # To define dataset split after defining which folder to read
-        x = self._get_dataset_split(folder_read, 'train')
+        x = self._get_dataset_split(folders_to_read, 'train')
         self.x = x.iloc[:, 4:]
         self.y = x['emotion_zone']
 
-        x_dev = self._get_dataset_split(folder_read, 'dev')
+        x_dev = self._get_dataset_split(folders_to_read, 'dev')
         self.x_dev = x_dev.iloc[:, 4:]
         self.y_dev = x_dev['emotion_zone']
 
-        x_test = self._get_dataset_split(folder_read, 'test')
+        x_test = self._get_dataset_split(folders_to_read, 'test')
         self.x_test = x_test.iloc[:, 4:]
         self.y_test = x_test['emotion_zone']
 
@@ -114,11 +116,13 @@ class EmotionDetectionClassifier:
                             self.features_types[self.modalities[0]][0],
                             self.session_number)
 
-    def _get_dataset_split(self, folder_read, dataset_split):
+    def _get_dataset_split(self, folders_to_read, dataset_split):
+
+        # TODO Put here the point to divide for the concatenation - from folders to read
         split_dfs = []
-        type_files_in_folder = [type_file for type_file in os.listdir(folder_read) if dataset_split in type_file]
+        type_files_in_folder = [type_file for type_file in os.listdir(folders_to_read) if dataset_split in type_file]
         for type_file in type_files_in_folder:
-            dataset_df = pd.read_pickle(os.path.join(folder_read, type_file))
+            dataset_df = pd.read_pickle(os.path.join(folders_to_read, type_file))
             split_dfs.append(dataset_df)
 
         concated_split_dataset = pd.concat(split_dfs)
@@ -227,3 +231,7 @@ class EmotionDetectionClassifier:
             self.participant_number = self.configuration['participant_number']
         else:
             raise ValueError(f'Participant number must be one of: {PARTICIPANT_NUMBERS}')
+
+    # I STOPPED HERE!
+    def _setup_folders_to_read_for_dataset(self):
+        pass
