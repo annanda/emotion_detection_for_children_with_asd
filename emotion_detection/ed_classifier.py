@@ -27,6 +27,9 @@ class EmotionDetectionClassifier:
         self.modalities = []
         self.features_types = {}
         self.models = {}
+        # To define the path for person-independent model or individuals model
+        self._person_independent_folder = 'cross-individuals' if self.configuration[
+            'person_independent_model'] else 'individuals'
         self._setup_modalities_features_type_values()
         self._setup_classifier_models()
         # Results of processing
@@ -75,6 +78,7 @@ class EmotionDetectionClassifier:
         else:
             raise ValueError('Just One modality supported')
 
+        # To define dataset split after defining which folder to read
         x = self._get_dataset_split(folder_read, 'train')
         self.x = x.iloc[:, 4:]
         self.y = x['emotion_zone']
@@ -88,15 +92,9 @@ class EmotionDetectionClassifier:
         self.y_test = x_test['emotion_zone']
 
     def _prepare_dataset_path_one_modality(self):
-        # To define the path for person-independent model or individuals model
-        if self.person_independent_model:
-            person_independent_folder = 'cross_individuals'
-        else:
-            person_independent_folder = 'individuals'
-
         folder_read_modality = os.path.join(DATASET_FOLDER,
                                             self.dataset_split_type,
-                                            person_independent_folder,
+                                            self._person_independent_folder,
                                             self.modalities[0])
         # For only one type of feature
         if len(self.features_types) == 1:
@@ -146,6 +144,7 @@ class EmotionDetectionClassifier:
 
         prediction_probability = clf.predict_proba(self.x_test)
         indexes = list(self.y_test.index)
+
         # organising the prediction results with the labels
         self._prediction_probabilities = pd.DataFrame(prediction_probability,
                                                       columns=ORDER_EMOTIONS,
