@@ -2,7 +2,8 @@ from emotion_detection.ed_classifier import EmotionDetectionClassifier
 
 if __name__ == '__main__':
     configure_data = {
-        'session_number': 'session_03_01',
+        'participant_number': 3,
+        'session_number': 1,
         'all_participant_data': False,
         'dataset_split_type': 'non_sequential',
         'person_independent_model': False,
@@ -28,8 +29,9 @@ if __name__ == '__main__':
     }
 
     classifier = EmotionDetectionClassifier(configure_data)
-    classifier.train_model_produce_predictions()
-    classifier.show_results()
+    classifier._prepare_dataset()
+    # classifier.train_model_produce_predictions()
+    # classifier.show_results()
 
     ############################################################
     # Example of configuration

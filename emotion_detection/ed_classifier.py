@@ -9,6 +9,7 @@ from sklearn.metrics import accuracy_score
 from setup.conf import DATASET_FOLDER
 
 ORDER_EMOTIONS = ['blue', 'green', 'red', 'yellow']
+PARTICIPANT_NUMBERS = [1, 2, 3, 4]
 
 
 class EmotionDetectionClassifier:
@@ -16,8 +17,11 @@ class EmotionDetectionClassifier:
         self._emotion_class = {0: 'blue', 1: 'green', 2: 'red', 3: 'yellow'}
         self.configuration = configuration
         # From configuration input
+        self.participant_number = 0
+        self._check_and_set_participant_number()
         self.session_number = self.configuration['session_number']
         self.all_participant_data = self.configuration['all_participant_data']
+        self.sessions_to_consider = []
         self.dataset_split_type = self.configuration['dataset_split_type']
         self.person_independent_model = self.configuration['person_independent_model']
         self.balance_dataset = self.configuration['balanced_dataset']
@@ -32,6 +36,7 @@ class EmotionDetectionClassifier:
             'person_independent_model'] else 'individuals'
         self._setup_modalities_features_type_values()
         self._setup_classifier_models()
+        self._setup_sessions_to_consider()
         # Results of processing
         self.x = None
         self.y = None
@@ -208,3 +213,17 @@ class EmotionDetectionClassifier:
                f'Classifier model: {self.classifier_model}\n' \
                f'Models per modality: {self.models}\n' \
                f'Fusion type: {self.fusion_type}'
+
+    def _setup_sessions_to_consider(self):
+        if self.configuration['all_participant_data']:
+            self.sessions_to_consider.append(f'session_0{self.participant_number}_01')
+            if self.participant_number != 1:
+                self.sessions_to_consider.append(f'session_0{self.participant_number}_02')
+        else:
+            self.sessions_to_consider.append(f'session_0{self.participant_number}_0{self.session_number}')
+
+    def _check_and_set_participant_number(self):
+        if self.configuration['participant_number'] in PARTICIPANT_NUMBERS:
+            self.participant_number = self.configuration['participant_number']
+        else:
+            raise ValueError(f'Participant number must be one of: {PARTICIPANT_NUMBERS}')
