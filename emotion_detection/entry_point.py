@@ -2,7 +2,7 @@ from emotion_detection.ed_classifier import EmotionDetectionClassifier
 
 if __name__ == '__main__':
     configure_data = {
-        'session_number': 'session_02_02',
+        'session_number': 'session_03_01',
         'all_participant_data': False,
         'dataset_split_type': 'non_sequential',
         'person_independent_model': False,

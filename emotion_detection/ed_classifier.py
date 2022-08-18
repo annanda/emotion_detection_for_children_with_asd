@@ -8,6 +8,8 @@ from sklearn.metrics import accuracy_score
 
 from setup.conf import DATASET_FOLDER
 
+ORDER_EMOTIONS = ['blue', 'green', 'red', 'yellow']
+
 
 class EmotionDetectionClassifier:
     def __init__(self, configuration):
@@ -34,6 +36,8 @@ class EmotionDetectionClassifier:
         self.y_dev = None
         self.x_test = None
         self.y_test = None
+        self._prediction_probabilities = None
+        self._prediction_labels = None
         self.accuracy = None
         self.confusion_matrix = None
 
@@ -143,17 +147,21 @@ class EmotionDetectionClassifier:
         prediction_probability = clf.predict_proba(self.x_test)
         indexes = list(self.y_test.index)
         # organising the prediction results with the labels
-        prediction_probability_df = pd.DataFrame(prediction_probability, columns=['blue', 'green', 'red', 'yellow'],
-                                                 index=indexes)
+        self._prediction_probabilities = pd.DataFrame(prediction_probability,
+                                                      columns=ORDER_EMOTIONS,
+                                                      index=indexes)
 
-        predictions_labels = self._get_final_label_prediction_array(prediction_probability_df)
-        self._calculate_accuracy(predictions_labels)
-        self._calculate_confusion_matrix(predictions_labels)
+        self._prediction_labels = self._get_final_label_prediction_array()
+        self._calculate_accuracy()
+        self._calculate_confusion_matrix()
 
-    def _get_final_label_prediction_array(self, prediction_probabilities):
+    def _get_final_label_prediction_array(self):
+        """
+        To get the prediction array with labels, not probabilities prediction
+        """
         predictions = []
-        for _, row in prediction_probabilities.iterrows():
-            label = self._get_predicted_label(np.array(row[['blue', 'green', 'red', 'yellow']]))
+        for _, row in self._prediction_probabilities.iterrows():
+            label = self._get_predicted_label(np.array(row[ORDER_EMOTIONS]))
             predictions.append(label)
         return predictions
 
@@ -162,17 +170,19 @@ class EmotionDetectionClassifier:
         emotion_index = result[0][0]
         return self._emotion_class[emotion_index]
 
-    def _calculate_accuracy(self, predictions):
+    def _calculate_accuracy(self):
         """
         To calculate accuracy
         """
-        self.accuracy = accuracy_score(self.y_test, predictions)
+        self.accuracy = accuracy_score(self.y_test, self._prediction_labels)
 
-    def _calculate_confusion_matrix(self, predictions):
+    def _calculate_confusion_matrix(self):
         """
         To calculate confusion matrix
         """
-        self.confusion_matrix = confusion_matrix(self.y_test, predictions, labels=["blue", "green", "yellow", "red"])
+        self.confusion_matrix = confusion_matrix(self.y_test,
+                                                 self._prediction_labels,
+                                                 labels=ORDER_EMOTIONS)
 
     def show_results(self):
         """
@@ -184,11 +194,18 @@ class EmotionDetectionClassifier:
         print(self.__str__())
         print(f'######################################')
         print('.\n.\n.')
-        print(f'Accuracy: {self.accuracy}')
-        # print(f'Accuracy: {self.accuracy:.4f}')
-        print('Confusion matrix: labels=["blue", "green", "yellow", "red"]')
+        # print(f'Accuracy: {self.accuracy}')
+        print(f'Accuracy: {self.accuracy:.4f}')
+        print(f'Confusion matrix: labels={ORDER_EMOTIONS}')
         print(self.confusion_matrix)
 
     def __str__(self):
         return f'Session number: {self.session_number}\n' \
-               f'All participant data: {self.all_participant_data}'
+               f'All participant data: {self.all_participant_data}\n' \
+               f'Dataset split type: {self.dataset_split_type}\n' \
+               f'Person-Independent model: {self.person_independent_model}\n' \
+               f'Modalities: {self.modalities}\n' \
+               f'Features type: {self.features_types}\n' \
+               f'Classifier model: {self.classifier_model}\n' \
+               f'Models per modality: {self.models}\n' \
+               f'Fusion type: {self.fusion_type}'
