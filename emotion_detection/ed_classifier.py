@@ -1,19 +1,23 @@
 import os.path
 
 import pandas as pd
+import numpy as np
 from sklearn import svm
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import accuracy_score
 
 from setup.conf import DATASET_FOLDER
 
 
 class EmotionDetectionClassifier:
     def __init__(self, configuration):
+        self._emotion_class = {0: 'blue', 1: 'green', 2: 'red', 3: 'yellow'}
         self.configuration = configuration
         # From configuration input
         self.session_number = self.configuration['session_number']
         self.all_participant_data = self.configuration['all_participant_data']
         self.dataset_split_type = self.configuration['dataset_split_type']
-        self.individual_model = self.configuration['individual_model']
+        self.person_independent_model = self.configuration['person_independent_model']
         self.balance_dataset = self.configuration['balanced_dataset']
         self.balance_dataset_technique = self.configuration['balance_dataset_technique']
         self.classifier_model = self.configuration['classifier_model']
@@ -56,10 +60,11 @@ class EmotionDetectionClassifier:
             models[modality] = self.configuration['modalities'][modality]['model_for_modality']
         self.models = models
 
-    def prepare_dataset(self):
+    def _prepare_dataset(self):
         """
         To attribute the correct values for x, y, x_test, y_test, x_dev, y_dev
         """
+        print('Preparing the dataset according to the configuration:')
         # Get the right path to the expected dataset
         if len(self.modalities) == 1:
             folder_read = self._prepare_dataset_path_one_modality()
@@ -79,9 +84,17 @@ class EmotionDetectionClassifier:
         self.y_test = x_test['emotion_zone']
 
     def _prepare_dataset_path_one_modality(self):
-        folder_read_modality = os.path.join(DATASET_FOLDER, self.dataset_split_type, self.individual_model,
+        # To define the path for person-independent model or individuals model
+        if self.person_independent_model:
+            person_independent_folder = 'cross_individuals'
+        else:
+            person_independent_folder = 'individuals'
+
+        folder_read_modality = os.path.join(DATASET_FOLDER,
+                                            self.dataset_split_type,
+                                            person_independent_folder,
                                             self.modalities[0])
-        # Case of just one type of features
+        # For only one type of feature
         if len(self.features_types) == 1:
             folder_read = self._prepare_dataset_path_one_modality_one_feature(folder_read_modality)
         else:
@@ -114,10 +127,13 @@ class EmotionDetectionClassifier:
         print('. . . . . . . . . . . . . . . . . .')
         print('.\n.\n.')
 
+        # Preparing the dataset for the experiment
+        self._prepare_dataset()
+
         print('Starting to train the model')
         print('.\n.\n.')
 
-        if self.model == 'SVM':
+        if self.classifier_model == 'SVM':
             clf = svm.SVC(probability=True)
         clf.fit(self.x, self.y)
 
@@ -129,19 +145,34 @@ class EmotionDetectionClassifier:
         # organising the prediction results with the labels
         prediction_probability_df = pd.DataFrame(prediction_probability, columns=['blue', 'green', 'red', 'yellow'],
                                                  index=indexes)
-        #####################
-        # STOPED HERE!
-        return prediction_probability_df
 
-    def _calculate_accuracy(self):
+        predictions_labels = self._get_final_label_prediction_array(prediction_probability_df)
+        self._calculate_accuracy(predictions_labels)
+        self._calculate_confusion_matrix(predictions_labels)
+
+    def _get_final_label_prediction_array(self, prediction_probabilities):
+        predictions = []
+        for _, row in prediction_probabilities.iterrows():
+            label = self._get_predicted_label(np.array(row[['blue', 'green', 'red', 'yellow']]))
+            predictions.append(label)
+        return predictions
+
+    def _get_predicted_label(self, probability_vector):
+        result = np.where(probability_vector == np.amax(probability_vector))
+        emotion_index = result[0][0]
+        return self._emotion_class[emotion_index]
+
+    def _calculate_accuracy(self, predictions):
         """
         To calculate accuracy
         """
+        self.accuracy = accuracy_score(self.y_test, predictions)
 
-    def _calculate_confusion_matrix(self):
+    def _calculate_confusion_matrix(self, predictions):
         """
         To calculate confusion matrix
         """
+        self.confusion_matrix = confusion_matrix(self.y_test, predictions, labels=["blue", "green", "yellow", "red"])
 
     def show_results(self):
         """
@@ -149,7 +180,8 @@ class EmotionDetectionClassifier:
         :return:
         """
         print(f'######################################')
-        print('Results for the experiment:')
+        print(' ... Results for the experiment: ...')
+        print(self.__str__())
         print(f'######################################')
         print('.\n.\n.')
         print(f'Accuracy: {self.accuracy}')
@@ -159,4 +191,4 @@ class EmotionDetectionClassifier:
 
     def __str__(self):
         return f'Session number: {self.session_number}\n' \
-               f'All participant data: {self.all_participant_data}\n'
+               f'All participant data: {self.all_participant_data}'

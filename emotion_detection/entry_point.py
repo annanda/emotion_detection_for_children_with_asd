@@ -5,7 +5,7 @@ if __name__ == '__main__':
         'session_number': 'session_02_02',
         'all_participant_data': False,
         'dataset_split_type': 'non_sequential',
-        'individual_model': 'individuals',
+        'person_independent_model': False,
         'modalities': {
             'video': {
                 'features_type': {
@@ -28,9 +28,8 @@ if __name__ == '__main__':
     }
 
     classifier = EmotionDetectionClassifier(configure_data)
-    classifier.prepare_dataset()
-    # classifier.train_model_produce_predictions()
-    # classifier.show_results()
+    classifier.train_model_produce_predictions()
+    classifier.show_results()
 
     ############################################################
     # Example of configuration
