@@ -174,6 +174,8 @@ class EmotionDetectionClassifier:
         print(f'Accuracy: {self.accuracy:.4f}')
         print(f'Confusion matrix: labels={ORDER_EMOTIONS}')
         print(self.confusion_matrix)
+        print(f'Total train examples: {len(self.x)}')
+        print(f'Total test examples: {np.sum(self.confusion_matrix)}')
 
     def __str__(self):
         return f'Participant number: 0{self.configuration.participant_number}\n' \
@@ -192,7 +194,7 @@ class EmotionDetectionClassifier:
 class PrepareDataset:
     def __init__(self, configuration):
         self.configuration = EmotionDetectionConfiguration(configuration)
-        self._folders_to_read_for_dataset = {}
+        self._folders_to_read_for_dataset = []
         self._setup_folders_to_read_for_dataset()
 
         self.x = None
@@ -206,22 +208,17 @@ class PrepareDataset:
 
     def _prepare_dataset(self):
         print('Preparing the dataset according to the configuration:')
-        # Get the right path to the expected dataset
-        if len(self.configuration.modalities) == 1:
-            folders_to_read = self._prepare_dataset_path_one_modality()
-        else:
-            raise ValueError('Just One modality supported')
 
         # To define dataset split after defining which folder to read
-        x = self._get_dataset_split(folders_to_read, 'train')
+        x = self._read_dataset_from_folders('train')
         self.x = x.iloc[:, 4:]
         self.y = x['emotion_zone']
 
-        x_dev = self._get_dataset_split(folders_to_read, 'dev')
+        x_dev = self._read_dataset_from_folders('dev')
         self.x_dev = x_dev.iloc[:, 4:]
         self.y_dev = x_dev['emotion_zone']
 
-        x_test = self._get_dataset_split(folders_to_read, 'test')
+        x_test = self._read_dataset_from_folders('test')
         self.x_test = x_test.iloc[:, 4:]
         self.y_test = x_test['emotion_zone']
 
@@ -233,30 +230,38 @@ class PrepareDataset:
 
         # For only one type of feature
         if len(self.configuration.features_types) == 1:
-            folder_read = self._prepare_dataset_path_one_modality_one_feature(folder_read_modality)
+            self._prepare_dataset_path_one_modality_one_feature(folder_read_modality)
         else:
             raise ValueError('More than one type of features is not yet supported')
 
-        return folder_read
-
     def _prepare_dataset_path_one_modality_one_feature(self, folder_read_modality):
-        return os.path.join(folder_read_modality,
-                            self.configuration.features_types[self.configuration.modalities[0]][0],
-                            self.configuration.sessions_to_consider[0])
+        for session in self.configuration.sessions_to_consider:
+            self._folders_to_read_for_dataset.append(os.path.join(
+                folder_read_modality,
+                self.configuration.features_types[self.configuration.modalities[0]][0],
+                session))
 
-    def _get_dataset_split(self, folders_to_read, dataset_split):
-
-        # TODO Put here the point to divide for the concatenation - from folders to read
-        split_dfs = []
-        type_files_in_folder = [type_file for type_file in os.listdir(folders_to_read) if dataset_split in type_file]
-        for type_file in type_files_in_folder:
-            dataset_df = pd.read_pickle(os.path.join(folders_to_read, type_file))
-            split_dfs.append(dataset_df)
-
-        concated_split_dataset = pd.concat(split_dfs)
-        return concated_split_dataset
-
-        # I STOPPED HERE!
+    def _read_dataset_from_folders(self, dataset_type):
+        """
+        :param folders_to_read: list with folders to read for building the dataset to read
+        :param dataset_type: the part of the dataset desired, i.e., train, dev or test
+        :return: the concatenated dataset for the specific type, from all the folders defined by 'folders_to_read'
+        """
+        folder_dfs = []
+        for folder in self._folders_to_read_for_dataset:
+            split_dfs = []
+            type_files_in_folder = [type_file for type_file in os.listdir(folder) if dataset_type in type_file]
+            for type_file in type_files_in_folder:
+                dataset_df = pd.read_pickle(os.path.join(folder, type_file))
+                split_dfs.append(dataset_df)
+            concated_split_dataset = pd.concat(split_dfs)
+            folder_dfs.append(concated_split_dataset)
+        concatenate_folder_dfs = pd.concat(folder_dfs)
+        return concatenate_folder_dfs
 
     def _setup_folders_to_read_for_dataset(self):
-        pass
+        # Get the right path to the expected dataset
+        if len(self.configuration.modalities) == 1:
+            self._prepare_dataset_path_one_modality()
+        else:
+            raise ValueError('Just One modality supported')

@@ -4,7 +4,7 @@ if __name__ == '__main__':
     configure_data = {
         'participant_number': 3,
         'session_number': 1,
-        'all_participant_data': False,
+        'all_participant_data': True,
         'dataset_split_type': 'non_sequential',
         'person_independent_model': False,
         'modalities': {
@@ -31,7 +31,6 @@ if __name__ == '__main__':
     classifier = EmotionDetectionClassifier(configure_data)
     classifier.train_model_produce_predictions()
     classifier.show_results()
-    # configuration = EmotionDetectionConfiguration(configure_data)
 
     ############################################################
     # Example of configuration
