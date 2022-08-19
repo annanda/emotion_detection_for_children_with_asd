@@ -1,4 +1,4 @@
-from emotion_detection.ed_classifier import EmotionDetectionClassifier
+from emotion_detection.ed_classifier import EmotionDetectionClassifier, EmotionDetectionConfiguration
 
 if __name__ == '__main__':
     configure_data = {
@@ -29,9 +29,9 @@ if __name__ == '__main__':
     }
 
     classifier = EmotionDetectionClassifier(configure_data)
-    classifier._prepare_dataset()
-    # classifier.train_model_produce_predictions()
-    # classifier.show_results()
+    classifier.train_model_produce_predictions()
+    classifier.show_results()
+    # configuration = EmotionDetectionConfiguration(configure_data)
 
     ############################################################
     # Example of configuration
