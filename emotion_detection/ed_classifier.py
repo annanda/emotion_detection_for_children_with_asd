@@ -194,8 +194,9 @@ class EmotionDetectionClassifier:
 class PrepareDataset:
     def __init__(self, configuration):
         self.configuration = EmotionDetectionConfiguration(configuration)
-        self._folders_to_read_for_dataset = []
-        self._setup_folders_to_read_for_dataset()
+        self.folders_to_read_add_rows = []
+        self.folders_to_read_add_columns = []
+        # self._setup_folders_to_read_for_dataset()
 
         self.x = None
         self.y = None
@@ -204,64 +205,151 @@ class PrepareDataset:
         self.x_test = None
         self.y_test = None
 
-        self._prepare_dataset()
+        self.prepare_dataset_one_modality()
 
-    def _prepare_dataset(self):
+        # self.read_dataset_split_parts()
+
+    def prepare_dataset(self):
+        # dfs_concatenate_columns = self.concatenate_dfs_rows()
+        return
+
+    def concatenate_dfs_rows(self, folders_add_rows):
+        x, y, x_dev, y_dev, x_test, y_test = ([], [], [], [], [], [])
+        for folder in folders_add_rows:
+            x_temp, y_temp, x_dev_temp, y_dev_temp, x_test_temp, y_test_temp = self.read_dataset_split_parts(folder)
+            x.append(x_temp)
+            y.append(y_temp)
+            x_dev.append(x_dev_temp)
+            y_dev.append(y_dev_temp)
+            x_test.append(x_test_temp)
+            y_test.append(y_test_temp)
+
+        x = pd.concat(x)
+        y = pd.concat(y)
+
+        x_dev = pd.concat(x_dev)
+        y_dev = pd.concat(y_dev)
+
+        x_test = pd.concat(x_test)
+        y_test = pd.concat(y_test)
+        return x, y, x_dev, y_dev, x_test, y_test
+
+    def concatenate_dfs_columns(self, x_concatenate_columns,
+                                y_concatenate_columns,
+                                x_dev_concatenate_columns,
+                                y_dev_concatenate_columns,
+                                x_test_concatenate_columns,
+                                y_test_concatenate_columns):
+        self.x = pd.concat(x_concatenate_columns, axis=1)
+        self.y = pd.concat(y_concatenate_columns)
+
+        self.x_dev = pd.concat(x_dev_concatenate_columns)
+        self.y_dev = pd.concat(y_dev_concatenate_columns)
+
+        self.x_test = pd.concat(x_test_concatenate_columns)
+        self.y_test = pd.concat(y_test_concatenate_columns)
+
+    def read_dataset_split_parts(self, folder_to_read):
         print('Preparing the dataset according to the configuration:')
 
         # To define dataset split after defining which folder to read
-        x = self._read_dataset_from_folders('train')
-        self.x = x.iloc[:, 4:]
-        self.y = x['emotion_zone']
+        x_read = self._read_dataset_from_folders(folder_to_read, 'train')
+        x = x_read.iloc[:, 4:]
+        y = x_read['emotion_zone']
 
-        x_dev = self._read_dataset_from_folders('dev')
-        self.x_dev = x_dev.iloc[:, 4:]
-        self.y_dev = x_dev['emotion_zone']
+        x_dev_read = self._read_dataset_from_folders(folder_to_read, 'dev')
+        x_dev = x_dev_read.iloc[:, 4:]
+        y_dev = x_dev_read['emotion_zone']
 
-        x_test = self._read_dataset_from_folders('test')
-        self.x_test = x_test.iloc[:, 4:]
-        self.y_test = x_test['emotion_zone']
+        x_test_read = self._read_dataset_from_folders(folder_to_read, 'test')
+        x_test = x_test_read.iloc[:, 4:]
+        y_test = x_test_read['emotion_zone']
+        return x, y, x_dev, y_dev, x_test, y_test
 
-    def _prepare_dataset_path_one_modality(self):
-        folder_read_modality = os.path.join(DATASET_FOLDER,
-                                            self.configuration.modalities[0],
-                                            self.configuration.person_independent_folder,
-                                            self.configuration.dataset_split_type)
+    def prepare_dataset_one_modality(self):
+        folder_modality = os.path.join(DATASET_FOLDER,
+                                       self.configuration.modalities[0],
+                                       self.configuration.person_independent_folder,
+                                       self.configuration.dataset_split_type)
 
         # For only one type of feature
-        if len(self.configuration.features_types) == 1:
-            self._prepare_dataset_path_one_modality_one_feature(folder_read_modality)
+        if len(list(self.configuration.features_types.keys())[0]) == 1:
+            modality = self.configuration.modalities[0]
+            feature = self.configuration.features_types[modality][0]
+            folders_read = self._prepare_dataset_one_modality_one_feature(folder_modality, feature)
+            self.x, self.y, self.x_dev, self.y_dev, self.x_test, self.y_test = self.concatenate_dfs_rows(folders_read)
+        # for more than one type of feature
         else:
-            raise ValueError('More than one type of features is not yet supported')
+            x_concatenate_columns = []
+            y_concatenate_columns = []
 
-    def _prepare_dataset_path_one_modality_one_feature(self, folder_read_modality):
+            x_dev_concatenate_columns = []
+            y_dev_concatenate_columns = []
+
+            x_test_concatenate_columns = []
+            y_test_concatenate_columns = []
+
+            modality = self.configuration.modalities[0]
+
+            for feature in self.configuration.features_types[modality]:
+                folders_read = self._prepare_dataset_one_modality_one_feature(folder_modality, feature)
+                x, y, x_dev, y_dev, x_test, y_test = self.concatenate_dfs_rows(
+                    folders_read)
+
+                x_concatenate_columns.append(x)
+                y_concatenate_columns.append(y)
+
+                x_dev_concatenate_columns.append(x_dev)
+                y_dev_concatenate_columns.append(y_dev)
+
+                x_test_concatenate_columns.append(x_test)
+                y_test_concatenate_columns.append(y_test)
+
+            self.concatenate_dfs_columns(x_concatenate_columns,
+                                         y_concatenate_columns,
+                                         x_dev_concatenate_columns,
+                                         y_dev_concatenate_columns,
+                                         x_test_concatenate_columns,
+                                         y_test_concatenate_columns)
+
+            # self._prepare_dataset_path_one_modality_many_features(folder_modality)
+
+    def _prepare_dataset_one_modality_one_feature(self, folder_read_modality, feature):
+        folders_one_modality_one_feature = []
         for session in self.configuration.sessions_to_consider:
-            self._folders_to_read_for_dataset.append(os.path.join(
+            folders_one_modality_one_feature.append(os.path.join(
                 folder_read_modality,
-                self.configuration.features_types[self.configuration.modalities[0]][0],
+                feature,
                 session))
+        return folders_one_modality_one_feature
 
-    def _read_dataset_from_folders(self, dataset_type):
+    def _read_dataset_from_folders(self, folder_to_read, dataset_type):
         """
         :param folders_to_read: list with folders to read for building the dataset to read
         :param dataset_type: the part of the dataset desired, i.e., train, dev or test
         :return: the concatenated dataset for the specific type, from all the folders defined by 'folders_to_read'
         """
-        folder_dfs = []
-        for folder in self._folders_to_read_for_dataset:
-            split_dfs = []
-            type_files_in_folder = [type_file for type_file in os.listdir(folder) if dataset_type in type_file]
-            for type_file in type_files_in_folder:
-                dataset_df = pd.read_pickle(os.path.join(folder, type_file))
-                split_dfs.append(dataset_df)
-            concated_split_dataset = pd.concat(split_dfs)
-            folder_dfs.append(concated_split_dataset)
-        concatenate_folder_dfs = pd.concat(folder_dfs)
-        return concatenate_folder_dfs
+        concated_split_dataset = []
+        split_dfs = []
+        type_files_in_folder = [type_file for type_file in os.listdir(folder_to_read) if dataset_type in type_file]
+        for type_file in type_files_in_folder:
+            dataset_df = pd.read_pickle(os.path.join(folder_to_read, type_file))
+            split_dfs.append(dataset_df)
+        concated_split_dataset = pd.concat(split_dfs)
+        return concated_split_dataset
 
     def _setup_folders_to_read_for_dataset(self):
         # Get the right path to the expected dataset
         if len(self.configuration.modalities) == 1:
-            self._prepare_dataset_path_one_modality()
+            self.prepare_dataset_one_modality()
         else:
             raise ValueError('Just One modality supported')
+
+    def _prepare_dataset_path_one_modality_many_features(self, folder_read_modality):
+        for session in self.configuration.sessions_to_consider:
+            modality = self.configuration.modalities[0]
+            for feature in self.configuration.features_types[modality]:
+                self.folders_to_read_add_rows.append(os.path.join(
+                    folder_read_modality,
+                    feature,
+                    session))

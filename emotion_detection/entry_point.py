@@ -1,4 +1,4 @@
-from emotion_detection.ed_classifier import EmotionDetectionClassifier, EmotionDetectionConfiguration
+from emotion_detection.ed_classifier import EmotionDetectionClassifier, EmotionDetectionConfiguration, PrepareDataset
 
 if __name__ == '__main__':
     configure_data = {
@@ -14,7 +14,7 @@ if __name__ == '__main__':
                     'appearance': False,
                     'BoVW': False,
                     'geometric': False,
-                    'gaze': False,
+                    'gaze': True,
                     '2d_eye_landmark': False,
                     '3d_eye_landmark': False,
                     'head_pose': False
@@ -31,6 +31,8 @@ if __name__ == '__main__':
     classifier = EmotionDetectionClassifier(configure_data)
     classifier.train_model_produce_predictions()
     classifier.show_results()
+    # dataset = PrepareDataset(configure_data)
+    # dataset.prepare_dataset_one_modality()
 
     ############################################################
     # Example of configuration
