@@ -14,7 +14,7 @@ if __name__ == '__main__':
                     'appearance': False,
                     'BoVW': False,
                     'geometric': False,
-                    'gaze': True,
+                    'gaze': False,
                     '2d_eye_landmark': False,
                     '3d_eye_landmark': False,
                     'head_pose': False
