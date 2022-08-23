@@ -3,8 +3,8 @@ from emotion_detection.ed_classifier import EmotionDetectionClassifier, EmotionD
 if __name__ == '__main__':
     configure_data = {
         'run_to_all_participants': False,
-        'sessions_to_consider': ['session_03_01',
-                                 'session_04_02'],
+        # 'sessions_to_consider': ['session_03_01',
+        #                          'session_04_02'],
         'participant_number': 3,
         'session_number': 1,
         'all_participant_data': False,

@@ -304,7 +304,9 @@ class EmotionDetectionClassifier:
         print(self.confusion_matrix)
         print(f'Total train examples: {len(self.x)}')
         print(f'Total test examples: {np.sum(self.confusion_matrix)}')
+        # print(f'Number of examples per class in test: \n{self.y_test.value_counts()}')
         print(f'Total number of features: {self.x.shape[1]}')
+        print(f'Number of examples per class in training: \n{self.y.value_counts()}')
 
     def __str__(self):
         return f'Participant number: 0{self.configuration.participant_number}\n' \
