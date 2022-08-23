@@ -11,6 +11,13 @@ from setup.conf import DATASET_FOLDER
 
 ORDER_EMOTIONS = ['blue', 'green', 'red', 'yellow']
 PARTICIPANT_NUMBERS = [1, 2, 3, 4]
+TOTAL_SESSIONS = ['session_01_01',
+                  'session_02_01',
+                  'session_02_02',
+                  'session_03_01',
+                  'session_03_02',
+                  'session_04_01',
+                  'session_04_02']
 
 
 class EmotionDetectionConfiguration:
@@ -63,6 +70,12 @@ class EmotionDetectionConfiguration:
         self.models = models
 
     def _setup_sessions_to_consider(self):
+        try:
+            if self.configuration['run_to_all_participants']:
+                self.sessions_to_consider = TOTAL_SESSIONS
+                return
+        except KeyError:
+            pass
         if self.configuration['all_participant_data']:
             self.sessions_to_consider.append(f'session_0{self.participant_number}_01')
             if self.participant_number != 1:

@@ -4,7 +4,8 @@ if __name__ == '__main__':
     configure_data = {
         'participant_number': 3,
         'session_number': 1,
-        'all_participant_data': True,
+        'all_participant_data': False,
+        'run_to_all_participants': True,
         'dataset_split_type': 'non_sequential',
         'person_independent_model': False,
         'modalities': {
