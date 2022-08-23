@@ -7,17 +7,7 @@ from sklearn import svm
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
 
-from setup.conf import DATASET_FOLDER
-
-ORDER_EMOTIONS = ['blue', 'green', 'red', 'yellow']
-PARTICIPANT_NUMBERS = [1, 2, 3, 4]
-TOTAL_SESSIONS = ['session_01_01',
-                  'session_02_01',
-                  'session_02_02',
-                  'session_03_01',
-                  'session_03_02',
-                  'session_04_01',
-                  'session_04_02']
+from setup.conf import DATASET_FOLDER, ORDER_EMOTIONS, TOTAL_SESSIONS, PARTICIPANT_NUMBERS
 
 
 class EmotionDetectionConfiguration:
@@ -74,6 +64,9 @@ class EmotionDetectionConfiguration:
             if self.configuration['run_to_all_participants']:
                 self.sessions_to_consider = TOTAL_SESSIONS
                 return
+            if self.configuration['sessions_to_consider']:
+                self.sessions_to_consider = self.configuration['sessions_to_consider']
+                return
         except KeyError:
             pass
         if self.configuration['all_participant_data']:
@@ -88,122 +81,6 @@ class EmotionDetectionConfiguration:
             self.participant_number = self.configuration['participant_number']
         else:
             raise ValueError(f'Participant number must be one of: {PARTICIPANT_NUMBERS}')
-
-
-class EmotionDetectionClassifier:
-    def __init__(self, configuration):
-        self._emotion_class = {0: 'blue', 1: 'green', 2: 'red', 3: 'yellow'}
-        self.configuration = EmotionDetectionConfiguration(configuration)
-
-        # Setting up dataset
-        dataset = PrepareDataset(configuration)
-        self.x = dataset.x
-        self.y = dataset.y
-
-        self.x_dev = dataset.x_dev
-        self.y_dev = dataset.y_dev
-
-        self.x_test = dataset.x_test
-        self.y_test = dataset.y_test
-
-        # Results of processing
-        self._prediction_probabilities = None
-        self._prediction_labels = None
-        self.accuracy = None
-        self.confusion_matrix = None
-
-    def train_model_produce_predictions(self):
-        """
-        To train the model and get predictions for x_test
-        """
-        print(f'Running experiment with configuration:')
-        print('. . . . . . . . . . . . . . .  . . .')
-        print(self.__str__())
-        print('. . . . . . . . . . . . . . . . . .')
-        print('.\n.\n.')
-
-        print('Starting to train the model')
-        print('.\n.\n.')
-
-        if self.configuration.classifier_model == 'SVM':
-            clf = svm.SVC(probability=True)
-
-        clf.fit(self.x, self.y)
-
-        print('Calculating predictions for test set')
-        print('.\n.\n.')
-
-        prediction_probability = clf.predict_proba(self.x_test)
-        indexes = list(self.y_test.index)
-
-        # organising the prediction results with the labels
-        self._prediction_probabilities = pd.DataFrame(prediction_probability,
-                                                      columns=ORDER_EMOTIONS,
-                                                      index=indexes)
-
-        self._prediction_labels = self._get_final_label_prediction_array()
-        self._calculate_accuracy()
-        self._calculate_confusion_matrix()
-
-    def _get_final_label_prediction_array(self):
-        """
-        To get the prediction array with labels, not probabilities prediction
-        """
-        predictions = []
-        for _, row in self._prediction_probabilities.iterrows():
-            label = self._get_predicted_label(np.array(row[ORDER_EMOTIONS]))
-            predictions.append(label)
-        return predictions
-
-    def _get_predicted_label(self, probability_vector):
-        result = np.where(probability_vector == np.amax(probability_vector))
-        emotion_index = result[0][0]
-        return self._emotion_class[emotion_index]
-
-    def _calculate_accuracy(self):
-        """
-        To calculate accuracy
-        """
-        self.accuracy = accuracy_score(self.y_test, self._prediction_labels)
-
-    def _calculate_confusion_matrix(self):
-        """
-        To calculate confusion matrix
-        """
-        self.confusion_matrix = confusion_matrix(self.y_test,
-                                                 self._prediction_labels,
-                                                 labels=ORDER_EMOTIONS)
-
-    def show_results(self):
-        """
-        To show the results after running an experiment
-        :return:
-        """
-        print(f'######################################')
-        print(' ... Results for the experiment: ...')
-        print(self.__str__())
-        print(f'######################################')
-        print('.\n.\n.')
-        # print(f'Accuracy: {self.accuracy}')
-        print(f'Accuracy: {self.accuracy:.4f}')
-        print(f'Confusion matrix: labels={ORDER_EMOTIONS}')
-        print(self.confusion_matrix)
-        print(f'Total train examples: {len(self.x)}')
-        print(f'Total test examples: {np.sum(self.confusion_matrix)}')
-        print(f'Total number of features: {self.x.shape[1]}')
-
-    def __str__(self):
-        return f'Participant number: 0{self.configuration.participant_number}\n' \
-               f'Session number: 0{self.configuration.session_number}\n' \
-               f'All participant data: {self.configuration.all_participant_data}\n' \
-               f'Sessions to consider: {self.configuration.sessions_to_consider}\n' \
-               f'Dataset split type: {self.configuration.dataset_split_type}\n' \
-               f'Person-Independent model: {self.configuration.person_independent_model}\n' \
-               f'Modalities: {self.configuration.modalities}\n' \
-               f'Features type: {self.configuration.features_types}\n' \
-               f'Classifier model: {self.configuration.classifier_model}\n' \
-               f'Models per modality: {self.configuration.models}\n' \
-               f'Fusion type: {self.configuration.fusion_type}'
 
 
 class PrepareDataset:
@@ -325,3 +202,119 @@ class PrepareDataset:
             split_dfs.append(dataset_df)
         concatenated_split_dataset = pd.concat(split_dfs)
         return concatenated_split_dataset
+
+
+class EmotionDetectionClassifier:
+    def __init__(self, configuration):
+        self._emotion_class = {0: 'blue', 1: 'green', 2: 'red', 3: 'yellow'}
+        self.configuration = EmotionDetectionConfiguration(configuration)
+
+        # Setting up dataset
+        dataset = PrepareDataset(configuration)
+        self.x = dataset.x
+        self.y = dataset.y
+
+        self.x_dev = dataset.x_dev
+        self.y_dev = dataset.y_dev
+
+        self.x_test = dataset.x_test
+        self.y_test = dataset.y_test
+
+        # Results of processing
+        self._prediction_probabilities = None
+        self._prediction_labels = None
+        self.accuracy = None
+        self.confusion_matrix = None
+
+    def train_model_produce_predictions(self):
+        """
+        To train the model and get predictions for x_test
+        """
+        print(f'Running experiment with configuration:')
+        print('. . . . . . . . . . . . . . .  . . .')
+        print(self.__str__())
+        print('. . . . . . . . . . . . . . . . . .')
+        print('.\n.\n.')
+
+        print('Starting to train the model')
+        print('.\n.\n.')
+
+        if self.configuration.classifier_model == 'SVM':
+            clf = svm.SVC(probability=True)
+
+        clf.fit(self.x, self.y)
+
+        print('Calculating predictions for test set')
+        print('.\n.\n.')
+
+        prediction_probability = clf.predict_proba(self.x_test)
+        indexes = list(self.y_test.index)
+
+        # organising the prediction results with the labels
+        self._prediction_probabilities = pd.DataFrame(prediction_probability,
+                                                      columns=ORDER_EMOTIONS,
+                                                      index=indexes)
+
+        self._prediction_labels = self._get_final_label_prediction_array()
+        self._calculate_accuracy()
+        self._calculate_confusion_matrix()
+
+    def _get_final_label_prediction_array(self):
+        """
+        To get the prediction array with labels, not probabilities prediction
+        """
+        predictions = []
+        for _, row in self._prediction_probabilities.iterrows():
+            label = self._get_predicted_label(np.array(row[ORDER_EMOTIONS]))
+            predictions.append(label)
+        return predictions
+
+    def _get_predicted_label(self, probability_vector):
+        result = np.where(probability_vector == np.amax(probability_vector))
+        emotion_index = result[0][0]
+        return self._emotion_class[emotion_index]
+
+    def _calculate_accuracy(self):
+        """
+        To calculate accuracy
+        """
+        self.accuracy = accuracy_score(self.y_test, self._prediction_labels)
+
+    def _calculate_confusion_matrix(self):
+        """
+        To calculate confusion matrix
+        """
+        self.confusion_matrix = confusion_matrix(self.y_test,
+                                                 self._prediction_labels,
+                                                 labels=ORDER_EMOTIONS)
+
+    def show_results(self):
+        """
+        To show the results after running an experiment
+        :return:
+        """
+        print(f'######################################')
+        print(' ... Results for the experiment: ...')
+        print(self.__str__())
+        print(f'######################################')
+        print('.\n.\n.')
+        # print(f'Accuracy: {self.accuracy}')
+        print(f'Accuracy: {self.accuracy:.4f}')
+        print(f'Confusion matrix: labels={ORDER_EMOTIONS}')
+        print(self.confusion_matrix)
+        print(f'Total train examples: {len(self.x)}')
+        print(f'Total test examples: {np.sum(self.confusion_matrix)}')
+        print(f'Total number of features: {self.x.shape[1]}')
+
+    def __str__(self):
+        return f'Participant number: 0{self.configuration.participant_number}\n' \
+               f'Session number: 0{self.configuration.session_number}\n' \
+               f'All participant data: {self.configuration.all_participant_data}\n' \
+               f'Sessions to consider: {self.configuration.sessions_to_consider}\n' \
+               f'Dataset split type: {self.configuration.dataset_split_type}\n' \
+               f'Person-Independent model: {self.configuration.person_independent_model}\n' \
+               f'Modalities: {self.configuration.modalities}\n' \
+               f'Features type: {self.configuration.features_types}\n' \
+               f'Classifier model: {self.configuration.classifier_model}\n' \
+               f'Models per modality: {self.configuration.models}\n' \
+               f'Fusion type: {self.configuration.fusion_type}'

@@ -3,6 +3,16 @@ import os.path
 
 from decouple import config
 
+ORDER_EMOTIONS = ['blue', 'green', 'red', 'yellow']
+PARTICIPANT_NUMBERS = [1, 2, 3, 4]
+TOTAL_SESSIONS = ['session_01_01',
+                  'session_02_01',
+                  'session_02_02',
+                  'session_03_01',
+                  'session_03_02',
+                  'session_04_01',
+                  'session_04_02']
+
 main_folder = pathlib.Path(__file__).parent.parent.absolute()
 
 MAIN_FOLDER = config('MAIN_FOLDER', default=main_folder)
