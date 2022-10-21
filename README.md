@@ -13,7 +13,6 @@ The system supports any combination of features and inputs listed below.
 
 - video
 - audio
-- physio
 
 ### Visual features list
 
@@ -32,9 +31,6 @@ The system supports any combination of features and inputs listed below.
 - DeepSpectrum
 - eGeMAPSfunct
 
-### Physiological signals features list
-
-- HRHRV
 
 ## How to use the system
 

@@ -9,7 +9,7 @@ import pathlib
 import os.path
 from scipy.io import arff
 import pandas as pd
-from setup.conf import MAIN_FOLDER
+from configs.conf import MAIN_FOLDER
 
 path_annotation_emotions = os.path.join(MAIN_FOLDER, 'labels', 'emotion_zones', 'emotion_names')
 list_file_annotation_emotions = glob.glob(f"{path_annotation_emotions}/*.csv")

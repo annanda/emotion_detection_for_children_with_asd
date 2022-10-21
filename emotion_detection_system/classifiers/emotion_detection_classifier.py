@@ -3,7 +3,7 @@ import os
 
 import pandas as pd
 import numpy as np
-from setup.conf import DATASET_FOLDER, EMOTION_ANNOTATION_FILE
+from configs.conf import DATASET_FOLDER, EMOTION_ANNOTATION_FILE
 from sklearn import svm
 
 from sklearn.model_selection import train_test_split

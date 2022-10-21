@@ -1,4 +1,4 @@
-from emotion_detection.ed_classifier import EmotionDetectionClassifier, EmotionDetectionConfiguration, PrepareDataset
+from emotion_detection_system.ed_classifier import EmotionDetectionClassifier, EmotionDetectionConfiguration, PrepareDataset
 
 if __name__ == '__main__':
     configure_data = {

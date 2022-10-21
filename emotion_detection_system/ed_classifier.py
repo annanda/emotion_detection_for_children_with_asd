@@ -7,7 +7,7 @@ from sklearn import svm
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
 
-from setup.conf import DATASET_FOLDER, ORDER_EMOTIONS, TOTAL_SESSIONS, PARTICIPANT_NUMBERS
+from emotion_detection_system.conf import DATASET_FOLDER, ORDER_EMOTIONS, TOTAL_SESSIONS, PARTICIPANT_NUMBERS
 
 
 class EmotionDetectionConfiguration:
@@ -61,10 +61,11 @@ class EmotionDetectionConfiguration:
 
     def _setup_sessions_to_consider(self):
         try:
-            if self.configuration['run_to_all_participants']:
+            # if self.configuration['run_to_all_participants']:
+            if self.configuration.get('run_to_all_participants', False):
                 self.sessions_to_consider = TOTAL_SESSIONS
                 return
-            if self.configuration['sessions_to_consider']:
+            if 'sessions_to_consider' in self.configuration.keys():
                 self.sessions_to_consider = self.configuration['sessions_to_consider']
                 return
         except KeyError:

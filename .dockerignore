@@ -1,0 +1,5 @@
+.git/*
+dataset/*
+dataset_legacy/*
+jupyter_notebooks/*
+data_statistics/*
