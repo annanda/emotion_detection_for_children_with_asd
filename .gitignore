@@ -2,3 +2,6 @@ backlog_data/*
 features/*
 labels/*
 *.idea
+dataset/*
+dataset_legacy/*
+/emotion_detection_system/classifiers/experimenting.py
