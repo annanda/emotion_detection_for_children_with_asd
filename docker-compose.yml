@@ -1,0 +1,13 @@
+version: '3'
+services:
+  emotion-detection:
+    image: registry.insight-centre.org/annandas-phd/emotion-detection:latest
+    build:
+      context: '.'
+      dockerfile: 'Dockerfile'
+    volumes:
+      - "./dataset:/app/dataset"
+      - "./setup/conf.py:/app/setup/conf.py"
+    restart: unless-stopped
+    working_dir: /app/emotion_detection_system
+    entrypoint: /bin/sh -c

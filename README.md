@@ -13,7 +13,6 @@ The system supports any combination of features and inputs listed below.
 
 - video
 - audio
-- physio
 
 ### Visual features list
 
@@ -32,20 +31,30 @@ The system supports any combination of features and inputs listed below.
 - DeepSpectrum
 - eGeMAPSfunct
 
-### Physiological signals features list
-
-- HRHRV
 
 ## How to use the system
 
 1. Use the system ```annotation_tool``` to create the labels.
-2. Use the system ```Features_Extraction``` to preprocess the features extracted from tool, e.g., OpenFace and OpenSMILE
-   into groups.
-3. Use the system ```split_datasert``` to split datataset and labels into train, dev and test sets. The output from
+2. Use the system ```features_extraction``` to preprocess the features extracted from tools, e.g., OpenFace and
+   OpenSMILE
+   into groups and into correct time window.
+3. Use the system ```split_dataset``` to split features and labels dataset into train, dev and test sets. The output
+   from
    there will serve as input to this system.
-4. Put the features CSV files into the folder `/dataset/video` or `/dataset/audio` depending on the modality you want
-   to use. 
-5. Put the labels CSVs files into the folder `/labels`.
-6. Change the `input_data` variable on file `main.py` to include the modality and features you want to use. The
+4. Put the features/labels PKL files into the folder `/dataset/video` or `/dataset/audio` depending on the modality you
+   want
+   to use.
+
+
+5. Change the `input_data` variable on file `main.py` to include the modality and features you want to use. The
    modalities and features you want to include need to have `True` value.
-7. Run `main.py`
+6. Run `main.py`
+
+
+
+# Updated README
+### Configuration for each experiment
+
+- classifier_model: the classifier model for the whole multimodal ED system, usually used together with early fusion
+  method, or in case of just one modality.
+- model (within modality): the classifier model for the specific modality, usually used together with late fusion type. 

@@ -1,6 +1,6 @@
 from sklearn.dummy import DummyClassifier
 import pandas as pd
-from setup.conf import DATASET_VIDEO_FOLDER
+from configs.conf import DATASET_VIDEO_FOLDER
 from sklearn.metrics import accuracy_score
 
 from sklearn.model_selection import train_test_split

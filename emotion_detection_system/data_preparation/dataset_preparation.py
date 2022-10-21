@@ -3,7 +3,7 @@ import functools
 import glob
 import pandas as pd
 from scipy.io import arff
-from setup.conf import MAIN_FOLDER, DATASET_FOLDER
+from configs.conf import MAIN_FOLDER, DATASET_FOLDER
 
 path_annotation_emotions = os.path.join(MAIN_FOLDER, 'labels', 'emotion_zones', 'emotion_names')
 list_file_annotation_emotions = glob.glob(f"{path_annotation_emotions}/*.csv")
@@ -55,7 +55,9 @@ def merge_different_features_type_together(modality, dataset_type, features_type
         merged.to_csv(f'{DATASET_FOLDER}/{modality}/temp/{file_name}', index=False)
 
 
-def produce_more_than_one_features_type(modality, feature_type_lst):
+# def produce_more_than_one_features_type(modality, feature_type_lst):
+def produce_more_than_one_features_type(session_number, dataset_split_type, individual_model, modality,
+                                        feature_type_lst):
     merge_different_features_type_together(modality, 'train', feature_type_lst)
     merge_different_features_type_together(modality, 'dev', feature_type_lst)
     concatenate_dataset_files(modality, 'train', 'temp')
