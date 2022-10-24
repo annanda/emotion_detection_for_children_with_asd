@@ -1,4 +1,5 @@
-from emotion_detection_system.ed_classifier import EmotionDetectionClassifier, EmotionDetectionConfiguration, PrepareDataset
+from emotion_detection_system.ed_classifier import EmotionDetectionClassifier, EmotionDetectionConfiguration, \
+    PrepareDataset
 
 if __name__ == '__main__':
     configure_data = {
@@ -13,7 +14,7 @@ if __name__ == '__main__':
         'modalities': {
             'video': {
                 'features_type': {
-                    'AU': True,
+                    'AU': False,
                     'appearance': False,
                     'BoVW': False,
                     'geometric': False,
@@ -24,6 +25,22 @@ if __name__ == '__main__':
                 },
                 'model_for_modality': 'SVM'
             },
+            'audio': {
+                'feature_group': {
+                    'frequency': True,
+                    'energy_amplitude': False,
+                    'spectral_balance': False,
+                    'temporal_features': False
+                },
+                'all_features_from_group': True,
+                'features_type': {
+                    'frequency': [],
+                    'energy_amplitude': [],
+                    'spectral_balance': [],
+                    'temporal_features': []
+                },
+                'feature_level': 'functionals',
+            }
         },
         'classifier_model': 'SVM',
         'fusion_type': 'late_fusion',
@@ -34,39 +51,7 @@ if __name__ == '__main__':
     classifier = EmotionDetectionClassifier(configure_data)
     classifier.train_model_produce_predictions()
     classifier.show_results()
-
+    # TODO add to README the hierarchic order of the configuration option for data experiments
     ############################################################
     # Example of configuration
     ############################################################
-
-    # configure_data = {
-    #     'session_number': 'session_02_02',
-    #     'all_participant_data': False,
-    #     'dataset_split_type': 'non_sequential',
-    #     'individual_model': True,
-    #     'modalities': {
-    #         'video': {
-    #             'features_type': {
-    #                 'AU': True,
-    #                 'appearance': False,
-    #                 'BoVW': False,
-    #                 'geometric': False,
-    #                 'gaze': False,
-    #                 '2d_eye_landmark': False,
-    #                 '3d_eye_landmark': False,
-    #                 'head_pose': False
-    #             },
-    #             'model': 'SVM'
-    #         },
-    #         'audio': {
-    #             'features_type': {
-    #                 'BoAW': True,
-    #                 'DeepSpectrum': False,
-    #                 'eGeMAPSfunct': False
-    #                 # eGeMAPSfunct feature_type can only be used alone
-    #             },
-    #             'model': 'SVM'
-    #         },
-    #     },
-    #     'fusion_type': 'late_fusion',
-    # }

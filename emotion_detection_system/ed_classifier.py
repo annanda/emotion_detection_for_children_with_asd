@@ -60,16 +60,14 @@ class EmotionDetectionConfiguration:
         self.models = models
 
     def _setup_sessions_to_consider(self):
-        try:
-            # if self.configuration['run_to_all_participants']:
-            if self.configuration.get('run_to_all_participants', False):
-                self.sessions_to_consider = TOTAL_SESSIONS
-                return
-            if 'sessions_to_consider' in self.configuration.keys():
-                self.sessions_to_consider = self.configuration['sessions_to_consider']
-                return
-        except KeyError:
-            pass
+
+        if self.configuration.get('run_to_all_participants', False):
+            self.sessions_to_consider = TOTAL_SESSIONS
+            return
+        if 'sessions_to_consider' in self.configuration.keys():
+            self.sessions_to_consider = self.configuration['sessions_to_consider']
+            return
+
         if self.configuration['all_participant_data']:
             self.sessions_to_consider.append(f'session_0{self.participant_number}_01')
             if self.participant_number != 1:
