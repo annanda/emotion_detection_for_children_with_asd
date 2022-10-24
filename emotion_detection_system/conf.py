@@ -25,3 +25,14 @@ emotions_file = os.path.join(MAIN_FOLDER, 'labels', 'emotion_zones', 'emotion_na
 # DATASET_VIDEO_FOLDER = config('DATASET_VIDEO_FOLDER', default=os.path.join(MAIN_FOLDER, 'dataset/video'))
 
 DATASET_FOLDER = config('DATASET_FOLDER', default=os.path.join(MAIN_FOLDER, 'dataset'))
+
+LLD_PARAMETER_GROUP = {
+    'frequency': ['pitch', 'jitter', 'formant_1-3_frequency', 'formant_1-3_bandwidth'],
+    'energy_amplitude': ['shimmer', 'loudness', 'harmonics-to-noise_ratio'],
+    'spectral_balance': ['alpha_ratio', 'hammarberg_index', 'spectral_slope',
+                         'formant_1-3_relative_energy', 'harmonic_difference_H1–H2',
+                         'Harmonic_difference_H1–A3', 'mfcc_1–4'],
+    'temporal_features': ['temporal_features']
+}
+
+AUDIO_FEATURES_LEVELS = ['llds', 'functionals', 'llds_deltas']

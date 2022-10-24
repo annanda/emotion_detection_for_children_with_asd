@@ -7,7 +7,8 @@ from sklearn import svm
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
 
-from emotion_detection_system.conf import DATASET_FOLDER, ORDER_EMOTIONS, TOTAL_SESSIONS, PARTICIPANT_NUMBERS
+from emotion_detection_system.conf import DATASET_FOLDER, ORDER_EMOTIONS, TOTAL_SESSIONS, PARTICIPANT_NUMBERS, \
+    LLD_PARAMETER_GROUP
 
 
 class EmotionDetectionConfiguration:
@@ -23,8 +24,12 @@ class EmotionDetectionConfiguration:
         self.balance_dataset_technique = self.configuration['balance_dataset_technique']
         self.classifier_model = self.configuration['classifier_model']
         self.fusion_type = self.configuration['fusion_type']
-        self.modalities = []
-        self.features_types = {}
+        self.modalities = self.configuration['modalities']
+        self.modalities_config = self.configuration['modalities_config']
+        self.video_features_types = []
+        self.audio_features_level = ''
+        self.audio_features_groups = []
+        self.audio_features_types = {}
         self.models = {}
 
         # To define the path for person-independent model or individuals model
@@ -39,16 +44,33 @@ class EmotionDetectionConfiguration:
         """
         To set up the modalities and features type of each modality
         """
-        self.modalities = list(self.configuration['modalities'].keys())
-        features_type = {}
 
-        for modality in self.modalities:
-            features_type[modality] = [feature for feature in
-                                       list(self.configuration['modalities'][modality]['features_type'].keys())
-                                       if
-                                       self.configuration['modalities'][modality]['features_type'][feature] is True]
+        if 'video' in self.modalities:
+            self._setup_features_video()
 
-        self.features_types = features_type
+        if 'audio' in self.modalities:
+            self._setup_features_audio()
+
+    def _setup_features_video(self):
+        self.video_features_types = [feature for feature in
+                                     list(self.modalities_config['video']['features_type'].keys())
+                                     if
+                                     self.modalities_config['video']['features_type'][feature] is True]
+
+    def _setup_features_audio(self):
+        audio_config = self.configuration['modalities_config']['audio']
+        self.audio_features_level = audio_config['feature_level']
+        self.audio_features_groups = [group for group in list(audio_config['feature_group'].keys()) if
+                                      audio_config['feature_group'][group] is True]
+
+        for feature_group in self.audio_features_groups:
+            if audio_config.get('all_features_from_group', False):
+                # if I want to use all features type from all the groups
+                self.audio_features_types[feature_group] = LLD_PARAMETER_GROUP[feature_group]
+            else:
+                # if I want to configure in more details which feature type I want to use from each group
+                self.audio_features_types[feature_group] = audio_config['features_type'][feature_group] if not \
+                    audio_config['features_type'][feature_group] == 'all' else LLD_PARAMETER_GROUP[feature_group]
 
     def _setup_classifier_models(self):
         """
@@ -167,7 +189,7 @@ class PrepareDataset:
 
         modality = self.configuration.modalities[0]
 
-        for feature in self.configuration.features_types[modality]:
+        for feature in self.configuration.video_features_types[modality]:
             folders_read = self._prepare_dataset_path_one_modality_one_feature(folder_modality, feature)
             df, df_dev, df_test = self.concatenate_dfs_rows(folders_read)
 
@@ -315,7 +337,7 @@ class EmotionDetectionClassifier:
                f'Dataset split type: {self.configuration.dataset_split_type}\n' \
                f'Person-Independent model: {self.configuration.person_independent_model}\n' \
                f'Modalities: {self.configuration.modalities}\n' \
-               f'Features type: {self.configuration.features_types}\n' \
+               f'Features type: {self.configuration.video_features_types}\n' \
                f'Classifier model: {self.configuration.classifier_model}\n' \
                f'Models per modality: {self.configuration.models}\n' \
                f'Fusion type: {self.configuration.fusion_type}'

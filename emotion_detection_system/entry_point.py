@@ -11,16 +11,17 @@ if __name__ == '__main__':
         'all_participant_data': False,
         'dataset_split_type': 'non_sequential',
         'person_independent_model': False,
-        'modalities': {
+        'modalities': ['audio', 'video'],
+        'modalities_config': {
             'video': {
                 'features_type': {
-                    'AU': False,
+                    'AU': True,
                     'appearance': False,
                     'BoVW': False,
-                    'geometric': False,
+                    'geometric': True,
                     'gaze': False,
                     '2d_eye_landmark': False,
-                    '3d_eye_landmark': False,
+                    '3d_eye_landmark': True,
                     'head_pose': False
                 },
                 'model_for_modality': 'SVM'
@@ -28,16 +29,16 @@ if __name__ == '__main__':
             'audio': {
                 'feature_group': {
                     'frequency': True,
-                    'energy_amplitude': False,
-                    'spectral_balance': False,
-                    'temporal_features': False
+                    'energy_amplitude': True,
+                    'spectral_balance': True,
+                    'temporal_features': True
                 },
-                'all_features_from_group': True,
+                'all_features_from_group': False,
                 'features_type': {
-                    'frequency': [],
-                    'energy_amplitude': [],
-                    'spectral_balance': [],
-                    'temporal_features': []
+                    'frequency': ['pitch'],
+                    'energy_amplitude': 'all',
+                    'spectral_balance': ['mfcc_1–4'],
+                    'temporal_features': ['temporal_features']
                 },
                 'feature_level': 'functionals',
             }
