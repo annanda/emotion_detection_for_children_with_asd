@@ -115,39 +115,53 @@ class PrepareDataset:
         # First we always fill the video or audio modalities, then, we make them become this main one. According to
         # the configuration of the system
         self.x = None
-        self.y = None
         self.x_dev = None
-        self.y_dev = None
         self.x_test = None
+        self.y = None
+        self.y_dev = None
         self.y_test = None
 
         # video
         self.x_video = None
-        self.y_video = None
         self.x_dev_video = None
-        self.y_dev_video = None
         self.x_test_video = None
-        self.y_test_video = None
 
         # audio
         self.x_audio = None
-        self.y_audio = None
         self.x_dev_audio = None
-        self.y_dev_audio = None
         self.x_test_audio = None
-        self.y_test_audio = None
 
         self.prepare_dataset()
 
     def prepare_dataset(self):
         print('Preparing the dataset according to the configuration:')
-        # if len(self.configuration.modalities) > 1:
-        #     raise ValueError('MultiModalities not yet supported')
         if 'video' in self.configuration.modalities:
             self._prepare_dataset_video_modality()
         if 'audio' in self.configuration.modalities:
             self._prepare_dataset_audio_modality()
+        if self.configuration.is_multimodal:
+            if self.configuration.fusion_type == 'early_fusion':
+                self._prepare_dataset_early_fusion()
+        else:
+            self._prepare_dataset_unimodality()
+
         print('hello!')
+
+    def _prepare_dataset_unimodality(self):
+        if self.configuration.modalities[0] == 'video':
+            self.x = self.x_video.iloc[:, 4:]
+            self.x_dev = self.x_dev_video.iloc[:, 4:]
+            self.x_test = self.x_test_video.iloc[:, 4:]
+        else:
+            self.x = self.x_audio.iloc[:, 4:]
+            self.x_dev = self.x_dev_audio.iloc[:, 4:]
+            self.x_test = self.x_test_audio.iloc[:, 4:]
+
+    def _prepare_dataset_early_fusion(self):
+        dfs = [self.x_video, self.x_audio]
+        dfs_dev = [self.x_dev_video, self.x_dev_audio]
+        dfs_test = [self.x_test_video, self.x_test_audio]
+        self.merge_dfs_columns(dfs, dfs_dev, dfs_test, 'multimodality')
 
     def concatenate_dfs_rows(self, folders_to_concat_df):
         df, df_dev, df_test = ([], [], [])
@@ -186,36 +200,23 @@ class PrepareDataset:
         df_dev = dfs_merged[1].dropna()
         df_test = dfs_merged[2].dropna()
 
-        if not self.configuration.is_multimodal:
-            self.x = df.iloc[:, 4:]
-            self.y = df['emotion_zone']
+        self.y = df['emotion_zone']
+        self.y_dev = df_dev['emotion_zone']
+        self.y_test = df_test['emotion_zone']
 
-            self.x_dev = df_dev.iloc[:, 4:]
-            self.y_dev = df_dev['emotion_zone']
-
-            self.x_test = df_test.iloc[:, 4:]
-            self.y_test = df_test['emotion_zone']
-            return
         if modality == 'video':
-            self.x_video = df.iloc[:, 4:]
-            self.y_video = df['emotion_zone']
-
-            self.x_dev_video = df_dev.iloc[:, 4:]
-            self.y_dev_video = df_dev['emotion_zone']
-
-            self.x_test_video = df_test.iloc[:, 4:]
-            self.y_test_video = df_test['emotion_zone']
+            self.x_video = df
+            self.x_dev_video = df_dev
+            self.x_test_video = df_test
             return
-        if modality == 'audiio':
-            self.x_video = df.iloc[:, 4:]
-            self.y_video = df['emotion_zone']
-
-            self.x_dev_video = df_dev.iloc[:, 4:]
-            self.y_dev_video = df_dev['emotion_zone']
-
-            self.x_test_video = df_test.iloc[:, 4:]
-            self.y_test_video = df_test['emotion_zone']
+        if modality == 'audio':
+            self.x_audio = df
+            self.x_dev_audio = df_dev
+            self.x_test_audio = df_test
             return
+        self.x = df.iloc[:, 4:]
+        self.x_dev = df_dev.iloc[:, 4:]
+        self.x_test = df_test.iloc[:, 4:]
 
     def read_dataset_split_parts(self, folder_to_read):
         df = self._read_dataset_from_folders(folder_to_read, 'train')

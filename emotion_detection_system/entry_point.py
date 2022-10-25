@@ -26,10 +26,10 @@ if __name__ == '__main__':
             },
             'audio': {
                 'feature_group': {
-                    'frequency': True,
+                    'frequency': False,
                     'energy_amplitude': False,
                     'spectral_balance': False,
-                    'temporal_features': False
+                    'temporal_features': True
                 },
                 'all_features_from_group': True,
                 'features_type': {
