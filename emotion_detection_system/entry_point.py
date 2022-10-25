@@ -11,29 +11,27 @@ if __name__ == '__main__':
         'all_participant_data': False,
         'dataset_split_type': 'non_sequential',
         'person_independent_model': False,
-        'modalities': ['audio', 'video'],
+        'modalities': ['video', 'audio'],
         'modalities_config': {
             'video': {
                 'features_type': {
-                    'AU': True,
-                    'appearance': False,
-                    'BoVW': False,
-                    'geometric': True,
-                    'gaze': False,
                     '2d_eye_landmark': False,
-                    '3d_eye_landmark': True,
+                    '3d_eye_landmark': False,
+                    'AU': True,
+                    'face_2d_landmarks': False,
+                    'face_3d_landmarks': False,
+                    'gaze': False,
                     'head_pose': False
                 },
-                'model_for_modality': 'SVM'
             },
             'audio': {
                 'feature_group': {
                     'frequency': True,
-                    'energy_amplitude': True,
-                    'spectral_balance': True,
-                    'temporal_features': True
+                    'energy_amplitude': False,
+                    'spectral_balance': False,
+                    'temporal_features': False
                 },
-                'all_features_from_group': False,
+                'all_features_from_group': True,
                 'features_type': {
                     'frequency': ['pitch'],
                     'energy_amplitude': 'all',
@@ -43,8 +41,13 @@ if __name__ == '__main__':
                 'feature_level': 'functionals',
             }
         },
-        'classifier_model': 'SVM',
-        'fusion_type': 'late_fusion',
+        'classifier_model': {
+            'all_modalities': 'SVM',
+            'audio': '',
+            'video': '',
+            'early_fusion_model': 'SVM'
+        },
+        'fusion_type': 'early_fusion',
         'balanced_dataset': False,
         'balance_dataset_technique': '',
     }

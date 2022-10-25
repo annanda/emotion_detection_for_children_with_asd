@@ -31,6 +31,7 @@ class EmotionDetectionConfiguration:
         self.audio_features_groups = []
         self.audio_features_types = {}
         self.models = {}
+        self.is_multimodal = True if len(self.modalities) > 1 else False
 
         # To define the path for person-independent model or individuals model
         self.person_independent_folder = 'cross-individuals' if self.configuration[
@@ -78,7 +79,10 @@ class EmotionDetectionConfiguration:
         """
         models = {}
         for modality in self.modalities:
-            models[modality] = self.configuration['modalities'][modality]['model_for_modality']
+            if self.configuration['classifier_model'].get('all_modalities', False):
+                models[modality] = self.configuration['classifier_model']['all_modalities']
+            else:
+                models[modality] = self.configuration['classifier_model'][modality]
         self.models = models
 
     def _setup_sessions_to_consider(self):
@@ -108,6 +112,8 @@ class PrepareDataset:
     def __init__(self, configuration):
         self.configuration = EmotionDetectionConfiguration(configuration)
 
+        # First we always fill the video or audio modalities, then, we make them become this main one. According to
+        # the configuration of the system
         self.x = None
         self.y = None
         self.x_dev = None
@@ -115,14 +121,33 @@ class PrepareDataset:
         self.x_test = None
         self.y_test = None
 
+        # video
+        self.x_video = None
+        self.y_video = None
+        self.x_dev_video = None
+        self.y_dev_video = None
+        self.x_test_video = None
+        self.y_test_video = None
+
+        # audio
+        self.x_audio = None
+        self.y_audio = None
+        self.x_dev_audio = None
+        self.y_dev_audio = None
+        self.x_test_audio = None
+        self.y_test_audio = None
+
         self.prepare_dataset()
 
     def prepare_dataset(self):
         print('Preparing the dataset according to the configuration:')
-        if len(self.configuration.modalities) == 1:
-            self.prepare_dataset_one_modality()
-        else:
-            raise ValueError('MultiModalities not yet supported')
+        # if len(self.configuration.modalities) > 1:
+        #     raise ValueError('MultiModalities not yet supported')
+        if 'video' in self.configuration.modalities:
+            self._prepare_dataset_video_modality()
+        if 'audio' in self.configuration.modalities:
+            self._prepare_dataset_audio_modality()
+        print('hello!')
 
     def concatenate_dfs_rows(self, folders_to_concat_df):
         df, df_dev, df_test = ([], [], [])
@@ -140,7 +165,7 @@ class PrepareDataset:
 
     def merge_dfs_columns(self, df_concatenate_columns,
                           df_dev_concatenate_columns,
-                          df_test_concatenate_columns):
+                          df_test_concatenate_columns, modality):
         dfs = [df_concatenate_columns, df_dev_concatenate_columns, df_test_concatenate_columns]
         dfs_merged = []
 
@@ -154,21 +179,43 @@ class PrepareDataset:
                                df_to_merge)
             dfs_merged.append(df_merged)
 
-        self.set_dataset_values(dfs_merged)
+        self.set_dataset_values(dfs_merged, modality)
 
-    def set_dataset_values(self, dfs_merged):
-        df = dfs_merged[0]
-        df_dev = dfs_merged[1]
-        df_test = dfs_merged[2]
+    def set_dataset_values(self, dfs_merged, modality):
+        df = dfs_merged[0].dropna()
+        df_dev = dfs_merged[1].dropna()
+        df_test = dfs_merged[2].dropna()
 
-        self.x = df.iloc[:, 4:]
-        self.y = df['emotion_zone']
+        if not self.configuration.is_multimodal:
+            self.x = df.iloc[:, 4:]
+            self.y = df['emotion_zone']
 
-        self.x_dev = df_dev.iloc[:, 4:]
-        self.y_dev = df_dev['emotion_zone']
+            self.x_dev = df_dev.iloc[:, 4:]
+            self.y_dev = df_dev['emotion_zone']
 
-        self.x_test = df_test.iloc[:, 4:]
-        self.y_test = df_test['emotion_zone']
+            self.x_test = df_test.iloc[:, 4:]
+            self.y_test = df_test['emotion_zone']
+            return
+        if modality == 'video':
+            self.x_video = df.iloc[:, 4:]
+            self.y_video = df['emotion_zone']
+
+            self.x_dev_video = df_dev.iloc[:, 4:]
+            self.y_dev_video = df_dev['emotion_zone']
+
+            self.x_test_video = df_test.iloc[:, 4:]
+            self.y_test_video = df_test['emotion_zone']
+            return
+        if modality == 'audiio':
+            self.x_video = df.iloc[:, 4:]
+            self.y_video = df['emotion_zone']
+
+            self.x_dev_video = df_dev.iloc[:, 4:]
+            self.y_dev_video = df_dev['emotion_zone']
+
+            self.x_test_video = df_test.iloc[:, 4:]
+            self.y_test_video = df_test['emotion_zone']
+            return
 
     def read_dataset_split_parts(self, folder_to_read):
         df = self._read_dataset_from_folders(folder_to_read, 'train')
@@ -177,9 +224,9 @@ class PrepareDataset:
 
         return df, df_dev, df_test
 
-    def prepare_dataset_one_modality(self):
+    def _prepare_dataset_video_modality(self):
         folder_modality = os.path.join(DATASET_FOLDER,
-                                       self.configuration.modalities[0],
+                                       'video',
                                        self.configuration.person_independent_folder,
                                        self.configuration.dataset_split_type)
 
@@ -187,10 +234,8 @@ class PrepareDataset:
         df_dev_concatenate_columns = []
         df_test_concatenate_columns = []
 
-        modality = self.configuration.modalities[0]
-
-        for feature in self.configuration.video_features_types[modality]:
-            folders_read = self._prepare_dataset_path_one_modality_one_feature(folder_modality, feature)
+        for feature in self.configuration.video_features_types:
+            folders_read = self._prepare_dataset_path_video_modality_one_feature(folder_modality, feature)
             df, df_dev, df_test = self.concatenate_dfs_rows(folders_read)
 
             df_concatenate_columns.append(df)
@@ -199,13 +244,47 @@ class PrepareDataset:
 
         self.merge_dfs_columns(df_concatenate_columns,
                                df_dev_concatenate_columns,
-                               df_test_concatenate_columns)
+                               df_test_concatenate_columns, 'video')
 
-    def _prepare_dataset_path_one_modality_one_feature(self, folder_read_modality, feature):
+    def _prepare_dataset_audio_modality(self):
+        folder_modality = os.path.join(DATASET_FOLDER,
+                                       'audio',
+                                       self.configuration.person_independent_folder,
+                                       self.configuration.dataset_split_type,
+                                       self.configuration.audio_features_level)
+
+        df_concatenate_columns = []
+        df_dev_concatenate_columns = []
+        df_test_concatenate_columns = []
+
+        for group in self.configuration.audio_features_groups:
+            for feature in self.configuration.audio_features_types[group]:
+                folders_to_read = self._prepare_dataset_path_audio_modality_one_feature(folder_modality, group, feature)
+                df, df_dev, df_test = self.concatenate_dfs_rows(folders_to_read)
+
+                df_concatenate_columns.append(df)
+                df_dev_concatenate_columns.append(df_dev)
+                df_test_concatenate_columns.append(df_test)
+
+        self.merge_dfs_columns(df_concatenate_columns,
+                               df_dev_concatenate_columns,
+                               df_test_concatenate_columns, 'audio')
+
+    def _prepare_dataset_path_video_modality_one_feature(self, folder_read_modality, feature):
         folders_one_modality_one_feature = []
         for session in self.configuration.sessions_to_consider:
             folders_one_modality_one_feature.append(os.path.join(
                 folder_read_modality,
+                feature,
+                session))
+        return folders_one_modality_one_feature
+
+    def _prepare_dataset_path_audio_modality_one_feature(self, folder_modality, group, feature):
+        folders_one_modality_one_feature = []
+        for session in self.configuration.sessions_to_consider:
+            folders_one_modality_one_feature.append(os.path.join(
+                folder_modality,
+                group,
                 feature,
                 session))
         return folders_one_modality_one_feature
@@ -246,6 +325,8 @@ class EmotionDetectionClassifier:
         self._prediction_labels = None
         self.accuracy = None
         self.confusion_matrix = None
+        self.classifier_model = None
+        self._set_classifier_model()
 
     def train_model_produce_predictions(self):
         """
@@ -260,15 +341,11 @@ class EmotionDetectionClassifier:
         print('Starting to train the model')
         print('.\n.\n.')
 
-        if self.configuration.classifier_model == 'SVM':
-            clf = svm.SVC(probability=True)
-
-        clf.fit(self.x, self.y)
-
         print('Calculating predictions for test set')
         print('.\n.\n.')
 
-        prediction_probability = clf.predict_proba(self.x_test)
+        self.classifier_model.fit(self.x, self.y)
+        prediction_probability = self.classifier_model.predict_proba(self.x_test)
         indexes = list(self.y_test.index)
 
         # organising the prediction results with the labels
@@ -279,6 +356,11 @@ class EmotionDetectionClassifier:
         self._prediction_labels = self._get_final_label_prediction_array()
         self._calculate_accuracy()
         self._calculate_confusion_matrix()
+
+    def _set_classifier_model(self):
+        # simplest case
+        # todo elaborate the selection and definition of models.
+        self.classifier_model = svm.SVC(probability=True)
 
     def _get_final_label_prediction_array(self):
         """
@@ -337,7 +419,10 @@ class EmotionDetectionClassifier:
                f'Dataset split type: {self.configuration.dataset_split_type}\n' \
                f'Person-Independent model: {self.configuration.person_independent_model}\n' \
                f'Modalities: {self.configuration.modalities}\n' \
-               f'Features type: {self.configuration.video_features_types}\n' \
+               f'Features type video: {self.configuration.video_features_types}\n' \
+               f'Features level audio: {self.configuration.audio_features_level}\n' \
+               f'Features groups audio: {self.configuration.audio_features_groups}\n' \
+               f'Features type audio: {self.configuration.audio_features_types}\n' \
                f'Classifier model: {self.configuration.classifier_model}\n' \
                f'Models per modality: {self.configuration.models}\n' \
                f'Fusion type: {self.configuration.fusion_type}'
