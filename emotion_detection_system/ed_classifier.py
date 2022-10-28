@@ -318,6 +318,7 @@ class EmotionDetectionClassifier:
         self.y = dataset.y
         self.y_dev = dataset.y_dev
         self.y_test = dataset.y_test
+        self.indexes_test = list(self.y_test.index)
 
         self.x = dataset.x
         self.x_dev = dataset.x_dev
@@ -355,37 +356,51 @@ class EmotionDetectionClassifier:
         print('. . . . . . . . . . . . . . . . . .')
         print('.\n.\n.')
 
-        if not self.configuration.is_multimodal or self.configuration.fusion_type == 'early_fusion':
-            prediction_probability, indexes = self._train_model_produce_predictions_basic()
-            self._prediction_probabilities = pd.DataFrame(prediction_probability,
-                                                          columns=ORDER_EMOTIONS,
-                                                          index=indexes)
-            self._produce_final_predictions()
-        else:
-            self._train_model_produce_predictions_late_fusion()
-
-    def _train_model_produce_predictions_basic(self, dataset):
         print('Starting to train the model')
         print('.\n.\n.')
-        self.classifier_model.fit(self.data_sets_dic[dataset][0], self.y)
 
-        print('Calculating predictions for test set')
+        if not self.configuration.is_multimodal or self.configuration.fusion_type == 'early_fusion':
+            prediction_probability = self._train_model_produce_predictions_basic()
+            self._prediction_probabilities = pd.DataFrame(prediction_probability,
+                                                          columns=ORDER_EMOTIONS,
+                                                          index=self.indexes_test)
+        else:
+            self._train_model_produce_predictions_late_fusion()
+        self._produce_final_predictions()
+
+    def _train_model_produce_predictions_basic(self, dataset=None):
+        if dataset:
+            x = self.data_sets_dic[dataset][0]
+            x = x.iloc[:, 4:]
+            x_test = self.data_sets_dic[dataset][2]
+            x_test = x_test.iloc[:, 4:]
+            self.classifier_model.fit(x, self.y)
+            prediction_probability = self.classifier_model.predict_proba(x_test)
+        else:
+            self.classifier_model.fit(self.x, self.y)
+            prediction_probability = self.classifier_model.predict_proba(self.x_test)
+        print('Predictions for test set completed')
         print('.\n.\n.')
-        prediction_probability = self.classifier_model.predict_proba(self.data_sets_dic[dataset][2])
-        indexes = list(self.y_test.index)
-        return prediction_probability, indexes
+        return prediction_probability
+
+    def _train_model_produce_predictions_late_fusion(self):
+        # In the end I need to fill self._prediction_probabilities, so I can run _produce_final_predictions
+        # So I need to calculate the video and audio predictions separately, then fusion them, and the result will
+        # be stored in the self._prediction_probabilities variable.
+
+        video_predictions = self._train_model_produce_predictions_basic('x_video')
+        audio_predictions = self._train_model_produce_predictions_basic('x_audio')
+
+        # Late fusion by averaging the predictions array
+        fusion_by_mean = np.mean(np.array([video_predictions, audio_predictions]), axis=0)
+        self._prediction_probabilities = pd.DataFrame(fusion_by_mean,
+                                                      columns=ORDER_EMOTIONS,
+                                                      index=self.indexes_test)
 
     def _produce_final_predictions(self):
         self._prediction_labels = self._get_final_label_prediction_array()
         self._calculate_accuracy()
         self._calculate_confusion_matrix()
-
-    def _train_model_produce_predictions_late_fusion(self):
-        video_predictions = None
-        audio_predictions = None
-
-        #TODO do this part of late fusion
-        self._produce_final_predictions()
 
     def _set_classifier_model(self):
         # simplest case
@@ -435,11 +450,22 @@ class EmotionDetectionClassifier:
         print(f'Accuracy: {self.accuracy:.4f}')
         print(f'Confusion matrix: labels={ORDER_EMOTIONS}')
         print(self.confusion_matrix)
-        print(f'Total train examples: {len(self.x)}')
+        if self.x:
+            print(f'Total train examples: {len(self.x)}')
+        else:
+            print(f'Total train examples: {len(self.x_video)}')
+        print(f'Number of examples per class in training: \n{self.y.value_counts()}')
         print(f'Total test examples: {np.sum(self.confusion_matrix)}')
         # print(f'Number of examples per class in test: \n{self.y_test.value_counts()}')
-        print(f'Total number of features: {self.x.shape[1]}')
-        print(f'Number of examples per class in training: \n{self.y.value_counts()}')
+        if self.x:
+            print(f'Total number of features: {self.x.shape[1]}')
+            if self.configuration.is_multimodal:
+                print(f'Total number of video features: {self.x_video.shape[1] - 4}')
+                print(f'Total number of audio features: {self.x_audio.shape[1] - 4}')
+        else:
+            print(f'Total number of features: {self.x_video.shape[1] - 4 + self.x_audio.shape[1] - 4}')
+            print(f'Total number of video features: {self.x_video.shape[1] - 4}')
+            print(f'Total number of audio features: {self.x_audio.shape[1] - 4}')
 
     def __str__(self):
         return f'Participant number: 0{self.configuration.participant_number}\n' \
@@ -453,6 +479,5 @@ class EmotionDetectionClassifier:
                f'Features level audio: {self.configuration.audio_features_level}\n' \
                f'Features groups audio: {self.configuration.audio_features_groups}\n' \
                f'Features type audio: {self.configuration.audio_features_types}\n' \
-               f'Classifier model: {self.configuration.classifier_model}\n' \
                f'Models per modality: {self.configuration.models}\n' \
                f'Fusion type: {self.configuration.fusion_type}'

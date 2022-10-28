@@ -47,7 +47,7 @@ if __name__ == '__main__':
             'video': '',
             'early_fusion_model': 'SVM'
         },
-        'fusion_type': 'early_fusion',
+        'fusion_type': 'late_fusion',
         'balanced_dataset': False,
         'balance_dataset_technique': '',
     }
