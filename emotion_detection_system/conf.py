@@ -14,7 +14,7 @@ TOTAL_SESSIONS = ['session_01_01',
                   'session_04_02']
 
 main_folder = pathlib.Path(__file__).parent.parent.absolute()
-
+emotion_detection_system_folder = pathlib.Path(__file__).parent.absolute()
 MAIN_FOLDER = config('MAIN_FOLDER', default=main_folder)
 emotion_folder = os.path.join(MAIN_FOLDER, 'labels', 'emotion_zones', 'emotion_names')
 emotions_file = os.path.join(MAIN_FOLDER, 'labels', 'emotion_zones', 'emotion_names', 'emotions_annotation.csv')

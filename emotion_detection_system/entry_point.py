@@ -1,56 +1,15 @@
-from emotion_detection_system.ed_classifier import EmotionDetectionClassifier, EmotionDetectionConfiguration, \
-    PrepareDataset
+import json
+import os.path
+
+from emotion_detection_system.ed_classifier import EmotionDetectionClassifier
+from conf import emotion_detection_system_folder
 
 if __name__ == '__main__':
-    configure_data = {
-        'run_to_all_participants': False,
-        # 'sessions_to_consider': ['session_03_01',
-        #                          'session_04_02'],
-        'participant_number': 2,
-        'session_number': 1,
-        'all_participant_data': False,
-        'dataset_split_type': 'non_sequential',
-        'person_independent_model': False,
-        'modalities': ['video', 'audio'],
-        'modalities_config': {
-            'video': {
-                'features_type': {
-                    '2d_eye_landmark': False,
-                    '3d_eye_landmark': False,
-                    'AU': True,
-                    'face_2d_landmarks': False,
-                    'face_3d_landmarks': False,
-                    'gaze': False,
-                    'head_pose': False
-                },
-            },
-            'audio': {
-                'feature_group': {
-                    'frequency': False,
-                    'energy_amplitude': False,
-                    'spectral_balance': False,
-                    'temporal_features': True
-                },
-                'all_features_from_group': True,
-                'features_type': {
-                    'frequency': ['pitch'],
-                    'energy_amplitude': 'all',
-                    'spectral_balance': ['mfcc_1–4'],
-                    'temporal_features': ['temporal_features']
-                },
-                'feature_level': 'functionals',
-            }
-        },
-        'classifier_model': {
-            'all_modalities': 'SVM',
-            'audio': '',
-            'video': '',
-            'early_fusion_model': 'SVM'
-        },
-        'fusion_type': 'late_fusion',
-        'balanced_dataset': False,
-        'balance_dataset_technique': '',
-    }
+    json_file = "example.json"
+    path_json = os.path.join(emotion_detection_system_folder, 'json_files', json_file)
+
+    f = open(path_json)
+    configure_data = json.load(f)
 
     classifier = EmotionDetectionClassifier(configure_data)
     classifier.train_model_produce_predictions()

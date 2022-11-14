@@ -442,22 +442,21 @@ class EmotionDetectionClassifier:
         :return:
         """
         print(f'######################################')
-        print(' ... Results for the experiment: ...')
+        print(' ... Results for the data experiment: ...')
         print(self.__str__())
         print(f'######################################')
-        print('.\n.\n.')
         # print(f'Accuracy: {self.accuracy}')
         print(f'Accuracy: {self.accuracy:.4f}')
         print(f'Confusion matrix: labels={ORDER_EMOTIONS}')
         print(self.confusion_matrix)
-        if self.x:
+        if self.x is not None:
             print(f'Total train examples: {len(self.x)}')
         else:
             print(f'Total train examples: {len(self.x_video)}')
         print(f'Number of examples per class in training: \n{self.y.value_counts()}')
         print(f'Total test examples: {np.sum(self.confusion_matrix)}')
         # print(f'Number of examples per class in test: \n{self.y_test.value_counts()}')
-        if self.x:
+        if self.x is not None:
             print(f'Total number of features: {self.x.shape[1]}')
             if self.configuration.is_multimodal:
                 print(f'Total number of video features: {self.x_video.shape[1] - 4}')
@@ -466,6 +465,7 @@ class EmotionDetectionClassifier:
             print(f'Total number of features: {self.x_video.shape[1] - 4 + self.x_audio.shape[1] - 4}')
             print(f'Total number of video features: {self.x_video.shape[1] - 4}')
             print(f'Total number of audio features: {self.x_audio.shape[1] - 4}')
+        print(f'######################################')
 
     def __str__(self):
         return f'Participant number: 0{self.configuration.participant_number}\n' \
