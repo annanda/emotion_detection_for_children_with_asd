@@ -1,11 +1,12 @@
 import json
 import os.path
+import sys
 
 from emotion_detection_system.ed_classifier import EmotionDetectionClassifier
 from conf import emotion_detection_system_folder
 
 if __name__ == '__main__':
-    json_file = "example.json"
+    json_file = sys.argv[1]
     path_json = os.path.join(emotion_detection_system_folder, 'json_files', json_file)
 
     f = open(path_json)

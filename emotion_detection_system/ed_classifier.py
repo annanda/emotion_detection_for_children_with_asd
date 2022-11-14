@@ -136,7 +136,7 @@ class PrepareDataset:
         self.prepare_dataset()
 
     def prepare_dataset(self):
-        print('Preparing the dataset according to the configuration:')
+        print('Preparing the dataset....')
         if 'video' in self.configuration.modalities:
             self._prepare_dataset_video_modality()
         if 'audio' in self.configuration.modalities:
@@ -146,8 +146,6 @@ class PrepareDataset:
                 self._prepare_dataset_early_fusion()
         else:
             self._prepare_dataset_unimodality()
-
-        print('hello!')
 
     def _prepare_dataset_unimodality(self):
         if self.configuration.modalities[0] == 'video':
