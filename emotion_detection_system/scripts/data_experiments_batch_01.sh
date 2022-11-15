@@ -1,1 +1,1 @@
-python entry_point.py example_2.json > results/example_testing_here.txt
+python entry_point.py all_sessions_va_late_fusion.json > results/all_sessions_va_late_fusion.txt
