@@ -127,11 +127,17 @@ class PrepareDataset:
         self.x_video = None
         self.x_dev_video = None
         self.x_test_video = None
+        self.y_video = None
+        self.y_dev_video = None
+        self.y_test_video = None
 
         # audio
         self.x_audio = None
         self.x_dev_audio = None
         self.x_test_audio = None
+        self.y_audio = None
+        self.y_dev_audio = None
+        self.y_test_audio = None
 
         self.prepare_dataset()
 
@@ -199,21 +205,25 @@ class PrepareDataset:
         df = dfs_merged[0].dropna()
         df_dev = dfs_merged[1].dropna()
         df_test = dfs_merged[2].dropna()
-
-        self.y = df['emotion_zone']
-        self.y_dev = df_dev['emotion_zone']
-        self.y_test = df_test['emotion_zone']
-
         if modality == 'video':
+            self.y_video = df['emotion_zone']
+            self.y_dev_video = df_dev['emotion_zone']
+            self.y_test_video = df_test['emotion_zone']
             self.x_video = df
             self.x_dev_video = df_dev
             self.x_test_video = df_test
             return
         if modality == 'audio':
+            self.y_audio = df['emotion_zone']
+            self.y_dev_audio = df_dev['emotion_zone']
+            self.y_test_audio = df_test['emotion_zone']
             self.x_audio = df
             self.x_dev_audio = df_dev
             self.x_test_audio = df_test
             return
+        self.y = df['emotion_zone']
+        self.y_dev = df_dev['emotion_zone']
+        self.y_test = df_test['emotion_zone']
         self.x = df.iloc[:, 4:]
         self.x_dev = df_dev.iloc[:, 4:]
         self.x_test = df_test.iloc[:, 4:]
@@ -312,28 +322,27 @@ class EmotionDetectionClassifier:
         self.configuration = EmotionDetectionConfiguration(configuration)
 
         # Setting up dataset
-        dataset = PrepareDataset(configuration)
-        self.y = dataset.y
-        self.y_dev = dataset.y_dev
-        self.y_test = dataset.y_test
-        self.indexes_test = list(self.y_test.index)
-
-        self.x = dataset.x
-        self.x_dev = dataset.x_dev
-        self.x_test = dataset.x_test
-
-        self.x_video = dataset.x_video
-        self.x_dev_video = dataset.x_dev_video
-        self.x_test_video = dataset.x_test_video
-
-        self.x_audio = dataset.x_audio
-        self.x_dev_audio = dataset.x_dev_audio
-        self.x_test_audio = dataset.x_test_audio
+        self.dataset = PrepareDataset(configuration)
+        # self.y = self.dataset.y
+        # self.y_dev = self.dataset.y_dev
+        # self.y_test = self.dataset.y_test
+        # if self.y_test:
+        #     self.indexes_test = list(self.y_test.index)
+        #
+        # self.x = self.dataset.x
+        # self.x_dev = self.dataset.x_dev
+        # self.x_test = self.dataset.x_test
 
         self.data_sets_dic = {
-            'x': [self.x, self.x_dev, self.x_test],
-            'x_video': [self.x_video, self.x_dev_video, self.x_test_video],
-            'x_audio': [self.x_audio, self.x_dev_audio, self.x_test_audio],
+            'x': [self.dataset.x, self.dataset.x_dev, self.dataset.x_test],
+            'x_video': [self.dataset.x_video, self.dataset.x_dev_video, self.dataset.x_test_video],
+            'x_audio': [self.dataset.x_audio, self.dataset.x_dev_audio, self.dataset.x_test_audio],
+        }
+
+        self.data_sets_dic_y = {
+            'x': [self.dataset.y, self.dataset.y_dev, self.dataset.y_test],
+            'x_video': [self.dataset.y_video, self.dataset.y_dev_video, self.dataset.y_test_video],
+            'x_audio': [self.dataset.y_audio, self.dataset.y_dev_audio, self.dataset.y_test_audio],
         }
 
         # Results of processing
@@ -358,10 +367,11 @@ class EmotionDetectionClassifier:
         print('.\n.\n.')
 
         if not self.configuration.is_multimodal or self.configuration.fusion_type == 'early_fusion':
+            indexes_test = list(self.dataset.y_test.index)
             prediction_probability = self._train_model_produce_predictions_basic()
             self._prediction_probabilities = pd.DataFrame(prediction_probability,
                                                           columns=ORDER_EMOTIONS,
-                                                          index=self.indexes_test)
+                                                          index=indexes_test)
         else:
             self._train_model_produce_predictions_late_fusion()
         self._produce_final_predictions()
@@ -372,11 +382,12 @@ class EmotionDetectionClassifier:
             x = x.iloc[:, 4:]
             x_test = self.data_sets_dic[dataset][2]
             x_test = x_test.iloc[:, 4:]
-            self.classifier_model.fit(x, self.y)
+            y = self.data_sets_dic_y[dataset][0]
+            self.classifier_model.fit(x, y)
             prediction_probability = self.classifier_model.predict_proba(x_test)
         else:
-            self.classifier_model.fit(self.x, self.y)
-            prediction_probability = self.classifier_model.predict_proba(self.x_test)
+            self.classifier_model.fit(self.dataset.x, self.dataset.y)
+            prediction_probability = self.classifier_model.predict_proba(self.dataset.x_test)
         print('Predictions for test set completed')
         print('.\n.\n.')
         return prediction_probability
@@ -390,10 +401,11 @@ class EmotionDetectionClassifier:
         audio_predictions = self._train_model_produce_predictions_basic('x_audio')
 
         # Late fusion by averaging the predictions array
+        indexes_test = list(self.dataset.y_test.index)
         fusion_by_mean = np.mean(np.array([video_predictions, audio_predictions]), axis=0)
         self._prediction_probabilities = pd.DataFrame(fusion_by_mean,
                                                       columns=ORDER_EMOTIONS,
-                                                      index=self.indexes_test)
+                                                      index=indexes_test)
 
     def _produce_final_predictions(self):
         self._prediction_labels = self._get_final_label_prediction_array()
@@ -424,13 +436,13 @@ class EmotionDetectionClassifier:
         """
         To calculate accuracy
         """
-        self.accuracy = accuracy_score(self.y_test, self._prediction_labels)
+        self.accuracy = accuracy_score(self.dataset.y_test, self._prediction_labels)
 
     def _calculate_confusion_matrix(self):
         """
         To calculate confusion matrix
         """
-        self.confusion_matrix = confusion_matrix(self.y_test,
+        self.confusion_matrix = confusion_matrix(self.dataset.y_test,
                                                  self._prediction_labels,
                                                  labels=ORDER_EMOTIONS)
 
@@ -447,22 +459,22 @@ class EmotionDetectionClassifier:
         print(f'Accuracy: {self.accuracy:.4f}')
         print(f'Confusion matrix: labels={ORDER_EMOTIONS}')
         print(self.confusion_matrix)
-        if self.x is not None:
-            print(f'Total train examples: {len(self.x)}')
+        if self.dataset.x is not None:
+            print(f'Total train examples: {len(self.dataset.x)}')
         else:
-            print(f'Total train examples: {len(self.x_video)}')
-        print(f'Number of examples per class in training: \n{self.y.value_counts()}')
+            print(f'Total train examples: {len(self.dataset.x_video)}')
+        print(f'Number of examples per class in training: \n{self.dataset.y.value_counts()}')
         print(f'Total test examples: {np.sum(self.confusion_matrix)}')
         # print(f'Number of examples per class in test: \n{self.y_test.value_counts()}')
-        if self.x is not None:
-            print(f'Total number of features: {self.x.shape[1]}')
+        if self.dataset.x is not None:
+            print(f'Total number of features: {self.dataset.x.shape[1]}')
             if self.configuration.is_multimodal:
-                print(f'Total number of video features: {self.x_video.shape[1] - 4}')
-                print(f'Total number of audio features: {self.x_audio.shape[1] - 4}')
+                print(f'Total number of video features: {self.dataset.x_video.shape[1] - 4}')
+                print(f'Total number of audio features: {self.dataset.x_audio.shape[1] - 4}')
         else:
-            print(f'Total number of features: {self.x_video.shape[1] - 4 + self.x_audio.shape[1] - 4}')
-            print(f'Total number of video features: {self.x_video.shape[1] - 4}')
-            print(f'Total number of audio features: {self.x_audio.shape[1] - 4}')
+            print(f'Total number of features: {self.dataset.x_video.shape[1] - 4 + self.dataset.x_audio.shape[1] - 4}')
+            print(f'Total number of video features: {self.dataset.x_video.shape[1] - 4}')
+            print(f'Total number of audio features: {self.dataset.x_audio.shape[1] - 4}')
         print(f'######################################')
 
     def __str__(self):
