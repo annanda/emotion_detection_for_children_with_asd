@@ -57,4 +57,8 @@ The system supports any combination of features and inputs listed below.
 
 - classifier_model: the classifier model for the whole multimodal ED system, usually used together with early fusion
   method, or in case of just one modality.
-- model (within modality): the classifier model for the specific modality, usually used together with late fusion type. 
+- model (within modality): the classifier model for the specific modality, usually used together with late fusion type.
+
+
+## Run data experiments script 
+Run the script from the main folder /emotion_detection_system
