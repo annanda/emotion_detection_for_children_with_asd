@@ -7,7 +7,7 @@ services:
       dockerfile: 'Dockerfile'
     volumes:
       - "./dataset:/app/dataset"
-      - "./setup/conf.py:/app/setup/conf.py"
+      - "./emotion_detection_system:/app/emotion_detection_system"
     restart: unless-stopped
     working_dir: /app/emotion_detection_system
     entrypoint: /bin/sh -c
