@@ -401,7 +401,7 @@ class EmotionDetectionClassifier:
         audio_predictions = self._train_model_produce_predictions_basic('x_audio')
 
         # Late fusion by averaging the predictions array
-        indexes_test = list(self.dataset.y_test.index)
+        indexes_test = list(self.dataset.y_test_video.index)
         fusion_by_mean = np.mean(np.array([video_predictions, audio_predictions]), axis=0)
         self._prediction_probabilities = pd.DataFrame(fusion_by_mean,
                                                       columns=ORDER_EMOTIONS,
