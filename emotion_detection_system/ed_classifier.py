@@ -150,7 +150,7 @@ class PrepareDataset:
         self.prepare_dataset()
 
     def prepare_dataset(self):
-        print('Preparing the dataset....')
+        # print('Preparing the dataset....')
         if 'video' in self.configuration.modalities:
             self._prepare_dataset_video_modality()
         if 'audio' in self.configuration.modalities:
@@ -400,14 +400,14 @@ class EmotionDetectionClassifier:
         """
         To train the model and get predictions for x_test
         """
-        print(f'Running experiment with configuration:')
-        print('. . . . . . . . . . . . . . .  . . .')
-        print(self.__str__())
-        print('. . . . . . . . . . . . . . . . . .')
-        print('.\n.\n.')
+        # print(f'Running experiment with configuration:')
+        # print('. . . . . . . . . . . . . . .  . . .')
+        # print(self.__str__())
+        # print('. . . . . . . . . . . . . . . . . .')
+        # print('.\n.\n.')
 
-        print('Starting to train the model')
-        print('.\n.\n.')
+        # print('Starting to train the model')
+        # print('.\n.\n.')
 
         if not self.configuration.is_multimodal or self.configuration.fusion_type == 'early_fusion':
             indexes_test = list(self.dataset.y_test.index)
@@ -431,8 +431,8 @@ class EmotionDetectionClassifier:
         else:
             self.classifier_model.fit(self.dataset.x, self.dataset.y)
             prediction_probability = self.classifier_model.predict_proba(self.dataset.x_test)
-        print('Predictions for test set completed')
-        print('.\n.\n.')
+        # print('Predictions for test set completed')
+        # print('.\n.\n.')
         return prediction_probability
 
     def _train_model_produce_predictions_late_fusion(self):
@@ -495,9 +495,9 @@ class EmotionDetectionClassifier:
         :return:
         """
         print(f'######################################')
-        print(' ... Results for the data experiment: ...')
+        print(' ... Results for the data experiment: ... \n')
         print(self.__str__())
-        print(f'######################################')
+        print(f'###################################### \n')
         # print(f'Accuracy: {self.accuracy}')
         print(f'Accuracy: {self.accuracy:.4f}')
         print(f'Confusion matrix: labels={ORDER_EMOTIONS}')
