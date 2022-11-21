@@ -57,6 +57,10 @@ class EmotionDetectionConfiguration:
                                      list(self.modalities_config['video']['features_type'].keys())
                                      if
                                      self.modalities_config['video']['features_type'][feature] is True]
+        if not self.video_features_types:
+            raise ValueError(
+                'You did not select a feature type for VIDEO modality. \n'
+                'If you select a modality, you need to have at least one feature type.')
 
     def _setup_features_audio(self):
         audio_config = self.configuration['modalities_config']['audio']
@@ -72,6 +76,10 @@ class EmotionDetectionConfiguration:
                 # if I want to configure in more details which feature type I want to use from each group
                 self.audio_features_types[feature_group] = audio_config['features_type'][feature_group] if not \
                     audio_config['features_type'][feature_group] == 'all' else LLD_PARAMETER_GROUP[feature_group]
+        if not self.audio_features_types:
+            raise ValueError(
+                'You did not select a feature type for AUDIO modality. \n'
+                'If you select a modality, you need to have at least one feature type.')
 
     def _setup_classifier_models(self):
         """
@@ -150,6 +158,8 @@ class PrepareDataset:
         if self.configuration.is_multimodal:
             if self.configuration.fusion_type == 'early_fusion':
                 self._prepare_dataset_early_fusion()
+            else:
+                self._organise_multimodal_late_fusion_test_datasets()
         else:
             self._prepare_dataset_unimodality()
 
@@ -162,6 +172,39 @@ class PrepareDataset:
             self.x = self.x_audio.iloc[:, 4:]
             self.x_dev = self.x_dev_audio.iloc[:, 4:]
             self.x_test = self.x_test_audio.iloc[:, 4:]
+
+    def _organise_multimodal_late_fusion_test_datasets(self):
+        """
+        It only gets here is the model is multimodal and late fusion type.
+        Make the test set consistent. Keeping only the values that are present in both video and audio test datasets.
+        :return: None
+        """
+        new_video_test = pd.merge(self.x_test_video,
+                                  self.x_test_audio[['time_of_video_seconds',
+                                                     'emotion_zone',
+                                                     'frametime',
+                                                     'video_part']],
+                                  on=['time_of_video_seconds',
+                                      'emotion_zone',
+                                      'frametime',
+                                      'video_part'])
+        new_audio_test = pd.merge(self.x_test_audio,
+                                  self.x_test_video[['time_of_video_seconds',
+                                                     'emotion_zone',
+                                                     'frametime',
+                                                     'video_part']],
+                                  on=['time_of_video_seconds',
+                                      'emotion_zone',
+                                      'frametime',
+                                      'video_part'])
+        self.x_test_video = new_video_test
+        self.x_test_audio = new_audio_test
+        self.y_test_video = self.x_test_video['emotion_zone']
+        self.y_test_audio = self.x_test_audio['emotion_zone']
+
+        # y_test_audio and y_test_video are exactly the same at this point.
+        # So I can attribute either of them to y_test value.
+        self.y_test = self.y_test_video
 
     def _prepare_dataset_early_fusion(self):
         dfs = [self.x_video, self.x_audio]
@@ -202,9 +245,9 @@ class PrepareDataset:
         self.set_dataset_values(dfs_merged, modality)
 
     def set_dataset_values(self, dfs_merged, modality):
-        df = dfs_merged[0].dropna()
-        df_dev = dfs_merged[1].dropna()
-        df_test = dfs_merged[2].dropna()
+        df = dfs_merged[0].fillna(0)
+        df_dev = dfs_merged[1].fillna(0)
+        df_test = dfs_merged[2].fillna(0)
         if modality == 'video':
             self.y_video = df['emotion_zone']
             self.y_dev_video = df_dev['emotion_zone']
@@ -463,7 +506,10 @@ class EmotionDetectionClassifier:
             print(f'Total train examples: {len(self.dataset.x)}')
         else:
             print(f'Total train examples: {len(self.dataset.x_video)}')
-        print(f'Number of examples per class in training: \n{self.dataset.y.value_counts()}')
+        if self.dataset.y is not None:
+            print(f'Number of examples per class in training: \n{self.dataset.y.value_counts()}')
+        else:
+            print(f'Number of examples per class in training: \n{self.dataset.y_video.value_counts()}')
         print(f'Total test examples: {np.sum(self.confusion_matrix)}')
         # print(f'Number of examples per class in test: \n{self.y_test.value_counts()}')
         if self.dataset.x is not None:

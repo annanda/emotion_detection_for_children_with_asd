@@ -62,3 +62,6 @@ The system supports any combination of features and inputs listed below.
 
 ## Run data experiments script 
 Run the script from the main folder /emotion_detection_system
+
+
+* If you select a modality, you need to select at least one features type.

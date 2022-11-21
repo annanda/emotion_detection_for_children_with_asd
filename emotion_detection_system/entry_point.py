@@ -22,7 +22,7 @@ if __name__ == '__main__':
     # json_file = sys.argv[1]
 
     #If using local run
-    json_file = 'participant_02_va_late_fusion.json'
+    json_file = 'fixing_mm.json'
     script_entry(json_file)
 
     # TODO add to README the hierarchic order of the configuration option for data experiments
