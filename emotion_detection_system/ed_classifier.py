@@ -165,13 +165,20 @@ class PrepareDataset:
 
     def _prepare_dataset_unimodality(self):
         if self.configuration.modalities[0] == 'video':
-            self.x = self.x_video.iloc[:, 4:]
-            self.x_dev = self.x_dev_video.iloc[:, 4:]
-            self.x_test = self.x_test_video.iloc[:, 4:]
+            self.x = self.x_video
+            self.x_dev = self.x_dev_video
+            self.x_test = self.x_test_video
         else:
-            self.x = self.x_audio.iloc[:, 4:]
-            self.x_dev = self.x_dev_audio.iloc[:, 4:]
-            self.x_test = self.x_test_audio.iloc[:, 4:]
+            self.x = self.x_audio
+            self.x_dev = self.x_dev_audio
+            self.x_test = self.x_test_audio
+
+        self.y = self.x['emotion_zone']
+        self.y_dev = self.x_dev['emotion_zone']
+        self.y_test = self.x_test['emotion_zone']
+        self.x = self.x.iloc[:, 4:]
+        self.x_dev = self.x_dev.iloc[:, 4:]
+        self.x_test = self.x_test.iloc[:, 4:]
 
     def _organise_multimodal_late_fusion_test_datasets(self):
         """
