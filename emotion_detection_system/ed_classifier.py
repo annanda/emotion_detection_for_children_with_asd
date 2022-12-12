@@ -442,12 +442,30 @@ class EmotionDetectionClassifier:
             # self.classifier_model.fit(self.dataset.x, self.dataset.y)
             # prediction_probability = self.classifier_model.predict_proba(self.dataset.x_test)
 
+        x = self.normalise_data(x)
+        x_test = self.normalise_data(x_test)
+
         self.classifier_model.fit(x, y)
         prediction_probability = self.classifier_model.predict_proba(x_test)
 
         # print('Predictions for test set completed')
         # print('.\n.\n.')
         return prediction_probability
+
+    def normalise_data(self, dataframe, norm_method='min-max'):
+        df_scaled = dataframe.copy()
+
+        # Numbers vary from 0 to 1
+        if norm_method == 'min-max':
+            for column in df_scaled.columns:
+                df_scaled[column] = (df_scaled[column] - df_scaled[column].min()) / (
+                        df_scaled[column].max() - df_scaled[column].min())
+        # Numbers vary from -1 to 1
+        elif norm_method == 'abs-scaling':
+            for column in df_scaled.columns:
+                df_scaled[column] = df_scaled[column] / df_scaled[column].abs().max()
+
+        return df_scaled
 
     def _train_model_produce_predictions_late_fusion(self):
         # In the end I need to fill self._prediction_probabilities, so I can run _produce_final_predictions
