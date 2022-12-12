@@ -19,9 +19,9 @@ def script_entry(json_file):
 
 if __name__ == '__main__':
     # if using shell script
-    # json_file = sys.argv[1]
+    json_file = sys.argv[1]
     # If using local run
-    json_file = 'session_02_01_va_early_fusion.json'
+    # json_file = 'example_2.json'
 
     script_entry(json_file)
 

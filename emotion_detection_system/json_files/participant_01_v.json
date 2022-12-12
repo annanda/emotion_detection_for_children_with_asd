@@ -1,28 +1,28 @@
 {
         "run_to_all_participants": false,
-        "participant_number": 3,
+        "participant_number": 1,
         "session_number": 1,
-        "all_participant_data": false,
+        "all_participant_data": true,
         "dataset_split_type": "non_sequential",
         "person_independent_model": false,
         "modalities": ["video"],
         "modalities_config": {
             "video": {
                 "features_type": {
-                    "2d_eye_landmark": false,
-                    "3d_eye_landmark": false,
+                    "2d_eye_landmark": true,
+                    "3d_eye_landmark": true,
                     "AU": true,
-                    "face_2d_landmarks": false,
-                    "face_3d_landmarks": false,
-                    "gaze": false,
-                    "head_pose": false
+                    "face_2d_landmarks": true,
+                    "face_3d_landmarks": true,
+                    "gaze": true,
+                    "head_pose": true
                 }
             },
             "audio": {
                 "feature_group": {
-                    "frequency": false,
-                    "energy_amplitude": false,
-                    "spectral_balance": false,
+                    "frequency": true,
+                    "energy_amplitude": true,
+                    "spectral_balance": true,
                     "temporal_features": true
                 },
                 "all_features_from_group": true,
@@ -41,7 +41,7 @@
             "video": "",
             "early_fusion_model": "SVM"
         },
-        "fusion_type": "late_fusion",
+        "fusion_type": "early_fusion",
         "balanced_dataset": false,
         "balance_dataset_technique": ""
     }
