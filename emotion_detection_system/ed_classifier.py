@@ -433,11 +433,18 @@ class EmotionDetectionClassifier:
             x_test = self.data_sets_dic[dataset][2]
             x_test = x_test.iloc[:, 4:]
             y = self.data_sets_dic_y[dataset][0]
-            self.classifier_model.fit(x, y)
-            prediction_probability = self.classifier_model.predict_proba(x_test)
+            # self.classifier_model.fit(x, y)
+            # prediction_probability = self.classifier_model.predict_proba(x_test)
         else:
-            self.classifier_model.fit(self.dataset.x, self.dataset.y)
-            prediction_probability = self.classifier_model.predict_proba(self.dataset.x_test)
+            x = self.dataset.x
+            x_test = self.dataset.x_test
+            y = self.dataset.y
+            # self.classifier_model.fit(self.dataset.x, self.dataset.y)
+            # prediction_probability = self.classifier_model.predict_proba(self.dataset.x_test)
+
+        self.classifier_model.fit(x, y)
+        prediction_probability = self.classifier_model.predict_proba(x_test)
+
         # print('Predictions for test set completed')
         # print('.\n.\n.')
         return prediction_probability
