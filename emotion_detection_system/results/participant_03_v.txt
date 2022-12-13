@@ -1,0 +1,36 @@
+######################################
+ ... Results for the data experiment: ... 
+
+Participant number: 02
+Session number: 01
+All participant data: False
+Sessions to consider: ['session_02_01']
+Dataset split type: non_sequential
+Person-Independent model: False
+Modalities: ['video', 'audio']
+Features type video: ['2d_eye_landmark', '3d_eye_landmark', 'AU', 'face_2d_landmarks', 'face_3d_landmarks', 'gaze', 'head_pose']
+Features level audio: functionals
+Features groups audio: ['frequency', 'energy_amplitude', 'spectral_balance', 'temporal_features']
+Features type audio: {'frequency': ['pitch', 'jitter', 'formant_1-3_frequency', 'formant_1-3_bandwidth'], 'energy_amplitude': ['shimmer', 'loudness', 'harmonics-to-noise_ratio'], 'spectral_balance': ['alpha_ratio', 'hammarberg_index', 'spectral_slope', 'formant_1-3_relative_energy', 'harmonic_difference_H1–H2', 'Harmonic_difference_H1–A3', 'mfcc_1–4'], 'temporal_features': ['temporal_features']}
+Models per modality: {'video': 'SVM', 'early_fusion_model': 'SVM', 'audio': 'SVM'}
+Fusion type: early_fusion
+###################################### 
+
+Accuracy: 0.5420
+Confusion matrix: labels=['blue', 'green', 'red', 'yellow']
+[[  0  84   0  55]
+ [  0 288   0  79]
+ [  0  27   0  56]
+ [  0  81   0 164]]
+Total train examples: 6651
+Number of examples per class in training: 
+green     2928
+yellow    1953
+blue      1108
+red        662
+Name: emotion_zone, dtype: int64
+Total test examples: 834
+Total number of features: 744
+Total number of video features: 669
+Total number of audio features: 75
+######################################
