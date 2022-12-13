@@ -9,11 +9,11 @@
         "modalities_config": {
             "video": {
                 "features_type": {
-                    "2d_eye_landmark": true,
-                    "3d_eye_landmark": true,
+                    "2d_eye_landmark": false,
+                    "3d_eye_landmark": false,
                     "AU": true,
-                    "face_2d_landmarks": true,
-                    "face_3d_landmarks": true,
+                    "face_2d_landmarks": false,
+                    "face_3d_landmarks": false,
                     "gaze": true,
                     "head_pose": true
                 }
