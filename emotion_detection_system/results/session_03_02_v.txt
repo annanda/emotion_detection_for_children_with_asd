@@ -1,0 +1,34 @@
+######################################
+ ... Results for the data experiment: ... 
+
+Participant number: 03
+Session number: 02
+All participant data: False
+Sessions to consider: ['session_03_02']
+Dataset split type: non_sequential
+Person-Independent model: False
+Modalities: ['video']
+Features type video: ['AU', 'gaze', 'head_pose']
+Features level audio: 
+Features groups audio: []
+Features type audio: {}
+Models per modality: {'video': 'SVM', 'early_fusion_model': 'SVM'}
+Fusion type: early_fusion
+###################################### 
+
+Accuracy: 0.7343
+Confusion matrix: labels=['blue', 'green', 'red', 'yellow']
+[[147  39   0  33]
+ [ 29 296   0  34]
+ [  3   1   3   1]
+ [ 34  37   1 140]]
+Total train examples: 6383
+Number of examples per class in training: 
+green     2874
+blue      1750
+yellow    1696
+red         63
+Name: emotion_zone, dtype: int64
+Total test examples: 798
+Total number of features: 49
+######################################
