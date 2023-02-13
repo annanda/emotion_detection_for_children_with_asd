@@ -32,6 +32,10 @@ class EmotionDetectionConfiguration:
         self.audio_features_types = {}
         self.models = {}
         self.is_multimodal = True if len(self.modalities) > 1 else False
+        if self.configuration.get('annotation_type', False):
+            self.annotation_type = self.configuration['annotation_type']
+        else:
+            self.annotation_type = 'parents'
 
         # To define the path for person-independent model or individuals model
         self.person_independent_folder = 'cross-individuals' if self.configuration[
@@ -147,7 +151,15 @@ class PrepareDataset:
         self.y_dev_audio = None
         self.y_test_audio = None
 
+        self.dataset_path = self.set_annotation_type()
+
         self.prepare_dataset()
+
+    def set_annotation_type(self):
+        if self.configuration.annotation_type == 'parents':
+            return os.path.join(DATASET_FOLDER, 'parents')
+        elif self.configuration.annotation_type == 'specialist':
+            return os.path.join(DATASET_FOLDER, 'specialist')
 
     def prepare_dataset(self):
         # print('Preparing the dataset....')
@@ -286,7 +298,7 @@ class PrepareDataset:
         return df, df_dev, df_test
 
     def _prepare_dataset_video_modality(self):
-        folder_modality = os.path.join(DATASET_FOLDER,
+        folder_modality = os.path.join(self.dataset_path,
                                        'video',
                                        self.configuration.person_independent_folder,
                                        self.configuration.dataset_split_type)
@@ -308,7 +320,7 @@ class PrepareDataset:
                                df_test_concatenate_columns, 'video')
 
     def _prepare_dataset_audio_modality(self):
-        folder_modality = os.path.join(DATASET_FOLDER,
+        folder_modality = os.path.join(self.dataset_path,
                                        'audio',
                                        self.configuration.person_independent_folder,
                                        self.configuration.dataset_split_type,
@@ -557,6 +569,7 @@ class EmotionDetectionClassifier:
                f'All participant data: {self.configuration.all_participant_data}\n' \
                f'Sessions to consider: {self.configuration.sessions_to_consider}\n' \
                f'Dataset split type: {self.configuration.dataset_split_type}\n' \
+               f'Annotation type: {self.configuration.annotation_type}\n' \
                f'Person-Independent model: {self.configuration.person_independent_model}\n' \
                f'Modalities: {self.configuration.modalities}\n' \
                f'Features type video: {self.configuration.video_features_types}\n' \
