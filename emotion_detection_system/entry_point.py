@@ -22,6 +22,7 @@ if __name__ == '__main__':
     # json_file = sys.argv[1]
     # If using local run
     json_file = 'example_annotation_specialist.json'
+    # json_file = 'example_2.json'
 
     script_entry(json_file)
 

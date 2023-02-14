@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 from sklearn import svm
 from sklearn.metrics import confusion_matrix
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, balanced_accuracy_score
 
 from emotion_detection_system.conf import DATASET_FOLDER, ORDER_EMOTIONS, TOTAL_SESSIONS, PARTICIPANT_NUMBERS, \
     LLD_PARAMETER_GROUP
@@ -380,8 +380,9 @@ class PrepareDataset:
 class EmotionDetectionClassifier:
 
     def __init__(self, configuration):
-        self._emotion_class = {0: 'blue', 1: 'green', 2: 'red', 3: 'yellow'}
         self.configuration = EmotionDetectionConfiguration(configuration)
+        self._emotion_class = {}
+        # self._emotion_class = {0: 'blue', 1: 'green', 2: 'red', 3: 'yellow'}
 
         # Setting up dataset
         self.dataset = PrepareDataset(configuration)
@@ -432,7 +433,7 @@ class EmotionDetectionClassifier:
             indexes_test = list(self.dataset.y_test.index)
             prediction_probability = self._train_model_produce_predictions_basic()
             self._prediction_probabilities = pd.DataFrame(prediction_probability,
-                                                          columns=ORDER_EMOTIONS,
+                                                          columns=self.classifier_model.classes_,
                                                           index=indexes_test)
         else:
             self._train_model_produce_predictions_late_fusion()
@@ -454,6 +455,9 @@ class EmotionDetectionClassifier:
         x_test = self.normalise_data(x_test)
 
         self.classifier_model.fit(x, y)
+        emotions = self.classifier_model.classes_
+        for idx, emotion in enumerate(emotions):
+            self._emotion_class[idx] = emotion
         prediction_probability = self.classifier_model.predict_proba(x_test)
 
         # print('Predictions for test set completed')
@@ -506,7 +510,8 @@ class EmotionDetectionClassifier:
         """
         predictions = []
         for _, row in self._prediction_probabilities.iterrows():
-            label = self._get_predicted_label(np.array(row[ORDER_EMOTIONS]))
+            prob = np.array(row[self.classifier_model.classes_])
+            label = self._get_predicted_label(prob)
             predictions.append(label)
         return predictions
 
@@ -528,6 +533,7 @@ class EmotionDetectionClassifier:
         self.confusion_matrix = confusion_matrix(self.dataset.y_test,
                                                  self._prediction_labels,
                                                  labels=ORDER_EMOTIONS)
+        print('hey')
 
     def show_results(self):
         """
@@ -540,7 +546,7 @@ class EmotionDetectionClassifier:
         print(f'###################################### \n')
         # print(f'Accuracy: {self.accuracy}')
         print(f'Accuracy: {self.accuracy:.4f}')
-        print(f'Confusion matrix: labels={ORDER_EMOTIONS}')
+        print(f'Confusion matrix: labels={self.classifier_model.classes_}')
         print(self.confusion_matrix)
         if self.dataset.x is not None:
             print(f'Total train examples: {len(self.dataset.x)}')
