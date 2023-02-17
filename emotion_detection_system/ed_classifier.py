@@ -4,8 +4,8 @@ from functools import reduce
 import pandas as pd
 import numpy as np
 from sklearn import svm
-from sklearn.metrics import confusion_matrix
-from sklearn.metrics import accuracy_score, balanced_accuracy_score
+from sklearn.metrics import confusion_matrix, accuracy_score, balanced_accuracy_score, recall_score, \
+    precision_score, precision_recall_fscore_support
 
 from emotion_detection_system.conf import DATASET_FOLDER, ORDER_EMOTIONS, TOTAL_SESSIONS, PARTICIPANT_NUMBERS, \
     LLD_PARAMETER_GROUP
@@ -412,6 +412,8 @@ class EmotionDetectionClassifier:
         self._prediction_probabilities = None
         self._prediction_labels = None
         self.accuracy = None
+        self.balanced_accuracy = None
+        self.recall, self.precision, self.f1score, self.support = None, None, None, None
         self.confusion_matrix = None
         self.classifier_model = None
         self._set_classifier_model()
@@ -497,6 +499,10 @@ class EmotionDetectionClassifier:
     def _produce_final_predictions(self):
         self._prediction_labels = self._get_final_label_prediction_array()
         self._calculate_accuracy()
+        self._calculate_balanced_accuracy()
+        # self._calculate_recall()
+        # self._calculate_precision()
+        self._calculate_precision_recall_f1score_support()
         self._calculate_confusion_matrix()
 
     def _set_classifier_model(self):
@@ -526,14 +532,54 @@ class EmotionDetectionClassifier:
         """
         self.accuracy = accuracy_score(self.dataset.y_test, self._prediction_labels)
 
+    def _calculate_balanced_accuracy(self):
+        """"
+        average of recall obtained on each class, only count the classes the model predicted.
+        """
+        self.balanced_accuracy = balanced_accuracy_score(self.dataset.y_test, self._prediction_labels)
+
+    def _calculate_recall(self):
+        """
+        True positive rate. What was correctly predicted divided by what should have been predicted. Per class.
+        E.g.: “What percentage of the green class was identified correctly?”
+        """
+        self.recall = recall_score(self.dataset.y_test, self._prediction_labels, average=None, labels=ORDER_EMOTIONS)
+
+    def _calculate_precision(self):
+        """
+        Precision is the percentage of data samples that a machine learning model correctly identifies for a class out
+        of all samples predicted to belong to that class.
+        e.g.: "What percentage of the green class classified by the model was indeed correct?"
+        """
+        self.precision = precision_score(self.dataset.y_test, self._prediction_labels, average=None,
+                                         labels=ORDER_EMOTIONS)
+
+    def _calculate_precision_recall_f1score_support(self):
+        """
+        Recall = True positive rate. What was correctly predicted divided by what should have been predicted. Per class.
+        E.g.: “What percentage of the green class was identified correctly?”
+
+        Precision is the percentage of data samples that a machine learning model correctly identifies for a class out
+        of all samples predicted to belong to that class.
+        e.g.: "What percentage of the green class classified by the model was indeed correct?"
+
+        F1 score is harmonic mean of the precision and recall, where an F1 score reaches its best value at 1 and
+        worst score at 0
+
+        Support is the number of examples of each class present in the y_true.
+        """
+        self.precision, self.recall, self.f1score, self.support = precision_recall_fscore_support(self.dataset.y_test,
+                                                                                                  self._prediction_labels,
+                                                                                                  average=None,
+                                                                                                  labels=self.classifier_model.classes_)
+
     def _calculate_confusion_matrix(self):
         """
         To calculate confusion matrix
         """
         self.confusion_matrix = confusion_matrix(self.dataset.y_test,
                                                  self._prediction_labels,
-                                                 labels=ORDER_EMOTIONS)
-        print('hey')
+                                                 labels=self.classifier_model.classes_)
 
     def show_results(self):
         """
@@ -546,6 +592,11 @@ class EmotionDetectionClassifier:
         print(f'###################################### \n')
         # print(f'Accuracy: {self.accuracy}')
         print(f'Accuracy: {self.accuracy:.4f}')
+        print(f'Balanced Accuracy: {self.balanced_accuracy:.4f}')
+        print(f'Recall per class: {self.recall}')
+        print(f'Precision per class: {self.precision}')
+        print(f'F1 score per class: {self.f1score}')
+        print(f'Support per class: {self.support}')
         print(f'Confusion matrix: labels={self.classifier_model.classes_}')
         print(self.confusion_matrix)
         if self.dataset.x is not None:

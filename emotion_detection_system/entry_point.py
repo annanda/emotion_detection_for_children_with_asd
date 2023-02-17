@@ -1,5 +1,6 @@
 import json
 import os.path
+
 import sys
 
 from emotion_detection_system.ed_classifier import EmotionDetectionClassifier
