@@ -5,3 +5,4 @@ labels/*
 dataset/*
 dataset_legacy/*
 /emotion_detection_system/classifiers/experimenting.py
+/emotion_detection_system/results/
