@@ -158,7 +158,7 @@ python entry_point.py session_03_02_a.json> results/${DATE}/session_03_02_a_${DA
 echo "Starting new Data Experiment Configuration: session_04_01_a.json"
 python entry_point.py session_04_01_a.json> results/${DATE}/session_04_01_a_${DATE}.txt
 
-echo "Starting new Data Experiment Configuration: session_04_02_a_${DATE}.json"
+echo "Starting new Data Experiment Configuration: session_04_02_a.json"
 python entry_point.py session_04_02_a.json> results/${DATE}/session_04_02_a_${DATE}.txt
 
 
