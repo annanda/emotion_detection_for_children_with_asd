@@ -494,7 +494,7 @@ class EmotionDetectionClassifier:
         indexes_test = list(self.dataset.y_test_video.index)
         fusion_by_mean = np.mean(np.array([video_predictions, audio_predictions]), axis=0)
         self._prediction_probabilities = pd.DataFrame(fusion_by_mean,
-                                                      columns=ORDER_EMOTIONS,
+                                                      columns=self.classifier_model.classes_,
                                                       index=indexes_test)
 
     def _produce_final_predictions(self):
@@ -601,7 +601,7 @@ class EmotionDetectionClassifier:
         print(' ... CONFIGURATION ... \n')
         print(self.__str__())
         print(f'###################################### \n')
-        print(f'... RESULTS ... \n')
+        print(f' ... RESULTS ... \n')
         # print(f'Accuracy: {self.accuracy}')
         print(f'Accuracy: {self.accuracy:.4f}')
         print(f'Balanced Accuracy: {self.balanced_accuracy:.4f}')
