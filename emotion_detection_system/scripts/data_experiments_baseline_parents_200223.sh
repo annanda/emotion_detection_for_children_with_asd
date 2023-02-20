@@ -2,7 +2,7 @@
 # to organise results by date and folders
 
 DATE="20-02-23"
-mkdir "results/${DATE}"
+mkdir -p "results/${DATE}"
 
 # Normalised data using linear normalisation (values vary from 0 to 1)
 # Features included:
