@@ -1,2 +1,2 @@
 #!/bin/bash
-docker-compose run --rm emotion-detection
+docker-compose run --rm -d emotion-detection
