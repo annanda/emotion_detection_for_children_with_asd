@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 from sklearn import svm
 from sklearn.metrics import confusion_matrix, accuracy_score, balanced_accuracy_score, recall_score, \
-    precision_score, precision_recall_fscore_support
+    precision_score, precision_recall_fscore_support, classification_report, multilabel_confusion_matrix
 
 from emotion_detection_system.conf import DATASET_FOLDER, ORDER_EMOTIONS, TOTAL_SESSIONS, PARTICIPANT_NUMBERS, \
     LLD_PARAMETER_GROUP
@@ -413,7 +413,8 @@ class EmotionDetectionClassifier:
         self._prediction_labels = None
         self.accuracy = None
         self.balanced_accuracy = None
-        self.recall, self.precision, self.f1score, self.support = None, None, None, None
+        # self.recall, self.precision, self.f1score, self.support = None, None, None, None
+        self.classification_report = None
         self.confusion_matrix = None
         self.classifier_model = None
         self._set_classifier_model()
@@ -502,8 +503,10 @@ class EmotionDetectionClassifier:
         self._calculate_balanced_accuracy()
         # self._calculate_recall()
         # self._calculate_precision()
-        self._calculate_precision_recall_f1score_support()
+        # self._calculate_precision_recall_f1score_support()
+        self._generate_classification_report()
         self._calculate_confusion_matrix()
+        self._calculate_multilabel_confusion_matrix()
 
     def _set_classifier_model(self):
         # simplest case
@@ -573,6 +576,10 @@ class EmotionDetectionClassifier:
                                                                                                   average=None,
                                                                                                   labels=self.classifier_model.classes_)
 
+    def _generate_classification_report(self):
+        self.classification_report = classification_report(self.dataset.y_test, self._prediction_labels,
+                                                           labels=self.classifier_model.classes_, digits=4)
+
     def _calculate_confusion_matrix(self):
         """
         To calculate confusion matrix
@@ -581,32 +588,36 @@ class EmotionDetectionClassifier:
                                                  self._prediction_labels,
                                                  labels=self.classifier_model.classes_)
 
+    def _calculate_multilabel_confusion_matrix(self):
+        self.multilabel_confusion_matrix = multilabel_confusion_matrix(self.dataset.y_test, self._prediction_labels,
+                                                                       labels=self.classifier_model.classes_)
+
     def show_results(self):
         """
         To show the results after running an experiment
         :return:
         """
         print(f'######################################')
-        print(' ... Results for the data experiment: ... \n')
+        print(' ... CONFIGURATION ... \n')
         print(self.__str__())
         print(f'###################################### \n')
+        print(f'... RESULTS ... \n')
         # print(f'Accuracy: {self.accuracy}')
         print(f'Accuracy: {self.accuracy:.4f}')
         print(f'Balanced Accuracy: {self.balanced_accuracy:.4f}')
-        print(f'Recall per class: {self.recall}')
-        print(f'Precision per class: {self.precision}')
-        print(f'F1 score per class: {self.f1score}')
-        print(f'Support per class: {self.support}')
+        print(f'Classification report: {self.classification_report}')
         print(f'Confusion matrix: labels={self.classifier_model.classes_}')
         print(self.confusion_matrix)
+        print(f'\nMultilabel Confusion matrix:')
+        print(self.multilabel_confusion_matrix)
         if self.dataset.x is not None:
             print(f'Total train examples: {len(self.dataset.x)}')
         else:
             print(f'Total train examples: {len(self.dataset.x_video)}')
-        if self.dataset.y is not None:
-            print(f'Number of examples per class in training: \n{self.dataset.y.value_counts()}')
-        else:
-            print(f'Number of examples per class in training: \n{self.dataset.y_video.value_counts()}')
+        # if self.dataset.y is not None:
+        #     print(f'Number of examples per class in training: \n{self.dataset.y.value_counts()}')
+        # else:
+        #     print(f'Number of examples per class in training: \n{self.dataset.y_video.value_counts()}')
         print(f'Total test examples: {np.sum(self.confusion_matrix)}')
         # print(f'Number of examples per class in test: \n{self.y_test.value_counts()}')
         if self.dataset.x is not None:
@@ -618,6 +629,7 @@ class EmotionDetectionClassifier:
             print(f'Total number of features: {self.dataset.x_video.shape[1] - 4 + self.dataset.x_audio.shape[1] - 4}')
             print(f'Total number of video features: {self.dataset.x_video.shape[1] - 4}')
             print(f'Total number of audio features: {self.dataset.x_audio.shape[1] - 4}')
+        print(f'\n')
         print(f'######################################')
 
     def __str__(self):
