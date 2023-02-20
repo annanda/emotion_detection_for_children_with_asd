@@ -9,7 +9,7 @@ mkdir "results/${DATE}"
 # audio: all
 # video: AU, gaze, head_movement
 # SVM model & Late Fusion
-# Annotation from parents
+# Annotation: parents
 
 
 #MULTIMODAL
