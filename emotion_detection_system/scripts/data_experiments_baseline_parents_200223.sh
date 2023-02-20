@@ -15,7 +15,7 @@ mkdir -p "results/${DATE}"
 #MULTIMODAL
 # Late Fusion
 # All participants separately - Video&Audio: features (above) - Late fusion
-echo "Starting new Data Experiment Configuration: participant_01_va_late_fusion_${DATE}.json"
+echo "Starting new Data Experiment Configuration: participant_01_va_late_fusion.json"
 python entry_point.py participant_01_va_late_fusion.json> results/${DATE}/participant_01_va_late_fusion_${DATE}.txt
 echo "Starting new Data Experiment Configuration: participant_02_va_late_fusion.json"
  python entry_point.py participant_02_va_late_fusion.json> results/${DATE}/participant_02_va_late_fusion_${DATE}.txt
