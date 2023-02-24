@@ -6,8 +6,7 @@
   "dataset_split_type": "non_sequential",
   "person_independent_model": false,
   "modalities": [
-    "video",
-    "audio"
+    "video"
   ],
   "modalities_config": {
     "video": {

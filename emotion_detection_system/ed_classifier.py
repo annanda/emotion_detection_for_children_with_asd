@@ -45,6 +45,9 @@ class EmotionDetectionConfiguration:
         self._setup_classifier_models()
         self._setup_sessions_to_consider()
 
+        self.x_and_x_validation_for_training = self.configuration.get('x_and_x_validation_for_training', False)
+        # self.x_dev_balanced = self.configuration.get('x_dev_balanced', False)
+
     def _setup_modalities_features_type_values(self):
         """
         To set up the modalities and features type of each modality
@@ -267,6 +270,16 @@ class PrepareDataset:
         df = dfs_merged[0].fillna(0)
         df_dev = dfs_merged[1].fillna(0)
         df_test = dfs_merged[2].fillna(0)
+
+        # Balance Dataset (x_train)
+        if self.configuration.balance_dataset:
+            df_balanced = self.apply_balance(df)
+            df = df_balanced
+
+            # Balance x_dev if it will be used as part of training data
+            if self.configuration.x_and_x_validation_for_training:
+                df_dev = self.apply_balance(df_dev)
+
         if modality == 'video':
             self.y_video = df['emotion_zone']
             self.y_dev_video = df_dev['emotion_zone']
@@ -290,6 +303,15 @@ class PrepareDataset:
         self.x = df.iloc[:, 4:]
         self.x_dev = df_dev.iloc[:, 4:]
         self.x_test = df_test.iloc[:, 4:]
+
+    def apply_balance(self, df_to_balance):
+        balanced_df = None
+        if self.configuration.balance_dataset_technique == 'undersampling':
+            group = df_to_balance.groupby('emotion_zone')
+            resulting_df = group.apply(lambda x: x.sample(group.size().min()).reset_index(drop=True))
+            balanced_df = resulting_df
+            # print(resulting_df)
+        return balanced_df
 
     def read_dataset_split_parts(self, folder_to_read):
         df = self._read_dataset_from_folders(folder_to_read, 'train')
@@ -418,6 +440,9 @@ class EmotionDetectionClassifier:
         self.classification_report = None
         self.confusion_matrix = None
         self.classifier_model = None
+        self._current_model = None
+        self.train_data_description = "x + x_validation sets" if self.configuration.x_and_x_validation_for_training else 'X set'
+
         self._set_classifier_model()
 
     def train_model_produce_predictions(self):
@@ -447,18 +472,29 @@ class EmotionDetectionClassifier:
         if dataset:
             x = self.data_sets_dic[dataset][0]
             x = x.iloc[:, 4:]
+            x_dev = self.data_sets_dic[dataset][1]
+            x_dev = x_dev.iloc[:, 4:]
             x_test = self.data_sets_dic[dataset][2]
             x_test = x_test.iloc[:, 4:]
             y = self.data_sets_dic_y[dataset][0]
+            y_dev = self.data_sets_dic_y[dataset][1]
         else:
             x = self.dataset.x
-            x_test = self.dataset.x_test
             y = self.dataset.y
+            x_dev = self.dataset.x_dev
+            y_dev = self.dataset.y_dev
+            x_test = self.dataset.x_test
+
+        if self.configuration.x_and_x_validation_for_training:
+            x_added = pd.concat([x, x_dev])
+            x = x_added
+            y = pd.concat([y, y_dev])
 
         x = self.normalise_data(x)
         x_test = self.normalise_data(x_test)
 
         self.classifier_model.fit(x, y)
+
         emotions = self.classifier_model.classes_
         for idx, emotion in enumerate(emotions):
             self._emotion_class[idx] = emotion
@@ -513,6 +549,7 @@ class EmotionDetectionClassifier:
         # simplest case
         # todo elaborate the selection and definition of models.
         self.classifier_model = svm.SVC(probability=True)
+        self._current_model = 'SVM'
 
     def _get_final_label_prediction_array(self):
         """
@@ -619,6 +656,16 @@ class EmotionDetectionClassifier:
             'F1 Score': self.f1score
         }
 
+    def _get_train_examples_number_to_print(self):
+        if self.dataset.x is not None:
+            if self.configuration.x_and_x_validation_for_training:
+                return len(self.dataset.x) + len(self.dataset.x_dev)
+            return len(self.dataset.x)
+        else:
+            if self.configuration.x_and_x_validation_for_training:
+                return len(self.dataset.x_video) + len(self.dataset.x_dev_video)
+            return len(self.dataset.x_video)
+
     def show_results(self):
         """
         To show the results after running an experiment
@@ -637,14 +684,7 @@ class EmotionDetectionClassifier:
         print(self.confusion_matrix)
         print(f'\nMultilabel Confusion matrix:')
         print(self.multilabel_confusion_matrix)
-        if self.dataset.x is not None:
-            print(f'Total train examples: {len(self.dataset.x)}')
-        else:
-            print(f'Total train examples: {len(self.dataset.x_video)}')
-        # if self.dataset.y is not None:
-        #     print(f'Number of examples per class in training: \n{self.dataset.y.value_counts()}')
-        # else:
-        #     print(f'Number of examples per class in training: \n{self.dataset.y_video.value_counts()}')
+        print(f'Total train examples: {self._get_train_examples_number_to_print()}')
         print(f'Total test examples: {np.sum(self.confusion_matrix)}')
         # print(f'Number of examples per class in test: \n{self.y_test.value_counts()}')
         if self.dataset.x is not None:
@@ -673,4 +713,7 @@ class EmotionDetectionClassifier:
                f'Features groups audio: {self.configuration.audio_features_groups}\n' \
                f'Features type audio: {self.configuration.audio_features_types}\n' \
                f'Models per modality: {self.configuration.models}\n' \
-               f'Fusion type: {self.configuration.fusion_type}'
+               f'Fusion type: {self.configuration.fusion_type}\n' \
+               f'Balanced Dataset: {self.configuration.balance_dataset}\n' \
+               f'Balanced Dataset Technique: {self.configuration.balance_dataset_technique}\n' \
+               f'Data used for Training: {self.train_data_description}'
