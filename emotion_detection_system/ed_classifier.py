@@ -286,6 +286,7 @@ class PrepareDataset:
         self.y = df['emotion_zone']
         self.y_dev = df_dev['emotion_zone']
         self.y_test = df_test['emotion_zone']
+
         self.x = df.iloc[:, 4:]
         self.x_dev = df_dev.iloc[:, 4:]
         self.x_test = df_test.iloc[:, 4:]
@@ -503,7 +504,7 @@ class EmotionDetectionClassifier:
         self._calculate_balanced_accuracy()
         # self._calculate_recall()
         # self._calculate_precision()
-        # self._calculate_precision_recall_f1score_support()
+        self._calculate_precision_recall_f1score_support()
         self._generate_classification_report()
         self._calculate_confusion_matrix()
         self._calculate_multilabel_confusion_matrix()
@@ -591,6 +592,32 @@ class EmotionDetectionClassifier:
     def _calculate_multilabel_confusion_matrix(self):
         self.multilabel_confusion_matrix = multilabel_confusion_matrix(self.dataset.y_test, self._prediction_labels,
                                                                        labels=self.classifier_model.classes_)
+
+    def format_results(self):
+        json_configuration = {
+            'Participant number': self.configuration.participant_number,
+            'Session number': f'0{self.configuration.session_number}',
+            'All participant data': self.configuration.all_participant_data,
+            'Sessions to consider': self.configuration.sessions_to_consider,
+            'Dataset split type': self.configuration.dataset_split_type,
+            'Annotation type': self.configuration.annotation_type,
+            'Person-Independent model': self.configuration.person_independent_model,
+            'Modalities': self.configuration.modalities,
+            'Features type video': self.configuration.video_features_types,
+            'Features level audio': self.configuration.audio_features_level,
+            'Features groups audio': self.configuration.audio_features_groups,
+            'Features type audio': self.configuration.audio_features_types,
+            'Models per modality': self.configuration.models,
+            'Fusion type': self.configuration.fusion_type
+        }
+        json_results = {
+            'Accuracy': self.accuracy,
+            'Balanced Accuracy': self.balanced_accuracy,
+            'Classes order': self.classifier_model.classes_,
+            'Precision': self.precision,
+            'Recall': self.recall,
+            'F1 Score': self.f1score
+        }
 
     def show_results(self):
         """
