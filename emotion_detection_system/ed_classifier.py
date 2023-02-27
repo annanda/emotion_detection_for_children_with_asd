@@ -494,6 +494,8 @@ class EmotionDetectionClassifier:
         x = self.normalise_data(x)
         x_test = self.normalise_data(x_test)
 
+        x = x.fillna(0)
+
         self.classifier_model.fit(x, y)
 
         emotions = self.classifier_model.classes_
