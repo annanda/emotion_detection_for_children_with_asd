@@ -1,13 +1,13 @@
 {
   "run_to_all_participants": false,
-  "participant_number": 3,
+  "participant_number": 4,
   "session_number": 1,
   "all_participant_data": false,
-  "sessions_to_consider": null,
   "dataset_split_type": "non_sequential",
   "annotation_type": "specialist",
   "person_independent_model": false,
   "modalities": [
+    "video",
     "audio"
   ],
   "modalities_config": {
@@ -18,15 +18,15 @@
         "AU": true,
         "face_2d_landmarks": false,
         "face_3d_landmarks": false,
-        "gaze": false,
-        "head_pose": false
+        "gaze": true,
+        "head_pose": true
       }
     },
     "audio": {
       "feature_group": {
-        "frequency": false,
-        "energy_amplitude": false,
-        "spectral_balance": false,
+        "frequency": true,
+        "energy_amplitude": true,
+        "spectral_balance": true,
         "temporal_features": true
       },
       "all_features_from_group": true,
