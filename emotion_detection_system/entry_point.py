@@ -58,7 +58,7 @@ if __name__ == '__main__':
     # json_file = 'example_balance_dataset.json'
     # json_file = 'example_2.json'
     # json_file = 'example_2_x_x_dev_training.json'
-    json_file = 'specialist_baseline/session_03_01_v.json'
+    # json_file = 'specialist_baseline/session_03_01_v.json'
 
     script_entry(json_file)
 
