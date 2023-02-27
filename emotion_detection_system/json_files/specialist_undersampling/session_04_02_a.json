@@ -51,6 +51,6 @@
     "early_fusion_model": "SVM"
   },
   "fusion_type": "early_fusion",
-  "balanced_dataset": false,
-  "balance_dataset_technique": ""
+  "balanced_dataset": true,
+  "balance_dataset_technique": "undersampling"
 }

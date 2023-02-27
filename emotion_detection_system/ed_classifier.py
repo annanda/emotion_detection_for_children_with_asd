@@ -444,6 +444,7 @@ class EmotionDetectionClassifier:
         self.train_data_description = "x + x_validation sets" if self.configuration.x_and_x_validation_for_training else 'X set'
 
         self._set_classifier_model()
+        self.json_results_information = {}
 
     def train_model_produce_predictions(self):
         """
@@ -630,31 +631,34 @@ class EmotionDetectionClassifier:
         self.multilabel_confusion_matrix = multilabel_confusion_matrix(self.dataset.y_test, self._prediction_labels,
                                                                        labels=self.classifier_model.classes_)
 
-    def format_results(self):
-        json_configuration = {
-            'Participant number': self.configuration.participant_number,
-            'Session number': f'0{self.configuration.session_number}',
-            'All participant data': self.configuration.all_participant_data,
-            'Sessions to consider': self.configuration.sessions_to_consider,
-            'Dataset split type': self.configuration.dataset_split_type,
-            'Annotation type': self.configuration.annotation_type,
-            'Person-Independent model': self.configuration.person_independent_model,
-            'Modalities': self.configuration.modalities,
-            'Features type video': self.configuration.video_features_types,
-            'Features level audio': self.configuration.audio_features_level,
-            'Features groups audio': self.configuration.audio_features_groups,
-            'Features type audio': self.configuration.audio_features_types,
-            'Models per modality': self.configuration.models,
-            'Fusion type': self.configuration.fusion_type
-        }
-        json_results = {
+    def format_json_results(self):
+        header_csv = ['Data_Included_Slug', 'Scenario', 'Annotation_Type', 'Accuracy', 'Accuracy_Balanced',
+                      'Precision_Blue', 'Precision_Green', 'Precision_Red', 'Precision_Yellow', 'Recall_Blue',
+                      'Recall_Green', 'Recall_Red', 'Recall_Yellow', 'F1score_Blue',
+                      'F1score_Green', 'F1score_Red', 'F1score_Yellow']
+
+        self.json_results_information = {
+            'Data_Included_Slug': '',
+            'Scenario': '',
+            'Annotation_Type': self.configuration.annotation_type,
             'Accuracy': self.accuracy,
-            'Balanced Accuracy': self.balanced_accuracy,
-            'Classes order': self.classifier_model.classes_,
-            'Precision': self.precision,
-            'Recall': self.recall,
-            'F1 Score': self.f1score
+            'Accuracy_Balanced': self.balanced_accuracy,
+            'Precision_blue': None, 'Precision_green': None, 'Precision_red': None, 'Precision_yellow': None,
+            'Recall_blue': None, 'Recall_green': None, 'Recall_red': None, 'Recall_yellow': None,
+            'F1score_blue': None, 'F1score_green': None, 'F1score_red': None, 'F1score_yellow': None
         }
+
+        self._fill_json_results()
+
+    def _fill_json_results(self):
+        classes = self.classifier_model.classes_
+        for x, emotion in enumerate(classes):
+            precision_key = f'Precision_{emotion}'
+            recall_key = f'Recall_{emotion}'
+            f1_key = f'F1score_{emotion}'
+            self.json_results_information[precision_key] = self.precision[x]
+            self.json_results_information[recall_key] = self.recall[x]
+            self.json_results_information[f1_key] = self.f1score[x]
 
     def _get_train_examples_number_to_print(self):
         if self.dataset.x is not None:
@@ -698,6 +702,9 @@ class EmotionDetectionClassifier:
             print(f'Total number of audio features: {self.dataset.x_audio.shape[1] - 4}')
         print(f'\n')
         print(f'######################################')
+
+    def save_json_results(self):
+        self.format_json_results()
 
     def __str__(self):
         return f'Participant number: 0{self.configuration.participant_number}\n' \
