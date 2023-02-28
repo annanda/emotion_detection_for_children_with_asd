@@ -232,7 +232,7 @@ class PrepareDataset:
         dfs = [self.x_video, self.x_audio]
         dfs_dev = [self.x_dev_video, self.x_dev_audio]
         dfs_test = [self.x_test_video, self.x_test_audio]
-        self.merge_dfs_columns(dfs, dfs_dev, dfs_test, 'multimodality')
+        self.merge_dfs_columns(dfs, dfs_dev, dfs_test, 'early_fusion')
 
     def concatenate_dfs_rows(self, folders_to_concat_df):
         df, df_dev, df_test = ([], [], [])
@@ -272,13 +272,19 @@ class PrepareDataset:
         df_test = dfs_merged[2].fillna(0)
 
         # Balance Dataset (x_train)
+        # case of single modalities
         if self.configuration.balance_dataset:
-            df_balanced = self.apply_balance(df)
-            df = df_balanced
-
-            # Balance x_dev if it will be used as part of training data
-            if self.configuration.x_and_x_validation_for_training:
-                df_dev = self.apply_balance(df_dev)
+            if self.configuration.is_multimodal:
+                if modality == 'early_fusion' or self.configuration.fusion_type == 'late_fusion':
+                    df = self.apply_balance(df)
+                    # Balance x_dev if it will be used as part of training data
+                    if self.configuration.x_and_x_validation_for_training:
+                        df_dev = self.apply_balance(df_dev)
+            else:
+                df = self.apply_balance(df)
+                # Balance x_dev if it will be used as part of training data
+                if self.configuration.x_and_x_validation_for_training:
+                    df_dev = self.apply_balance(df_dev)
 
         if modality == 'video':
             self.y_video = df['emotion_zone']
@@ -643,6 +649,8 @@ class EmotionDetectionClassifier:
         self.json_results_information = {
             'Data_Included_Slug': '',
             'Scenario': '',
+            'Participant': self.configuration.participant_number,
+            'Session:': self.configuration.session_number,
             'Annotation_Type': self.configuration.annotation_type,
             'Accuracy': self.accuracy,
             'Accuracy_Balanced': self.balanced_accuracy,
@@ -665,13 +673,20 @@ class EmotionDetectionClassifier:
 
     def _get_train_examples_number_to_print(self):
         if self.dataset.x is not None:
-            if self.configuration.x_and_x_validation_for_training:
-                return len(self.dataset.x) + len(self.dataset.x_dev)
-            return len(self.dataset.x)
+            # if self.configuration.x_and_x_validation_for_training:
+            #     return len(self.dataset.x) + len(self.dataset.x_dev)
+            return len(self.dataset.y)
         else:
-            if self.configuration.x_and_x_validation_for_training:
-                return len(self.dataset.x_video) + len(self.dataset.x_dev_video)
-            return len(self.dataset.x_video)
+            # if self.configuration.x_and_x_validation_for_training:
+            #     return len(self.dataset.x_video) + len(self.dataset.x_dev_video)
+            return len(self.dataset.y_video)
+
+    def print_train_classes_number(self):
+        print('Train examples of each class:')
+        if self.dataset.x is not None:
+            print(dict(self.dataset.y.value_counts()))
+        else:
+            print(dict(self.dataset.y_video.value_counts()))
 
     def show_results(self):
         """
@@ -693,6 +708,7 @@ class EmotionDetectionClassifier:
         print(self.multilabel_confusion_matrix)
         print(f'Total train examples: {self._get_train_examples_number_to_print()}')
         print(f'Total test examples: {np.sum(self.confusion_matrix)}')
+        self.print_train_classes_number()
         # print(f'Number of examples per class in test: \n{self.y_test.value_counts()}')
         if self.dataset.x is not None:
             print(f'Total number of features: {self.dataset.x.shape[1]}')
