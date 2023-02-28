@@ -308,7 +308,8 @@ class PrepareDataset:
         balanced_df = None
         if self.configuration.balance_dataset_technique == 'undersampling':
             group = df_to_balance.groupby('emotion_zone')
-            resulting_df = group.apply(lambda x: x.sample(group.size().min()).reset_index(drop=True))
+            resulting_df = group.apply(lambda x: x.sample(group.size().min()).reset_index())
+            resulting_df = resulting_df.set_index(['index'])
             balanced_df = resulting_df
             # print(resulting_df)
         return balanced_df
