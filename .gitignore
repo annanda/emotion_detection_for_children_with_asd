@@ -8,3 +8,4 @@ dataset_legacy/*
 /emotion_detection_system/results/*
 /check_file.py
 /emotion_detection_system.egg-info/
+/emotion_detection_system/json_results/
