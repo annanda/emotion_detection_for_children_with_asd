@@ -1,7 +1,7 @@
 #!/bin/bash
 # to organise results by date and folders
 
-DATE="27-02-23"
+DATE="28-02-23"
 OUTPUT_FOLDER="results/${DATE}/specialist"
 INPUT_FOLDER="specialist_undersampling"
 mkdir -p ${OUTPUT_FOLDER}
