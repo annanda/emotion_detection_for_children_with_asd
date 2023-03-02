@@ -650,7 +650,7 @@ class EmotionDetectionClassifier:
             'Data_Included_Slug': '',
             'Scenario': '',
             'Participant': self.configuration.participant_number,
-            'Session:': self.configuration.session_number,
+            'Session': self.configuration.session_number,
             'Annotation_Type': self.configuration.annotation_type,
             'Accuracy': self.accuracy,
             'Accuracy_Balanced': self.balanced_accuracy,
