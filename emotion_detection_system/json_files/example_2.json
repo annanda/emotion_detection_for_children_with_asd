@@ -1,14 +1,14 @@
 {
   "run_to_all_participants": false,
-  "participant_number": 1,
+  "participant_number": 3,
   "session_number": 1,
   "all_participant_data": true,
   "dataset_split_type": "non_sequential",
   "annotation_type": "parents",
   "person_independent_model": false,
   "modalities": [
-    "audio",
-    "video"
+    "video",
+    "audio"
   ],
   "modalities_config": {
     "video": {
@@ -53,6 +53,6 @@
   },
   "fusion_type": "early_fusion",
   "balanced_dataset": true,
-  "balance_dataset_technique": "undersampling",
+  "balance_dataset_technique": "class_weight",
   "x_and_x_validation_for_training": false
 }

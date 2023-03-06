@@ -271,9 +271,9 @@ class PrepareDataset:
         df_dev = dfs_merged[1].fillna(0)
         df_test = dfs_merged[2].fillna(0)
 
-        # Balance Dataset (x_train)
+        # Balance Dataset (x_train) - undersampling
         # case of single modalities
-        if self.configuration.balance_dataset:
+        if self.configuration.balance_dataset and self.configuration.balance_dataset_technique == 'undersampling':
             if self.configuration.is_multimodal:
                 if modality == 'early_fusion' or self.configuration.fusion_type == 'late_fusion':
                     df = self.apply_balance(df)
@@ -558,7 +558,10 @@ class EmotionDetectionClassifier:
     def _set_classifier_model(self):
         # simplest case
         # todo elaborate the selection and definition of models.
-        self.classifier_model = svm.SVC(probability=True)
+        if self.configuration.balance_dataset and self.configuration.balance_dataset_technique == 'class_weight':
+            self.classifier_model = svm.SVC(probability=True, class_weight="balanced")
+        else:
+            self.classifier_model = svm.SVC(probability=True)
         self._current_model = 'SVM'
 
     def _get_final_label_prediction_array(self):
