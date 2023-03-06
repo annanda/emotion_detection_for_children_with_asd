@@ -1,0 +1,57 @@
+{
+  "run_to_all_participants": false,
+  "participant_number": 3,
+  "session_number": 1,
+  "all_participant_data": false,
+  "dataset_split_type": "non_sequential",
+  "annotation_type": "parents",
+  "person_independent_model": false,
+  "modalities": [
+    "video",
+    "audio"
+  ],
+  "modalities_config": {
+    "video": {
+      "features_type": {
+        "2d_eye_landmark": false,
+        "3d_eye_landmark": false,
+        "AU": true,
+        "face_2d_landmarks": false,
+        "face_3d_landmarks": false,
+        "gaze": true,
+        "head_pose": true
+      }
+    },
+    "audio": {
+      "feature_group": {
+        "frequency": true,
+        "energy_amplitude": true,
+        "spectral_balance": true,
+        "temporal_features": true
+      },
+      "all_features_from_group": true,
+      "features_type": {
+        "frequency": [
+          "pitch"
+        ],
+        "energy_amplitude": "all",
+        "spectral_balance": [
+          "mfcc_1–4"
+        ],
+        "temporal_features": [
+          "temporal_features"
+        ]
+      },
+      "feature_level": "functionals"
+    }
+  },
+  "classifier_model": {
+    "all_modalities": "SVM",
+    "audio": "",
+    "video": "",
+    "early_fusion_model": "SVM"
+  },
+  "fusion_type": "late_fusion",
+  "balanced_dataset": true,
+  "balance_dataset_technique": "undersampling"
+}
