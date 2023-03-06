@@ -52,5 +52,5 @@
   },
   "fusion_type": "early_fusion",
   "balanced_dataset": true,
-  "balance_dataset_technique": "undersampling"
+  "balance_dataset_technique": "class_weight"
 }
