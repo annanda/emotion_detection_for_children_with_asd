@@ -15,7 +15,16 @@ BASELINE_DATA = pd.read_csv(
 
 
 def calculate_difference_percentage(value_current, value_baseline):
-    pass
+    # print(f'> {comp_name}: {value_current}')
+    perc = ((value_current / value_baseline)) * 100
+    # print(f'{perc} %')
+
+    # print(f'diff = {value_baseline - value_current}')
+    diff_perc = (1 - (value_current / value_baseline)) * 100
+    # print(f'diff perc = {diff_perc} (how much \% of improvement or detriment)')
+    # print(f'x times better/worse = {value_baseline / value_current}')
+
+    return perc, diff_perc
 
 
 def compare_against_baseline(scenario, annotation_type, participant=None, session=None, metric=None):
@@ -41,24 +50,26 @@ def compare_against_baseline(scenario, annotation_type, participant=None, sessio
         baseline_df = BASELINE_DATA.query(f"Scenario in {scenario} & Annotation_Type in {annotation_type}")
 
     if not metric:
-        avg_acc = resulting_df[['Accuracy']].mean().to_string(index=False)
-        std_acc = resulting_df[['Accuracy']].std().to_string(index=False)
-        avg_acc_bl = baseline_df[['Accuracy']].mean().to_string(index=False)
+        avg_acc = resulting_df[['Accuracy']].mean()
+        std_acc = resulting_df[['Accuracy']].std()
+        avg_acc_bl = baseline_df[['Accuracy']].mean()
         scenario_to_print = f"{scenario}_{annotation_type}"
 
-        diff_avg = calculate_difference_percentage(avg_acc, avg_acc_bl)
+        perc_avg, diff_avg = calculate_difference_percentage(avg_acc['Accuracy'], avg_acc_bl['Accuracy'])
 
         print(
-            f"Average Accuracy in {scenario_to_print} models: {avg_acc} (+-{std_acc})\n Difference from Baseline: {diff_avg}\%")
+            f"Average Accuracy in {scenario_to_print} models: {avg_acc.to_string(index=False)} (+-{std_acc.to_string(index=False)})\n"
+            f"Difference from Baseline: {diff_avg:.2f}%")
 
-        avg_b_acc = resulting_df[['Accuracy_Balanced']].mean().to_string(index=False)
-        std_b_acc = resulting_df[['Accuracy_Balanced']].std().to_string(index=False)
-        b_acc_avg_bl = baseline_df[['Accuracy_Balanced']].mean().to_string(index=False)
+        avg_b_acc = resulting_df[['Accuracy_Balanced']].mean()
+        std_b_acc = resulting_df[['Accuracy_Balanced']].std()
+        b_acc_avg_bl = baseline_df[['Accuracy_Balanced']].mean()
 
-        diff_std = calculate_difference_percentage(avg_b_acc, b_acc_avg_bl)
+        perc_b_acc, diff_b_acc = calculate_difference_percentage(avg_b_acc['Accuracy_Balanced'], b_acc_avg_bl['Accuracy_Balanced'])
 
         print(
-            f"Average Balanced Accuracy in {scenario_to_print} models: {avg_b_acc} (+-{std_b_acc})\n Difference from Baseline: {diff_std}\%")
+            f"Average Balanced Accuracy in {scenario_to_print} models: {avg_b_acc.to_string(index=False)} (+-{std_b_acc.to_string(index=False)})\n"
+            f"Difference from Baseline: {diff_b_acc:.2f}%")
 
         # Best Results
 
