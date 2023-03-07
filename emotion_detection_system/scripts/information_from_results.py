@@ -131,14 +131,59 @@ def calculate_best_acc():
         f"Difference from Baseline: {diff_b_acc:.2f}%")
 
 
-# ################
-# # CLASSES CLASSIFICATION IN GENERAL (F1 SCORES)
-#
-# best_f1_blue_row = data_results.query('F1score_Blue == F1score_Blue.max()')
-# best_f1_green_row = data_results.query('F1score_Green == F1score_Green.max()')
-# best_f1_red_row = data_results.query('F1score_Red == F1score_Red.max()')
-# best_f1_yellow_row = data_results.query('F1score_Yellow == F1score_Yellow.max()')
-#
+def calculate_best_f1_score(data_to_apply):
+    # Current Batch
+    max_f1score_blue = data_to_apply.query('F1score_Blue == F1score_Blue.max()')
+    max_f1score_green = data_to_apply.query('F1score_Green == F1score_Green.max()')
+    max_f1score_red = data_to_apply.query('F1score_Red == F1score_Red.max()')
+    max_f1score_yellow = data_to_apply.query('F1score_Yellow == F1score_Yellow.max()')
+
+    # Baseline
+    max_f1score_blue_bl = BASELINE_DATA.query('F1score_Blue == F1score_Blue.max()')
+    max_f1score_green_bl = BASELINE_DATA.query('F1score_Green == F1score_Green.max()')
+    max_f1score_red_bl = BASELINE_DATA.query('F1score_Red == F1score_Red.max()')
+    max_f1score_yellow_bl = BASELINE_DATA.query('F1score_Yellow == F1score_Yellow.max()')
+
+    # Differences from the baseline
+    diff_f1_blue = calculate_difference_percentage(max_f1score_blue['F1score_Blue'].iloc[0],
+                                                   max_f1score_blue_bl['F1score_Blue'].iloc[0])
+
+    diff_f1_green = calculate_difference_percentage(max_f1score_green['F1score_Green'].iloc[0],
+                                                    max_f1score_green_bl['F1score_Green'].iloc[0])
+
+    diff_f1_red = calculate_difference_percentage(max_f1score_red['F1score_Red'].iloc[0],
+                                                  max_f1score_red_bl['F1score_Red'].iloc[0])
+
+    diff_f1_yellow = calculate_difference_percentage(max_f1score_yellow['F1score_Yellow'].iloc[0],
+                                                     max_f1score_yellow_bl['F1score_Yellow'].iloc[0])
+
+    print("##########\n")
+    print("Best Values of F1Score:")
+    print(
+        f"Best F1Score (Blue): {max_f1score_blue['F1score_Blue'].to_string(index=False)} ({max_f1score_blue['Data_Included_Slug'].to_string(index=False)}_{max_f1score_blue['Annotation_Type'].to_string(index=False)})\n"
+        f"Compared to baseline: {max_f1score_blue_bl['F1score_Blue'].to_string(index=False)} ({max_f1score_blue_bl['Data_Included_Slug'].to_string(index=False)}_{max_f1score_blue_bl['Annotation_Type'].to_string(index=False)})\n"
+        f"Difference from Baseline: {diff_f1_blue:.2f}%")
+    print("..........")
+    print(
+        f"Best F1Score (Green): {max_f1score_green['F1score_Green'].to_string(index=False)} ({max_f1score_green['Data_Included_Slug'].to_string(index=False)}_{max_f1score_green['Annotation_Type'].to_string(index=False)})\n"
+        f"Compared to baseline: {max_f1score_green_bl['F1score_Green'].to_string(index=False)} ({max_f1score_green_bl['Data_Included_Slug'].to_string(index=False)}_{max_f1score_green_bl['Annotation_Type'].to_string(index=False)})\n"
+        f"Difference from Baseline: {diff_f1_green:.2f}%")
+    print("..........")
+    print(
+        f"Best F1Score (Red): {max_f1score_red['F1score_Red'].to_string(index=False)} ({max_f1score_red['Data_Included_Slug'].to_string(index=False)}_{max_f1score_red['Annotation_Type'].to_string(index=False)})\n"
+        f"Compared to baseline: {max_f1score_red_bl['F1score_Red'].to_string(index=False)} ({max_f1score_red_bl['Data_Included_Slug'].to_string(index=False)}_{max_f1score_red_bl['Annotation_Type'].to_string(index=False)})\n"
+        f"Difference from Baseline: {diff_f1_red:.2f}%")
+    print("..........")
+    print(
+        f"Best F1Score (Yellow): {max_f1score_yellow['F1score_Yellow'].to_string(index=False)} ({max_f1score_yellow['Data_Included_Slug'].to_string(index=False)}_{max_f1score_yellow['Annotation_Type'].to_string(index=False)})\n"
+        f"Compared to baseline: {max_f1score_yellow_bl['F1score_Yellow'].to_string(index=False)} ({max_f1score_yellow_bl['Data_Included_Slug'].to_string(index=False)}_{max_f1score_yellow_bl['Annotation_Type'].to_string(index=False)})\n"
+        f"Difference from Baseline: {diff_f1_yellow:.2f}%")
+
+
+def calculate_aggregated_f1_score():
+    pass
+
+
 # avg_f1_blue = data_results[["F1score_Blue"]].mean()
 # avg_f1_green = data_results[["F1score_Green"]].mean()
 # avg_f1_red = data_results[["F1score_Red"]].mean()
@@ -152,6 +197,7 @@ if __name__ == '__main__':
     # session = None
 
     # calculate_best_acc()
+    calculate_best_f1_score(data_results)
     # compare_against_baseline(scenario=['va_late_fusion', 'va_early_fusion'], annotation_type=['parents', 'specialist'])
     # compare_against_baseline(scenario=['va_late_fusion', 'va_early_fusion'], annotation_type=['parents'])
     # compare_against_baseline(scenario=['va_late_fusion', 'va_early_fusion'], annotation_type=['specialist'])
@@ -171,4 +217,4 @@ if __name__ == '__main__':
     #
     # compare_against_baseline(scenario=['a'], annotation_type=['parents', 'specialist'])
     # compare_against_baseline(scenario=['a'], annotation_type=['specialist'])
-    compare_against_baseline(scenario=['a'], annotation_type=['parents'])
+    # compare_against_baseline(scenario=['a'], annotation_type=['parents'])
