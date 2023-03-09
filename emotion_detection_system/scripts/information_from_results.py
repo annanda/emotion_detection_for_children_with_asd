@@ -180,14 +180,64 @@ def calculate_best_f1_score(data_to_apply):
         f"Difference from Baseline: {diff_f1_yellow:.2f}%")
 
 
-def calculate_aggregated_f1_score():
-    pass
+def calculate_aggregated_f1_score(data_to_apply):
+    avg_f1_blue = data_to_apply[["F1score_Blue"]].mean()
+    std_f1_blue = data_to_apply[["F1score_Blue"]].std()
 
+    avg_f1_green = data_to_apply[["F1score_Green"]].mean()
+    std_f1_green = data_to_apply[["F1score_Green"]].std()
 
-# avg_f1_blue = data_results[["F1score_Blue"]].mean()
-# avg_f1_green = data_results[["F1score_Green"]].mean()
-# avg_f1_red = data_results[["F1score_Red"]].mean()
-# avg_f1_yellow = data_results[["F1score_Yellow"]].mean()
+    avg_f1_red = data_to_apply[["F1score_Red"]].mean()
+    std_f1_red = data_to_apply[["F1score_Red"]].std()
+
+    avg_f1_yellow = data_to_apply[["F1score_Yellow"]].mean()
+    std_f1_yellow = data_to_apply[["F1score_Yellow"]].std()
+
+    avg_f1_blue_bl = BASELINE_DATA[["F1score_Blue"]].mean()
+    avg_f1_green_bl = BASELINE_DATA[["F1score_Green"]].mean()
+    avg_f1_red_bl = BASELINE_DATA[["F1score_Red"]].mean()
+    avg_f1_yellow_bl = BASELINE_DATA[["F1score_Yellow"]].mean()
+
+    diff_f1_blue = calculate_difference_percentage(avg_f1_blue['F1score_Blue'],
+                                                   avg_f1_blue_bl['F1score_Blue'])
+
+    diff_f1_green = calculate_difference_percentage(avg_f1_green['F1score_Green'],
+                                                    avg_f1_green_bl['F1score_Green'])
+
+    diff_f1_red = calculate_difference_percentage(avg_f1_red['F1score_Red'],
+                                                  avg_f1_red_bl['F1score_Red'])
+
+    diff_f1_yellow = calculate_difference_percentage(avg_f1_yellow['F1score_Yellow'],
+                                                     avg_f1_yellow_bl['F1score_Yellow'])
+
+    print("##########\n")
+    print(
+        f"Average F1score (blue) models: {avg_f1_blue.to_string(index=False)} "
+        f"(+-{std_f1_blue.to_string(index=False)})\n"
+        f"Baseline value: {avg_f1_blue_bl.to_string(index=False)}\n"
+        f"Difference from Baseline: {diff_f1_blue:.2f}%")
+
+    print("##########\n")
+    print(
+        f"Average F1score (green) models: {avg_f1_green.to_string(index=False)} "
+        f"(+-{std_f1_green.to_string(index=False)})\n"
+        f"Baseline value: {avg_f1_green_bl.to_string(index=False)}\n"
+        f"Difference from Baseline: {diff_f1_green:.2f}%")
+
+    print("##########\n")
+    print(
+        f"Average F1score (red) models: {avg_f1_red.to_string(index=False)} "
+        f"(+-{std_f1_red.to_string(index=False)})\n"
+        f"Baseline value: {avg_f1_red_bl.to_string(index=False)}\n"
+        f"Difference from Baseline: {diff_f1_red:.2f}%")
+
+    print("##########\n")
+    print(
+        f"Average F1score (yellow) models: {avg_f1_yellow.to_string(index=False)} "
+        f"(+-{std_f1_yellow.to_string(index=False)})\n"
+        f"Baseline value: {avg_f1_yellow_bl.to_string(index=False)}\n"
+        f"Difference from Baseline: {diff_f1_yellow:.2f}%")
+
 
 if __name__ == '__main__':
     # Example of configuration values
@@ -197,7 +247,8 @@ if __name__ == '__main__':
     # session = None
 
     # calculate_best_acc()
-    calculate_best_f1_score(data_results)
+    # calculate_best_f1_score(data_results)
+    calculate_aggregated_f1_score(data_results)
     # compare_against_baseline(scenario=['va_late_fusion', 'va_early_fusion'], annotation_type=['parents', 'specialist'])
     # compare_against_baseline(scenario=['va_late_fusion', 'va_early_fusion'], annotation_type=['parents'])
     # compare_against_baseline(scenario=['va_late_fusion', 'va_early_fusion'], annotation_type=['specialist'])
