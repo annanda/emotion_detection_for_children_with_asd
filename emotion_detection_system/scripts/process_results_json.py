@@ -6,8 +6,8 @@ import json
 
 from emotion_detection_system.conf import emotion_detection_system_folder
 
-results_path = os.path.join(emotion_detection_system_folder, 'json_results', '280223')
-batch_data_experiments = 'undersampling'
+results_path = os.path.join(emotion_detection_system_folder, 'json_results', '060323')
+batch_data_experiments = 'class_weight'
 csv_path = os.path.join(results_path, f'{batch_data_experiments}_results.csv')
 
 
