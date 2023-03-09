@@ -53,5 +53,5 @@
   },
   "fusion_type": "late_fusion",
   "balanced_dataset": true,
-  "balance_dataset_technique": "class_weight"
+  "balance_dataset_technique": "oversampling"
 }
