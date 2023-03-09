@@ -38,7 +38,10 @@ class EmotionDetectionConfiguration:
         self.person_independent_model = self.configuration['person_independent_model']
         self.balance_dataset = self.configuration['balanced_dataset']
         self.balance_dataset_technique = self.configuration['balance_dataset_technique']
-        self.oversampling_method = self.configuration.get('oversampling_method', 'random')
+        if self.balance_dataset_technique == 'oversampling':
+            self.oversampling_method = self.configuration.get('oversampling_method', 'random')
+        else:
+            self.oversampling_method = None
         self.classifier_model = self.configuration['classifier_model']
         self.fusion_type = self.configuration['fusion_type']
         self.modalities = self.configuration['modalities']
@@ -791,4 +794,5 @@ class EmotionDetectionClassifier:
                f'Fusion type: {self.configuration.fusion_type}\n' \
                f'Balanced Dataset: {self.configuration.balance_dataset}\n' \
                f'Balanced Dataset Technique: {self.configuration.balance_dataset_technique}\n' \
+               f'Oversampling Method: {self.configuration.oversampling_method}\n' \
                f'Data used for Training: {self.train_data_description}'

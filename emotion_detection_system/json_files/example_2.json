@@ -7,6 +7,7 @@
   "annotation_type": "parents",
   "person_independent_model": false,
   "modalities": [
+    "audio",
     "video"
   ],
   "modalities_config": {
@@ -50,7 +51,7 @@
     "video": "",
     "early_fusion_model": "SVM"
   },
-  "fusion_type": "early_fusion",
+  "fusion_type": "late_fusion",
   "balanced_dataset": true,
   "balance_dataset_technique": "oversampling",
   "oversampling_method": "adasyn",
