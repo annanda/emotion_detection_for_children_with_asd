@@ -3,12 +3,13 @@ import os
 
 from emotion_detection_system.conf import main_folder
 
-date_experiment = '280223'
-file_name = 'undersampling_results.csv'
+undersampling_data_results = pd.read_csv(
+    os.path.join(main_folder, 'emotion_detection_system', 'json_results', '280223',
+                 'undersampling_results.csv'))
 
-data_results = pd.read_csv(
-    os.path.join(main_folder, 'emotion_detection_system', 'json_results', f'{date_experiment}',
-                 file_name))
+class_weight_data_results = pd.read_csv(
+    os.path.join(main_folder, 'emotion_detection_system', 'json_results', '060323',
+                 'class_weight_results.csv'))
 
 BASELINE_DATA = pd.read_csv(
     os.path.join(main_folder, 'emotion_detection_system', 'json_results', 'baselines_results_added_columns.csv'))
@@ -28,7 +29,7 @@ def calculate_difference_percentage(value_current, value_baseline):
     return diff_perc
 
 
-def compare_against_baseline(scenario, annotation_type, participant=None, session=None, metric=None):
+def compare_against_baseline(data_to_apply, scenario, annotation_type, participant=None, session=None, metric=None):
     """
     Takes the current dataset and compare it with the baseline results
     :param scenario: list of scenarios (strings) with any of the possible scenarios
@@ -37,17 +38,18 @@ def compare_against_baseline(scenario, annotation_type, participant=None, sessio
     :return:  None (it prints a message)
     """
     if participant:
-        resulting_df = data_results.query(
+        resulting_df = data_to_apply.query(
             f"Participant in {participant} & Scenario in {scenario} & Annotation_Type in {annotation_type}")
         baseline_df = BASELINE_DATA.query(
             f"Participant in {participant} & Scenario in {scenario} & Annotation_Type in {annotation_type}")
     elif session:
-        resulting_df = data_results.query(
+        resulting_df = data_to_apply.query(
             f"Session in {session} & Scenario in {scenario} & Annotation_Type in {annotation_type}")
         baseline_df = BASELINE_DATA.query(
             f"Session in {session} & Scenario in {scenario} & Annotation_Type in {annotation_type}")
     else:
-        resulting_df = data_results.query(f"Scenario in {scenario} & Annotation_Type in {annotation_type}")
+        resulting_df = data_to_apply.query(
+            f"Scenario in {scenario} & Annotation_Type in {annotation_type}")
         baseline_df = BASELINE_DATA.query(f"Scenario in {scenario} & Annotation_Type in {annotation_type}")
 
     if not metric:
@@ -103,17 +105,18 @@ def compare_against_baseline(scenario, annotation_type, participant=None, sessio
             f"Compared to baseline: {max_b_acc_bl['Accuracy_Balanced'].to_string(index=False)} ({max_b_acc_bl['Data_Included_Slug'].to_string(index=False)}_{max_b_acc_bl['Annotation_Type'].to_string(index=False)})\n"
             f"Difference from Baseline: {diff_max_b_acc:.2f}%")
 
+        print('hi')
 
     else:
         print('Not Accuracy metric')
 
 
-def calculate_best_acc():
-    max_acc = data_results.query('Accuracy == Accuracy.max()')
+def calculate_best_acc(data_to_apply):
+    max_acc = data_to_apply.query('Accuracy == Accuracy.max()')
     max_acc_bl = BASELINE_DATA.query('Accuracy == Accuracy.max()')
     diff = calculate_difference_percentage(max_acc['Accuracy'].iloc[0], max_acc_bl['Accuracy'].iloc[0])
 
-    max_b_acc = data_results.query('Accuracy_Balanced == Accuracy_Balanced.max()')
+    max_b_acc = data_to_apply.query('Accuracy_Balanced == Accuracy_Balanced.max()')
     max_b_acc_bl = BASELINE_DATA.query('Accuracy_Balanced == Accuracy_Balanced.max()')
     diff_b_acc = calculate_difference_percentage(max_b_acc['Accuracy_Balanced'].iloc[0],
                                                  max_b_acc_bl['Accuracy_Balanced'].iloc[0])
@@ -246,10 +249,10 @@ if __name__ == '__main__':
     # participant = ['All data']
     # session = None
 
-    # calculate_best_acc()
-    # calculate_best_f1_score(data_results)
-    calculate_aggregated_f1_score(data_results)
-    # compare_against_baseline(scenario=['va_late_fusion', 'va_early_fusion'], annotation_type=['parents', 'specialist'])
+    # calculate_best_acc(undersampling_data_results)
+    # calculate_best_f1_score(undersampling_data_results)
+    # calculate_aggregated_f1_score(undersampling_data_results)
+    # compare_against_baseline(undersampling_data_results, scenario=['va_late_fusion', 'va_early_fusion'], annotation_type=['parents', 'specialist'])
     # compare_against_baseline(scenario=['va_late_fusion', 'va_early_fusion'], annotation_type=['parents'])
     # compare_against_baseline(scenario=['va_late_fusion', 'va_early_fusion'], annotation_type=['specialist'])
 
@@ -269,3 +272,4 @@ if __name__ == '__main__':
     # compare_against_baseline(scenario=['a'], annotation_type=['parents', 'specialist'])
     # compare_against_baseline(scenario=['a'], annotation_type=['specialist'])
     # compare_against_baseline(scenario=['a'], annotation_type=['parents'])
+    compare_against_baseline(class_weight_data_results, scenario=['a'], annotation_type=['specialist'])
