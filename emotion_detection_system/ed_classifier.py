@@ -1,14 +1,30 @@
 import os.path
 from functools import reduce
+from collections import Counter
 
 import pandas as pd
 import numpy as np
 from sklearn import svm
 from sklearn.metrics import confusion_matrix, accuracy_score, balanced_accuracy_score, recall_score, \
     precision_score, precision_recall_fscore_support, classification_report, multilabel_confusion_matrix
+from imblearn.over_sampling import RandomOverSampler, SMOTE, ADASYN
 
 from emotion_detection_system.conf import DATASET_FOLDER, ORDER_EMOTIONS, TOTAL_SESSIONS, PARTICIPANT_NUMBERS, \
     LLD_PARAMETER_GROUP
+
+CLASSES_NAME_TO_NUMBERS_DICT = {
+    'blue': 0,
+    'green': 1,
+    'red': 2,
+    'yellow': 3
+}
+
+CLASSES_NUMBERS_TO_NAMES_DICT = {
+    0: 'blue',
+    1: 'green',
+    2: 'red',
+    3: 'yellow'
+}
 
 
 class EmotionDetectionConfiguration:
@@ -22,6 +38,7 @@ class EmotionDetectionConfiguration:
         self.person_independent_model = self.configuration['person_independent_model']
         self.balance_dataset = self.configuration['balanced_dataset']
         self.balance_dataset_technique = self.configuration['balance_dataset_technique']
+        self.oversampling_method = self.configuration.get('oversampling_method', 'random')
         self.classifier_model = self.configuration['classifier_model']
         self.fusion_type = self.configuration['fusion_type']
         self.modalities = self.configuration['modalities']
@@ -32,10 +49,7 @@ class EmotionDetectionConfiguration:
         self.audio_features_types = {}
         self.models = {}
         self.is_multimodal = True if len(self.modalities) > 1 else False
-        if self.configuration.get('annotation_type', False):
-            self.annotation_type = self.configuration['annotation_type']
-        else:
-            self.annotation_type = 'parents'
+        self.annotation_type = self.configuration.get('annotation_type', 'parents')
 
         # To define the path for person-independent model or individuals model
         self.person_independent_folder = 'cross-individuals' if self.configuration[
@@ -273,7 +287,8 @@ class PrepareDataset:
 
         # Balance Dataset (x_train) - undersampling
         # case of single modalities
-        if self.configuration.balance_dataset and self.configuration.balance_dataset_technique == 'undersampling':
+        if self.configuration.balance_dataset and self.configuration.balance_dataset_technique in ['undersampling',
+                                                                                                   'oversampling']:
             if self.configuration.is_multimodal:
                 if modality == 'early_fusion' or self.configuration.fusion_type == 'late_fusion':
                     df = self.apply_balance(df)
@@ -317,8 +332,31 @@ class PrepareDataset:
             resulting_df = group.apply(lambda x: x.sample(group.size().min()).reset_index())
             resulting_df = resulting_df.set_index(['index'])
             balanced_df = resulting_df
-            # print(resulting_df)
+        if self.configuration.balance_dataset_technique == 'oversampling':
+            if self.configuration.oversampling_method == 'random':
+                ros = RandomOverSampler(random_state=0)
+                X_resampled, y_resampled = ros.fit_resample(df_to_balance, df_to_balance[['emotion_zone']])
+                balanced_df = X_resampled
+            elif self.configuration.oversampling_method == 'adasyn':
+                df_to_balance = self.represent_class_by_numbers(df_to_balance)
+                df_to_balance_no_string = df_to_balance.drop(['frametime'], axis=1)
+                X_resampled, y_resampled = ADASYN().fit_resample(df_to_balance_no_string,
+                                                                 df_to_balance_no_string[['emotion_zone']])
+                balanced_df = X_resampled
+                balanced_df = self.represent_class_by_names(balanced_df)
+                # Create an empty column to maintain the shape of the dataframe
+                balanced_df.insert(3, 'frametime', np.nan)
+                # print(y_resampled.value_counts())
+
         return balanced_df
+
+    def represent_class_by_numbers(self, dataframe):
+        dataframe['emotion_zone'] = dataframe.apply(self.get_class_number, axis=1)
+        return dataframe
+
+    def represent_class_by_names(self, dataframe):
+        dataframe['emotion_zone'] = dataframe.apply(self.get_class_name, axis=1)
+        return dataframe
 
     def read_dataset_split_parts(self, folder_to_read):
         df = self._read_dataset_from_folders(folder_to_read, 'train')
@@ -326,6 +364,14 @@ class PrepareDataset:
         df_test = self._read_dataset_from_folders(folder_to_read, 'test')
 
         return df, df_dev, df_test
+
+    def get_class_number(self, df_row):
+        emotion = df_row['emotion_zone']
+        return CLASSES_NAME_TO_NUMBERS_DICT[emotion]
+
+    def get_class_name(self, df_row):
+        emotion_numerber = df_row['emotion_zone']
+        return CLASSES_NUMBERS_TO_NAMES_DICT[emotion_numerber]
 
     def _prepare_dataset_video_modality(self):
         folder_modality = os.path.join(self.dataset_path,
