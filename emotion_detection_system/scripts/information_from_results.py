@@ -11,6 +11,10 @@ class_weight_data_results = pd.read_csv(
     os.path.join(main_folder, 'emotion_detection_system', 'json_results', '060323',
                  'class_weight_results.csv'))
 
+oversampling_data_results = pd.read_csv(
+    os.path.join(main_folder, 'emotion_detection_system', 'json_results', '090323',
+                 'oversampling_results.csv'))
+
 BASELINE_DATA = pd.read_csv(
     os.path.join(main_folder, 'emotion_detection_system', 'json_results', 'baselines_results_added_columns.csv'))
 
@@ -105,7 +109,6 @@ def compare_against_baseline(data_to_apply, scenario, annotation_type, participa
             f"Compared to baseline: {max_b_acc_bl['Accuracy_Balanced'].to_string(index=False)} ({max_b_acc_bl['Data_Included_Slug'].to_string(index=False)}_{max_b_acc_bl['Annotation_Type'].to_string(index=False)})\n"
             f"Difference from Baseline: {diff_max_b_acc:.2f}%")
 
-        print('hi')
 
     else:
         print('Not Accuracy metric')
