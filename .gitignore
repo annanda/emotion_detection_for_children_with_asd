@@ -9,3 +9,5 @@ dataset_legacy/*
 /check_file.py
 /emotion_detection_system.egg-info/
 /emotion_detection_system/json_results/
+/emotion_detection_system/scripts/.ipynb_checkpoints/
+/emotion_detection_system/testing.py
