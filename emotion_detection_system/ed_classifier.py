@@ -8,6 +8,14 @@ from sklearn import svm
 from sklearn.metrics import confusion_matrix, accuracy_score, balanced_accuracy_score, recall_score, \
     precision_score, precision_recall_fscore_support, classification_report, multilabel_confusion_matrix
 from imblearn.over_sampling import RandomOverSampler, SMOTE, ADASYN
+from sklearn.feature_selection import RFECV
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.pipeline import Pipeline
+from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import Perceptron
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import GradientBoostingClassifier
 
 from emotion_detection_system.conf import DATASET_FOLDER, ORDER_EMOTIONS, TOTAL_SESSIONS, PARTICIPANT_NUMBERS, \
     LLD_PARAMETER_GROUP
@@ -53,6 +61,8 @@ class EmotionDetectionConfiguration:
         self.models = {}
         self.is_multimodal = True if len(self.modalities) > 1 else False
         self.annotation_type = self.configuration.get('annotation_type', 'parents')
+        self.rfe = self.configuration.get('recursive_feature_elimination', False)
+        self.rfe_algorithm = self.configuration.get('RFE_algorithm', 'random_forest')
 
         # To define the path for person-independent model or individuals model
         self.person_independent_folder = 'cross-individuals' if self.configuration[
@@ -506,14 +516,6 @@ class EmotionDetectionClassifier:
         """
         To train the model and get predictions for x_test
         """
-        # print(f'Running experiment with configuration:')
-        # print('. . . . . . . . . . . . . . .  . . .')
-        # print(self.__str__())
-        # print('. . . . . . . . . . . . . . . . . .')
-        # print('.\n.\n.')
-
-        # print('Starting to train the model')
-        # print('.\n.\n.')
 
         if not self.configuration.is_multimodal or self.configuration.fusion_type == 'early_fusion':
             indexes_test = list(self.dataset.y_test.index)
@@ -552,15 +554,23 @@ class EmotionDetectionClassifier:
 
         x = x.fillna(0)
 
-        self.classifier_model.fit(x, y)
+        if self.configuration.rfe:
+            # self.rfe = RFECV(estimator=DecisionTreeClassifier(), scoring='accuracy', cv=5, step=4)
+            self.rfe = RFECV(estimator=RandomForestClassifier())
+            model = self.classifier_model
+            self.pipeline = Pipeline(steps=[('s', self.rfe), ('m', model)])
+            self.pipeline.fit(x, y)
+            emotions = self.classifier_model.classes_
+            for idx, emotion in enumerate(emotions):
+                self._emotion_class[idx] = emotion
+            prediction_probability = self.pipeline.predict_proba(x_test)
+        else:
+            self.classifier_model.fit(x, y)
+            emotions = self.classifier_model.classes_
+            for idx, emotion in enumerate(emotions):
+                self._emotion_class[idx] = emotion
+            prediction_probability = self.classifier_model.predict_proba(x_test)
 
-        emotions = self.classifier_model.classes_
-        for idx, emotion in enumerate(emotions):
-            self._emotion_class[idx] = emotion
-        prediction_probability = self.classifier_model.predict_proba(x_test)
-
-        # print('Predictions for test set completed')
-        # print('.\n.\n.')
         return prediction_probability
 
     def normalise_data(self, dataframe, norm_method='min-max'):
@@ -764,6 +774,8 @@ class EmotionDetectionClassifier:
         # print(f'Number of examples per class in test: \n{self.y_test.value_counts()}')
         if self.dataset.x is not None:
             print(f'Total number of features: {self.dataset.x.shape[1]}')
+            if self.configuration.rfe:
+                print(f'Total number of features - after RFE: {self.rfe.n_features_}')
             if self.configuration.is_multimodal:
                 print(f'Total number of video features: {self.dataset.x_video.shape[1] - 4}')
                 print(f'Total number of audio features: {self.dataset.x_audio.shape[1] - 4}')
@@ -795,4 +807,6 @@ class EmotionDetectionClassifier:
                f'Balanced Dataset: {self.configuration.balance_dataset}\n' \
                f'Balanced Dataset Technique: {self.configuration.balance_dataset_technique}\n' \
                f'Oversampling Method: {self.configuration.oversampling_method}\n' \
-               f'Data used for Training: {self.train_data_description}'
+               f'Data used for Training: {self.train_data_description}\n' \
+               f'RFE: {self.configuration.rfe}\n' \
+               f'RFE algorithm: {self.configuration.rfe_algorithm}'

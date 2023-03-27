@@ -56,7 +56,7 @@ if __name__ == '__main__':
     # If using local run
     # json_file = 'example_annotation_specialist.json'
     # json_file = 'example_balance_dataset.json'
-    # json_file = 'example_2.json'
+    # json_file = 'example_rfe.json'
     # json_file = 'example.json'
 
     script_entry(json_file)
