@@ -11,11 +11,9 @@ from imblearn.over_sampling import RandomOverSampler, SMOTE, ADASYN
 from sklearn.feature_selection import RFECV
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.pipeline import Pipeline
-from sklearn.linear_model import LogisticRegression
-from sklearn.linear_model import Perceptron
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.linear_model import LogisticRegression, Perceptron
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.preprocessing import RobustScaler
 
 from emotion_detection_system.conf import DATASET_FOLDER, ORDER_EMOTIONS, TOTAL_SESSIONS, PARTICIPANT_NUMBERS, \
     LLD_PARAMETER_GROUP
@@ -527,7 +525,7 @@ class EmotionDetectionClassifier:
             self._train_model_produce_predictions_late_fusion()
         self._produce_final_predictions()
 
-    def _train_model_produce_predictions_basic(self, dataset=None):
+    def set_x_y_to_train(self, dataset):
         if dataset:
             x = self.data_sets_dic[dataset][0]
             x = x.iloc[:, 4:]
@@ -549,44 +547,32 @@ class EmotionDetectionClassifier:
             x = x_added
             y = pd.concat([y, y_dev])
 
-        x = self.normalise_data(x)
-        x_test = self.normalise_data(x_test)
+        return x, y, x_dev, y_dev, x_test
+
+    def _train_model_produce_predictions_basic(self, dataset=None):
+
+        x, y, x_dev, y_dev, x_test = self.set_x_y_to_train(dataset)
 
         x = x.fillna(0)
 
+        model = self.classifier_model
+        normaliser = RobustScaler()
+
         if self.configuration.rfe:
-            # self.rfe = RFECV(estimator=DecisionTreeClassifier(), scoring='accuracy', cv=5, step=4)
             self.rfe = RFECV(estimator=RandomForestClassifier())
-            model = self.classifier_model
-            self.pipeline = Pipeline(steps=[('s', self.rfe), ('m', model)])
-            self.pipeline.fit(x, y)
-            emotions = self.classifier_model.classes_
-            for idx, emotion in enumerate(emotions):
-                self._emotion_class[idx] = emotion
-            prediction_probability = self.pipeline.predict_proba(x_test)
+            steps = [('normalise', normaliser), ('reduce_features', self.rfe), ('m', model)]
         else:
-            self.classifier_model.fit(x, y)
-            emotions = self.classifier_model.classes_
-            for idx, emotion in enumerate(emotions):
-                self._emotion_class[idx] = emotion
-            prediction_probability = self.classifier_model.predict_proba(x_test)
+            steps = [('normalise', normaliser), ('m', model)]
+
+        self.pipeline = Pipeline(steps=steps)
+        self.pipeline.fit(x, y)
+
+        emotions = self.pipeline.classes_
+        for idx, emotion in enumerate(emotions):
+            self._emotion_class[idx] = emotion
+        prediction_probability = self.pipeline.predict_proba(x_test)
 
         return prediction_probability
-
-    def normalise_data(self, dataframe, norm_method='min-max'):
-        df_scaled = dataframe.copy()
-
-        # Numbers vary from 0 to 1
-        if norm_method == 'min-max':
-            for column in df_scaled.columns:
-                df_scaled[column] = (df_scaled[column] - df_scaled[column].min()) / (
-                        df_scaled[column].max() - df_scaled[column].min())
-        # Numbers vary from -1 to 1
-        elif norm_method == 'abs-scaling':
-            for column in df_scaled.columns:
-                df_scaled[column] = df_scaled[column] / df_scaled[column].abs().max()
-
-        return df_scaled
 
     def _train_model_produce_predictions_late_fusion(self):
         # In the end I need to fill self._prediction_probabilities, so I can run _produce_final_predictions
