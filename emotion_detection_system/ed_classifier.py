@@ -13,7 +13,8 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression, Perceptron
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-from sklearn.preprocessing import RobustScaler
+from sklearn.preprocessing import RobustScaler, MinMaxScaler
+from sklearn.model_selection import GridSearchCV
 
 from emotion_detection_system.conf import DATASET_FOLDER, ORDER_EMOTIONS, TOTAL_SESSIONS, PARTICIPANT_NUMBERS, \
     LLD_PARAMETER_GROUP
@@ -61,6 +62,7 @@ class EmotionDetectionConfiguration:
         self.annotation_type = self.configuration.get('annotation_type', 'parents')
         self.rfe = self.configuration.get('recursive_feature_elimination', False)
         self.rfe_algorithm = self.configuration.get('RFE_algorithm', 'random_forest')
+        self.grid_search = self.configuration.get('grid_search', False)
 
         # To define the path for person-independent model or individuals model
         self.person_independent_folder = 'cross-individuals' if self.configuration[
@@ -505,6 +507,7 @@ class EmotionDetectionClassifier:
         self.confusion_matrix = None
         self.classifier_model = None
         self._current_model = None
+        self.emotion_from_classifier = None
         self.train_data_description = "x + x_validation sets" if self.configuration.x_and_x_validation_for_training else 'X set'
 
         self._set_classifier_model()
@@ -519,7 +522,7 @@ class EmotionDetectionClassifier:
             indexes_test = list(self.dataset.y_test.index)
             prediction_probability = self._train_model_produce_predictions_basic()
             self._prediction_probabilities = pd.DataFrame(prediction_probability,
-                                                          columns=self.classifier_model.classes_,
+                                                          columns=self.emotion_from_classifier,
                                                           index=indexes_test)
         else:
             self._train_model_produce_predictions_late_fusion()
@@ -560,17 +563,34 @@ class EmotionDetectionClassifier:
 
         if self.configuration.rfe:
             self.rfe = RFECV(estimator=RandomForestClassifier())
-            steps = [('normalise', normaliser), ('reduce_features', self.rfe), ('m', model)]
+            steps = [('normalise', normaliser), ('reduce_features', self.rfe), ('svc', model)]
         else:
-            steps = [('normalise', normaliser), ('m', model)]
+            steps = [('normalise', normaliser), ('svc', model)]
 
         self.pipeline = Pipeline(steps=steps)
-        self.pipeline.fit(x, y)
+        self.grid = None
 
-        emotions = self.pipeline.classes_
+        if self.configuration.grid_search:
+            # parameteres = {'svc__C': ([0.001, 0.1, 10, 100, 10e5]), 'svc__gamma': [0.1, 0.01]}
+            parameteres = {'normalise': [MinMaxScaler(), RobustScaler()]}
+            self.grid = GridSearchCV(self.pipeline, param_grid=parameteres, cv=2)
+            executer = self.grid
+        else:
+            executer = self.pipeline
+
+        executer.fit(x, y)
+        self.emotion_from_classifier = executer.classes_
+
+        if self.grid:
+            print("##################")
+            print("Best Search Grid Parameters:\n")
+            print(self.grid.best_params_)
+
+        emotions = self.emotion_from_classifier
         for idx, emotion in enumerate(emotions):
             self._emotion_class[idx] = emotion
-        prediction_probability = self.pipeline.predict_proba(x_test)
+
+        prediction_probability = executer.predict_proba(x_test)
 
         return prediction_probability
 
@@ -586,7 +606,7 @@ class EmotionDetectionClassifier:
         indexes_test = list(self.dataset.y_test_video.index)
         fusion_by_mean = np.mean(np.array([video_predictions, audio_predictions]), axis=0)
         self._prediction_probabilities = pd.DataFrame(fusion_by_mean,
-                                                      columns=self.classifier_model.classes_,
+                                                      columns=self.emotion_from_classifier,
                                                       index=indexes_test)
 
     def _produce_final_predictions(self):
@@ -615,7 +635,7 @@ class EmotionDetectionClassifier:
         """
         predictions = []
         for _, row in self._prediction_probabilities.iterrows():
-            prob = np.array(row[self.classifier_model.classes_])
+            prob = np.array(row[self.emotion_from_classifier])
             label = self._get_predicted_label(prob)
             predictions.append(label)
         return predictions
@@ -670,11 +690,11 @@ class EmotionDetectionClassifier:
         self.precision, self.recall, self.f1score, self.support = precision_recall_fscore_support(self.dataset.y_test,
                                                                                                   self._prediction_labels,
                                                                                                   average=None,
-                                                                                                  labels=self.classifier_model.classes_)
+                                                                                                  labels=self.emotion_from_classifier)
 
     def _generate_classification_report(self):
         self.classification_report = classification_report(self.dataset.y_test, self._prediction_labels,
-                                                           labels=self.classifier_model.classes_, digits=4)
+                                                           labels=self.emotion_from_classifier, digits=4)
 
     def _calculate_confusion_matrix(self):
         """
@@ -682,11 +702,11 @@ class EmotionDetectionClassifier:
         """
         self.confusion_matrix = confusion_matrix(self.dataset.y_test,
                                                  self._prediction_labels,
-                                                 labels=self.classifier_model.classes_)
+                                                 labels=self.emotion_from_classifier)
 
     def _calculate_multilabel_confusion_matrix(self):
         self.multilabel_confusion_matrix = multilabel_confusion_matrix(self.dataset.y_test, self._prediction_labels,
-                                                                       labels=self.classifier_model.classes_)
+                                                                       labels=self.emotion_from_classifier)
 
     def format_json_results(self):
         header_csv = ['Data_Included_Slug', 'Scenario', 'Annotation_Type', 'Accuracy', 'Accuracy_Balanced',
@@ -710,7 +730,7 @@ class EmotionDetectionClassifier:
         self._fill_json_results()
 
     def _fill_json_results(self):
-        classes = self.classifier_model.classes_
+        classes = self.emotion_from_classifier
         for x, emotion in enumerate(classes):
             precision_key = f'Precision_{emotion}'
             recall_key = f'Recall_{emotion}'
@@ -750,7 +770,7 @@ class EmotionDetectionClassifier:
         print(f'Accuracy: {self.accuracy:.4f}')
         print(f'Balanced Accuracy: {self.balanced_accuracy:.4f}')
         print(f'Classification report: {self.classification_report}')
-        print(f'Confusion matrix: labels={self.classifier_model.classes_}')
+        print(f'Confusion matrix: labels={self.emotion_from_classifier}')
         print(self.confusion_matrix)
         print(f'\nMultilabel Confusion matrix:')
         print(self.multilabel_confusion_matrix)

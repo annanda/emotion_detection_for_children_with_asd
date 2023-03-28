@@ -14,16 +14,16 @@
       "features_type": {
         "2d_eye_landmark": false,
         "3d_eye_landmark": false,
-        "AU": true,
+        "AU": false,
         "face_2d_landmarks": false,
         "face_3d_landmarks": false,
         "gaze": true,
-        "head_pose": true
+        "head_pose": false
       }
     },
     "audio": {
       "feature_group": {
-        "frequency": true,
+        "frequency": false,
         "energy_amplitude": true,
         "spectral_balance": true,
         "temporal_features": true
@@ -51,8 +51,10 @@
     "early_fusion_model": "SVM"
   },
   "fusion_type": "late_fusion",
-  "balanced_dataset": true,
+  "x_and_x_validation_for_training": false,
+  "balanced_dataset": false,
   "balance_dataset_technique": "oversampling",
-  "recursive_feature_elimination": true,
-  "RFE_algorithm": "random_forest"
+  "recursive_feature_elimination": false,
+  "RFE_algorithm": "random_forest",
+  "grid_search": true
 }
