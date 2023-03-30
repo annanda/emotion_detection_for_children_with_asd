@@ -13,7 +13,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression, Perceptron
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-from sklearn.preprocessing import RobustScaler, MinMaxScaler
+from sklearn.preprocessing import RobustScaler, MinMaxScaler, StandardScaler, Normalizer
 from sklearn.model_selection import GridSearchCV
 
 from emotion_detection_system.conf import DATASET_FOLDER, ORDER_EMOTIONS, TOTAL_SESSIONS, PARTICIPANT_NUMBERS, \
@@ -60,6 +60,7 @@ class EmotionDetectionConfiguration:
         self.models = {}
         self.is_multimodal = True if len(self.modalities) > 1 else False
         self.annotation_type = self.configuration.get('annotation_type', 'parents')
+        self.normaliser = RobustScaler()
         self.rfe = self.configuration.get('recursive_feature_elimination', False)
         self.rfe_algorithm = self.configuration.get('RFE_algorithm', 'random_forest')
         self.grid_search = self.configuration.get('grid_search', False)
@@ -475,15 +476,6 @@ class EmotionDetectionClassifier:
 
         # Setting up dataset
         self.dataset = PrepareDataset(configuration)
-        # self.y = self.dataset.y
-        # self.y_dev = self.dataset.y_dev
-        # self.y_test = self.dataset.y_test
-        # if self.y_test:
-        #     self.indexes_test = list(self.y_test.index)
-        #
-        # self.x = self.dataset.x
-        # self.x_dev = self.dataset.x_dev
-        # self.x_test = self.dataset.x_test
 
         self.data_sets_dic = {
             'x': [self.dataset.x, self.dataset.x_dev, self.dataset.x_test],
@@ -553,46 +545,67 @@ class EmotionDetectionClassifier:
         return x, y, x_dev, y_dev, x_test
 
     def _train_model_produce_predictions_basic(self, dataset=None):
-
+        """
+        :param dataset: Can be x_video, x_audio or None (default)
+        :return: The prediction probabilities for the current model + dataset
+        """
         x, y, x_dev, y_dev, x_test = self.set_x_y_to_train(dataset)
 
         x = x.fillna(0)
 
-        model = self.classifier_model
-        normaliser = RobustScaler()
-
-        if self.configuration.rfe:
-            self.rfe = RFECV(estimator=RandomForestClassifier())
-            steps = [('normalise', normaliser), ('reduce_features', self.rfe), ('svc', model)]
-        else:
-            steps = [('normalise', normaliser), ('svc', model)]
-
-        self.pipeline = Pipeline(steps=steps)
-        self.grid = None
+        # executor can be a pipeline or a search grid
+        pipeline = self.create_pipeline()
 
         if self.configuration.grid_search:
-            # parameteres = {'svc__C': ([0.001, 0.1, 10, 100, 10e5]), 'svc__gamma': [0.1, 0.01]}
-            parameteres = {'normalise': [MinMaxScaler(), RobustScaler()]}
-            self.grid = GridSearchCV(self.pipeline, param_grid=parameteres, cv=2)
-            executer = self.grid
+            executor = self.create_grid_search(pipeline)
         else:
-            executer = self.pipeline
+            executor = pipeline
 
-        executer.fit(x, y)
-        self.emotion_from_classifier = executer.classes_
+        executor.fit(x, y)
+        self.emotion_from_classifier = executor.classes_
 
-        if self.grid:
+        if self.configuration.grid_search:
             print("##################")
             print("Best Search Grid Parameters:\n")
-            print(self.grid.best_params_)
+            print(executor.best_params_)
 
         emotions = self.emotion_from_classifier
         for idx, emotion in enumerate(emotions):
             self._emotion_class[idx] = emotion
 
-        prediction_probability = executer.predict_proba(x_test)
+        prediction_probability = executor.predict_proba(x_test)
+
+        if dataset:
+            if dataset == 'x_video':
+                self.video_executor = executor
+            elif dataset == 'x_audio':
+                self.audio_executor = executor
+        else:
+            self.executor = executor
 
         return prediction_probability
+
+    def create_pipeline(self):
+        # basic pipeline (with just normaliser)
+        steps = [('normalise', self.configuration.normaliser), ('model', self.classifier_model)]
+
+        # Pipeline with Recursive Features Elimination
+        if self.configuration.rfe:
+            self.configuration.rfe = RFECV(estimator=RandomForestClassifier())
+            steps = [('normalise', self.configuration.normaliser), ('reduce_features', self.configuration.rfe),
+                     ('model', self.classifier_model)]
+
+        pipeline = Pipeline(steps=steps)
+        return pipeline
+
+    def create_grid_search(self, pipeline):
+        # parameteres = {'svc__C': ([0.001, 0.1, 10, 100, 10e5]), 'svc__gamma': [0.1, 0.01]}
+        # norm_parameters = [MinMaxScaler(), RobustScaler(), Normalizer(), StandardScaler()]
+        parameteres = {
+            'reduce_features__estimator': [RandomForestClassifier(), Perceptron(), DecisionTreeClassifier()]}
+
+        grid = GridSearchCV(pipeline, param_grid=parameteres, cv=5)
+        return grid
 
     def _train_model_produce_predictions_late_fusion(self):
         # In the end I need to fill self._prediction_probabilities, so I can run _produce_final_predictions
@@ -781,7 +794,7 @@ class EmotionDetectionClassifier:
         if self.dataset.x is not None:
             print(f'Total number of features: {self.dataset.x.shape[1]}')
             if self.configuration.rfe:
-                print(f'Total number of features - after RFE: {self.rfe.n_features_}')
+                print(f'Total number of features - after RFE:')
             if self.configuration.is_multimodal:
                 print(f'Total number of video features: {self.dataset.x_video.shape[1] - 4}')
                 print(f'Total number of audio features: {self.dataset.x_audio.shape[1] - 4}')
