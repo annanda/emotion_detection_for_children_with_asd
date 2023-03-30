@@ -43,14 +43,17 @@ class EmotionDetectionConfiguration:
         self.sessions_to_consider = []
         self.dataset_split_type = self.configuration['dataset_split_type']
         self.person_independent_model = self.configuration['person_independent_model']
+
         self.balance_dataset = self.configuration['balanced_dataset']
-        self.balance_dataset_technique = self.configuration['balance_dataset_technique']
+        if self.balance_dataset:
+            self.balance_dataset_technique = self.configuration['balance_dataset_technique']
+        else:
+            self.balance_dataset_technique = None
         if self.balance_dataset_technique == 'oversampling':
             self.oversampling_method = self.configuration.get('oversampling_method', 'random')
         else:
             self.oversampling_method = None
         self.classifier_model = self.configuration['classifier_model']
-        self.fusion_type = self.configuration['fusion_type']
         self.modalities = self.configuration['modalities']
         self.modalities_config = self.configuration['modalities_config']
         self.video_features_types = []
@@ -59,10 +62,17 @@ class EmotionDetectionConfiguration:
         self.audio_features_types = {}
         self.models = {}
         self.is_multimodal = True if len(self.modalities) > 1 else False
+        if self.is_multimodal:
+            self.fusion_type = self.configuration['fusion_type']
+        else:
+            self.fusion_type = None
         self.annotation_type = self.configuration.get('annotation_type', 'parents')
         self.normaliser = RobustScaler()
         self.rfe = self.configuration.get('recursive_feature_elimination', False)
-        self.rfe_algorithm = self.configuration.get('RFE_algorithm', 'random_forest')
+        if self.rfe:
+            self.rfe_algorithm = self.configuration.get('RFE_algorithm', 'random_forest')
+        else:
+            self.rfe_algorithm = None
         self.grid_search = self.configuration.get('grid_search', False)
 
         # To define the path for person-independent model or individuals model
@@ -564,11 +574,6 @@ class EmotionDetectionClassifier:
         executor.fit(x, y)
         self.emotion_from_classifier = executor.classes_
 
-        if self.configuration.grid_search:
-            print("##################")
-            print("Best Search Grid Parameters:\n")
-            print(executor.best_params_)
-
         emotions = self.emotion_from_classifier
         for idx, emotion in enumerate(emotions):
             self._emotion_class[idx] = emotion
@@ -591,8 +596,9 @@ class EmotionDetectionClassifier:
 
         # Pipeline with Recursive Features Elimination
         if self.configuration.rfe:
-            self.configuration.rfe = RFECV(estimator=RandomForestClassifier())
-            steps = [('normalise', self.configuration.normaliser), ('reduce_features', self.configuration.rfe),
+            if self.configuration.rfe_algorithm == 'random_forest':
+                rfe_algorithm = RFECV(estimator=RandomForestClassifier())
+            steps = [('normalise', self.configuration.normaliser), ('rfe', rfe_algorithm),
                      ('model', self.classifier_model)]
 
         pipeline = Pipeline(steps=steps)
@@ -602,7 +608,7 @@ class EmotionDetectionClassifier:
         # parameteres = {'svc__C': ([0.001, 0.1, 10, 100, 10e5]), 'svc__gamma': [0.1, 0.01]}
         # norm_parameters = [MinMaxScaler(), RobustScaler(), Normalizer(), StandardScaler()]
         parameteres = {
-            'reduce_features__estimator': [RandomForestClassifier(), Perceptron(), DecisionTreeClassifier()]}
+            'rfe__estimator': [RandomForestClassifier(), Perceptron(), DecisionTreeClassifier()]}
 
         grid = GridSearchCV(pipeline, param_grid=parameteres, cv=5)
         return grid
@@ -769,6 +775,36 @@ class EmotionDetectionClassifier:
         else:
             print(dict(self.dataset.y_video.value_counts()))
 
+    def print_train_features_number(self):
+        if self.dataset.x is not None:
+            print(f'Total number of features: {self.dataset.x.shape[1]}')
+            if self.configuration.is_multimodal:
+                print(f'Total number of video features: {self.dataset.x_video.shape[1] - 4}')
+                print(f'Total number of audio features: {self.dataset.x_audio.shape[1] - 4}')
+            if self.configuration.rfe:
+                print(f'Total number of features - after RFE: {self.executor.n_features_in_}')
+        else:
+            print(f'Total number of features: {self.dataset.x_video.shape[1] - 4 + self.dataset.x_audio.shape[1] - 4}')
+            print(f'Total number of video features: {self.dataset.x_video.shape[1] - 4}')
+            print(f'Total number of audio features: {self.dataset.x_audio.shape[1] - 4}')
+            if self.configuration.rfe:
+                print(f'Total number of features (video) - after RFE: {self.video_executor.n_features_in_}')
+                print(f'Total number of features (audio) - after RFE: {self.audio_executor.n_features_in_}')
+
+    def print_search_grid_elements(self):
+        if self.configuration.grid_search:
+            print("##################")
+            print("Best Search Grid Parameters:\n")
+            if self.dataset.x:
+                # uni modal or early fusion cases
+                print(self.executor.best_params_)
+            else:
+                # late fusion case
+                print("Best Search Grid Parameters (video):\n")
+                print(self.video_executor.best_params_)
+                print("Best Search Grid Parameters (audio):\n")
+                print(self.audio_executor.best_params_)
+
     def show_results(self):
         """
         To show the results after running an experiment
@@ -791,17 +827,8 @@ class EmotionDetectionClassifier:
         print(f'Total test examples: {np.sum(self.confusion_matrix)}')
         self.print_train_classes_number()
         # print(f'Number of examples per class in test: \n{self.y_test.value_counts()}')
-        if self.dataset.x is not None:
-            print(f'Total number of features: {self.dataset.x.shape[1]}')
-            if self.configuration.rfe:
-                print(f'Total number of features - after RFE:')
-            if self.configuration.is_multimodal:
-                print(f'Total number of video features: {self.dataset.x_video.shape[1] - 4}')
-                print(f'Total number of audio features: {self.dataset.x_audio.shape[1] - 4}')
-        else:
-            print(f'Total number of features: {self.dataset.x_video.shape[1] - 4 + self.dataset.x_audio.shape[1] - 4}')
-            print(f'Total number of video features: {self.dataset.x_video.shape[1] - 4}')
-            print(f'Total number of audio features: {self.dataset.x_audio.shape[1] - 4}')
+        self.print_train_features_number()
+        self.print_search_grid_elements()
         print(f'\n')
         print(f'######################################')
 
@@ -823,9 +850,9 @@ class EmotionDetectionClassifier:
                f'Features type audio: {self.configuration.audio_features_types}\n' \
                f'Models per modality: {self.configuration.models}\n' \
                f'Fusion type: {self.configuration.fusion_type}\n' \
+               f'Data used for Training: {self.train_data_description}\n' \
                f'Balanced Dataset: {self.configuration.balance_dataset}\n' \
                f'Balanced Dataset Technique: {self.configuration.balance_dataset_technique}\n' \
                f'Oversampling Method: {self.configuration.oversampling_method}\n' \
-               f'Data used for Training: {self.train_data_description}\n' \
                f'RFE: {self.configuration.rfe}\n' \
                f'RFE algorithm: {self.configuration.rfe_algorithm}'
