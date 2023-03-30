@@ -17,7 +17,7 @@ from sklearn.preprocessing import RobustScaler, MinMaxScaler, StandardScaler, No
 from sklearn.model_selection import GridSearchCV
 
 from emotion_detection_system.conf import DATASET_FOLDER, ORDER_EMOTIONS, TOTAL_SESSIONS, PARTICIPANT_NUMBERS, \
-    LLD_PARAMETER_GROUP
+    LLD_PARAMETER_GROUP, PARAMETER_GRID_SEARCH
 
 CLASSES_NAME_TO_NUMBERS_DICT = {
     'blue': 0,
@@ -605,12 +605,7 @@ class EmotionDetectionClassifier:
         return pipeline
 
     def create_grid_search(self, pipeline):
-        # parameteres = {'svc__C': ([0.001, 0.1, 10, 100, 10e5]), 'svc__gamma': [0.1, 0.01]}
-        # norm_parameters = [MinMaxScaler(), RobustScaler(), Normalizer(), StandardScaler()]
-        parameteres = {
-            'rfe__estimator': [RandomForestClassifier(), Perceptron(), DecisionTreeClassifier()]}
-
-        grid = GridSearchCV(pipeline, param_grid=parameteres, cv=5)
+        grid = GridSearchCV(pipeline, param_grid=PARAMETER_GRID_SEARCH, cv=5)
         return grid
 
     def _train_model_produce_predictions_late_fusion(self):
@@ -794,9 +789,9 @@ class EmotionDetectionClassifier:
     def print_search_grid_elements(self):
         if self.configuration.grid_search:
             print("##################")
-            print("Best Search Grid Parameters:\n")
             if self.dataset.x:
                 # uni modal or early fusion cases
+                print("Best Search Grid Parameters:\n")
                 print(self.executor.best_params_)
             else:
                 # late fusion case

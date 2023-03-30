@@ -1,6 +1,10 @@
 import pathlib
 import os.path
 
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.linear_model import LogisticRegression, Perceptron
+
 from decouple import config
 
 ORDER_EMOTIONS = ['blue', 'green', 'red', 'yellow']
@@ -36,3 +40,9 @@ LLD_PARAMETER_GROUP = {
 }
 
 AUDIO_FEATURES_LEVELS = ['llds', 'functionals', 'llds_deltas']
+
+# parameteres = {'svc__C': ([0.001, 0.1, 10, 100, 10e5]), 'svc__gamma': [0.1, 0.01]}
+# norm_parameters = [MinMaxScaler(), RobustScaler(), Normalizer(), StandardScaler()]
+
+PARAMETER_GRID_SEARCH = {
+    'rfe__estimator': [RandomForestClassifier(), Perceptron(), DecisionTreeClassifier()]}
