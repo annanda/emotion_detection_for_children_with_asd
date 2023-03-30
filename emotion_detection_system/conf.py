@@ -46,3 +46,6 @@ AUDIO_FEATURES_LEVELS = ['llds', 'functionals', 'llds_deltas']
 
 PARAMETER_GRID_SEARCH = {
     'rfe__estimator': [RandomForestClassifier(), Perceptron(), DecisionTreeClassifier()]}
+
+TRAINED_MODELS_FOLDER = config('TRAINED_MODELS_FOLDER',
+                               default=os.path.join(emotion_detection_system_folder, 'trained_models'))

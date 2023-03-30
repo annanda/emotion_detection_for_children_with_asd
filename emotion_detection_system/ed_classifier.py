@@ -1,6 +1,7 @@
 import os.path
 from functools import reduce
 from collections import Counter
+import pickle
 
 import pandas as pd
 import numpy as np
@@ -74,6 +75,7 @@ class EmotionDetectionConfiguration:
         else:
             self.rfe_algorithm = None
         self.grid_search = self.configuration.get('grid_search', False)
+        self.load_trained_model = self.configuration.get('load_trained_model', False)
 
         # To define the path for person-independent model or individuals model
         self.person_independent_folder = 'cross-individuals' if self.configuration[
@@ -571,7 +573,15 @@ class EmotionDetectionClassifier:
         else:
             executor = pipeline
 
-        executor.fit(x, y)
+        if self.configuration.load_trained_model:
+            executor = pickle.load(open(
+                '/Users/annanda/PycharmProjects/emotion_detection_system/emotion_detection_system/trained_models/300323/parents/example_rfe.pickle',
+                'rb')
+            )
+            print('using saved model!')
+        else:
+            executor.fit(x, y)
+
         self.emotion_from_classifier = executor.classes_
 
         emotions = self.emotion_from_classifier
@@ -763,7 +773,7 @@ class EmotionDetectionClassifier:
             #     return len(self.dataset.x_video) + len(self.dataset.x_dev_video)
             return len(self.dataset.y_video)
 
-    def print_train_classes_number(self):
+    def print_train_example_number_per_class(self):
         print('Train examples of each class:')
         if self.dataset.x is not None:
             print(dict(self.dataset.y.value_counts()))
@@ -789,7 +799,7 @@ class EmotionDetectionClassifier:
     def print_search_grid_elements(self):
         if self.configuration.grid_search:
             print("##################")
-            if self.dataset.x:
+            if self.dataset.x is not None:
                 # uni modal or early fusion cases
                 print("Best Search Grid Parameters:\n")
                 print(self.executor.best_params_)
@@ -820,7 +830,7 @@ class EmotionDetectionClassifier:
         print(self.multilabel_confusion_matrix)
         print(f'Total train examples: {self._get_train_examples_number_to_print()}')
         print(f'Total test examples: {np.sum(self.confusion_matrix)}')
-        self.print_train_classes_number()
+        self.print_train_example_number_per_class()
         # print(f'Number of examples per class in test: \n{self.y_test.value_counts()}')
         self.print_train_features_number()
         self.print_search_grid_elements()
@@ -846,6 +856,7 @@ class EmotionDetectionClassifier:
                f'Models per modality: {self.configuration.models}\n' \
                f'Fusion type: {self.configuration.fusion_type}\n' \
                f'Data used for Training: {self.train_data_description}\n' \
+               f'Loaded Trained model: {self.configuration.load_trained_model}\n' \
                f'Balanced Dataset: {self.configuration.balance_dataset}\n' \
                f'Balanced Dataset Technique: {self.configuration.balance_dataset_technique}\n' \
                f'Oversampling Method: {self.configuration.oversampling_method}\n' \

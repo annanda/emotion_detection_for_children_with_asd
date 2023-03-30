@@ -2,16 +2,18 @@ import json
 import os.path
 import pathlib
 from datetime import datetime
+import pickle
 
 import sys
 
 from emotion_detection_system.ed_classifier import EmotionDetectionClassifier
 from emotion_detection_system.scripts.process_results import get_scenario
-from conf import emotion_detection_system_folder
+from conf import emotion_detection_system_folder, TRAINED_MODELS_FOLDER
 
 
 def script_entry(json_file):
     path_json = os.path.join(emotion_detection_system_folder, 'json_files', json_file)
+    file_name = pathlib.Path(path_json).name
 
     f = open(path_json)
     configure_data = json.load(f)
@@ -22,6 +24,28 @@ def script_entry(json_file):
 
     # If want to generate structured json files with the results
     generate_json_results(classifier, path_json)
+
+    save_model(classifier, file_name)
+
+
+def save_model(classifier, file_name):
+    date = f'{datetime.now():%d%m%y}'
+    file_name = file_name.split('.json')[0]
+    path_to_save = os.path.join(TRAINED_MODELS_FOLDER, date, classifier.configuration.annotation_type)
+
+    if not os.path.exists(path_to_save):
+        os.makedirs(path_to_save)
+
+    if classifier.dataset.x is not None:
+        output_path = os.path.join(path_to_save, file_name + '.pickle')
+        # uni modal or early fusion cases
+        pickle.dump(classifier.executor, open(output_path, "wb"))
+    else:
+        # late fusion case
+        output_path_video = os.path.join(path_to_save, file_name + '_video' + '.pickle')
+        output_path_audio = os.path.join(path_to_save, file_name + '_audio' + '.pickle')
+        pickle.dump(classifier.video_executor, open(output_path_video, "wb"))
+        pickle.dump(classifier.audio_executor, open(output_path_audio, "wb"))
 
 
 def generate_json_results(classifier, path_json):
@@ -52,11 +76,11 @@ def save_json_result_file(dict_json, file_name):
 
 if __name__ == '__main__':
     # if using shell script
-    json_file = sys.argv[1]
+    # json_file = sys.argv[1]
     # If using local run
     # json_file = 'example_annotation_specialist.json'
     # json_file = 'example_balance_dataset.json'
-    # json_file = 'example_rfe.json'
+    json_file = 'example_rfe.json'
     # json_file = 'example.json'
 
     script_entry(json_file)
