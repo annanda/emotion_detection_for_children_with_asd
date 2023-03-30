@@ -11,3 +11,4 @@ dataset_legacy/*
 /emotion_detection_system/json_results/
 /emotion_detection_system/scripts/.ipynb_checkpoints/
 /emotion_detection_system/testing.py
+/emotion_detection_system/trained_models/

@@ -575,7 +575,7 @@ class EmotionDetectionClassifier:
 
         if self.configuration.load_trained_model:
             executor = pickle.load(open(
-                '/Users/annanda/PycharmProjects/emotion_detection_system/emotion_detection_system/trained_models/300323/parents/example_rfe.pickle',
+                '/Users/annanda/PycharmProjects/emotion_detection_system/emotion_detection_system/trained_models/300323/specialist/example_rfe.pickle',
                 'rb')
             )
             print('using saved model!')
