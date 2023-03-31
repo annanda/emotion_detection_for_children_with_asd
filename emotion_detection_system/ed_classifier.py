@@ -617,7 +617,7 @@ class EmotionDetectionClassifier:
         # Pipeline with Recursive Features Elimination
         if self.configuration.rfe:
             if self.configuration.rfe_algorithm == 'random_forest':
-                rfe_algorithm = RFECV(estimator=RandomForestClassifier())
+                rfe_algorithm = RFECV(estimator=RandomForestClassifier(), scoring='accuracy', cv=3)
             steps = [('normalise', self.configuration.normaliser[modality]), ('rfe', rfe_algorithm),
                      ('model', self.classifier_model[modality])]
 
