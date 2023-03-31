@@ -51,7 +51,7 @@
     "video": "",
     "early_fusion_model": "SVM"
   },
-  "fusion_type": "late_fusion",
+  "fusion_type": "early_fusion",
   "balanced_dataset": true,
   "balance_dataset_technique": "oversampling"
 }

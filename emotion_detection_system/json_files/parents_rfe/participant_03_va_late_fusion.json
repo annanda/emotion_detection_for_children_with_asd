@@ -1,6 +1,6 @@
 {
   "run_to_all_participants": false,
-  "participant_number": 1,
+  "participant_number": 3,
   "session_number": 1,
   "all_participant_data": true,
   "dataset_split_type": "non_sequential",

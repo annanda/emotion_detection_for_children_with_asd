@@ -1,14 +1,13 @@
 {
   "run_to_all_participants": false,
-  "participant_number": 1,
+  "participant_number": 4,
   "session_number": 1,
   "all_participant_data": true,
   "dataset_split_type": "non_sequential",
-  "annotation_type": "parents",
+  "annotation_type": "specialist",
   "person_independent_model": false,
   "modalities": [
-    "video",
-    "audio"
+    "video"
   ],
   "modalities_config": {
     "video": {
@@ -51,7 +50,7 @@
     "video": "",
     "early_fusion_model": "SVM"
   },
-  "fusion_type": "late_fusion",
+  "fusion_type": "early_fusion",
   "balanced_dataset": true,
   "balance_dataset_technique": "oversampling"
 }
