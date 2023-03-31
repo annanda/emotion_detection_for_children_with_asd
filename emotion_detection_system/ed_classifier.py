@@ -68,7 +68,7 @@ class EmotionDetectionConfiguration:
         else:
             self.fusion_type = None
         self.annotation_type = self.configuration.get('annotation_type', 'parents')
-        self.normaliser = RobustScaler()
+        self.normaliser = {'default': RobustScaler(), 'audio': RobustScaler(), 'video': RobustScaler()}
         self.rfe = self.configuration.get('recursive_feature_elimination', False)
         if self.rfe:
             self.rfe_algorithm = self.configuration.get('RFE_algorithm', 'random_forest')
@@ -509,7 +509,7 @@ class EmotionDetectionClassifier:
         # self.recall, self.precision, self.f1score, self.support = None, None, None, None
         self.classification_report = None
         self.confusion_matrix = None
-        self.classifier_model = None
+        self.classifier_model = {}
         self._current_model = None
         self.emotion_from_classifier = None
         self.train_data_description = "x + x_validation sets" if self.configuration.x_and_x_validation_for_training else 'X set'
@@ -556,6 +556,14 @@ class EmotionDetectionClassifier:
 
         return x, y, x_dev, y_dev, x_test
 
+    def get_modality(self, dataset):
+        if not dataset:
+            return "default"
+        elif dataset == 'x_video':
+            return "video"
+        elif dataset == 'x_audio':
+            return "audio"
+
     def _train_model_produce_predictions_basic(self, dataset=None):
         """
         :param dataset: Can be x_video, x_audio or None (default)
@@ -565,8 +573,10 @@ class EmotionDetectionClassifier:
 
         x = x.fillna(0)
 
+        modality = self.get_modality(dataset)
+
         # executor can be a pipeline or a search grid
-        pipeline = self.create_pipeline()
+        pipeline = self.create_pipeline(modality)
 
         if self.configuration.grid_search:
             executor = self.create_grid_search(pipeline)
@@ -600,16 +610,16 @@ class EmotionDetectionClassifier:
 
         return prediction_probability
 
-    def create_pipeline(self):
+    def create_pipeline(self, modality):
         # basic pipeline (with just normaliser)
-        steps = [('normalise', self.configuration.normaliser), ('model', self.classifier_model)]
+        steps = [('normalise', self.configuration.normaliser[modality]), ('model', self.classifier_model[modality])]
 
         # Pipeline with Recursive Features Elimination
         if self.configuration.rfe:
             if self.configuration.rfe_algorithm == 'random_forest':
                 rfe_algorithm = RFECV(estimator=RandomForestClassifier())
-            steps = [('normalise', self.configuration.normaliser), ('rfe', rfe_algorithm),
-                     ('model', self.classifier_model)]
+            steps = [('normalise', self.configuration.normaliser[modality]), ('rfe', rfe_algorithm),
+                     ('model', self.classifier_model[modality])]
 
         pipeline = Pipeline(steps=steps)
         return pipeline
@@ -650,7 +660,9 @@ class EmotionDetectionClassifier:
         if self.configuration.balance_dataset and self.configuration.balance_dataset_technique == 'class_weight':
             self.classifier_model = svm.SVC(probability=True, class_weight="balanced")
         else:
-            self.classifier_model = svm.SVC(probability=True)
+            self.classifier_model['default'] = svm.SVC(probability=True)
+            self.classifier_model['audio'] = svm.SVC(probability=True)
+            self.classifier_model['video'] = svm.SVC(probability=True)
         self._current_model = 'SVM'
 
     def _get_final_label_prediction_array(self):

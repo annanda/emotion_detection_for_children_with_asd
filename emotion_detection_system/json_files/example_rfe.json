@@ -1,13 +1,14 @@
 {
   "run_to_all_participants": false,
-  "participant_number": 3,
+  "participant_number": 1,
   "session_number": 1,
-  "all_participant_data": false,
+  "all_participant_data": true,
   "dataset_split_type": "non_sequential",
+  "annotation_type": "parents",
   "person_independent_model": false,
-  "annotation_type": "specialist",
   "modalities": [
-    "video"
+    "video",
+    "audio"
   ],
   "modalities_config": {
     "video": {
@@ -50,11 +51,10 @@
     "video": "",
     "early_fusion_model": "SVM"
   },
-  "fusion_type": "early_fusion",
-  "x_and_x_validation_for_training": false,
+  "fusion_type": "late_fusion",
   "balanced_dataset": false,
   "balance_dataset_technique": "oversampling",
-  "recursive_feature_elimination": false,
+  "recursive_feature_elimination": true,
   "RFE_algorithm": "random_forest",
   "grid_search": false,
   "load_trained_model": false
