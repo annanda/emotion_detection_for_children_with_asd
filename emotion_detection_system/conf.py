@@ -1,5 +1,6 @@
 import pathlib
 import os.path
+from datetime import datetime
 
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.tree import DecisionTreeClassifier
@@ -7,6 +8,7 @@ from sklearn.linear_model import LogisticRegression, Perceptron
 
 from decouple import config
 
+DATA_EXPERIMENT_SLUG = config('DATA_EXPERIMENT_SLUG', default=f'{datetime.now():%d%m%y}')
 ORDER_EMOTIONS = ['blue', 'green', 'red', 'yellow']
 PARTICIPANT_NUMBERS = [1, 2, 3, 4]
 TOTAL_SESSIONS = ['session_01_01',

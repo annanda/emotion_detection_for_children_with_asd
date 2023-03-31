@@ -8,7 +8,12 @@ import sys
 
 from emotion_detection_system.ed_classifier import EmotionDetectionClassifier
 from emotion_detection_system.scripts.process_results import get_scenario
-from conf import emotion_detection_system_folder, TRAINED_MODELS_FOLDER
+from conf import emotion_detection_system_folder, TRAINED_MODELS_FOLDER, DATA_EXPERIMENT_SLUG
+
+folder_to_save = DATA_EXPERIMENT_SLUG.split('_')[:-2]
+date_experiment = DATA_EXPERIMENT_SLUG.split('_')[-1]
+folder_to_save.append(date_experiment)
+folder_to_save_name = '_'.join(folder_to_save)
 
 
 def script_entry(json_file):
@@ -29,9 +34,8 @@ def script_entry(json_file):
 
 
 def save_model(classifier, file_name):
-    date = f'{datetime.now():%d%m%y}'
     file_name = file_name.split('.json')[0]
-    path_to_save = os.path.join(TRAINED_MODELS_FOLDER, date, classifier.configuration.annotation_type)
+    path_to_save = os.path.join(TRAINED_MODELS_FOLDER, folder_to_save_name, classifier.configuration.annotation_type)
 
     if not os.path.exists(path_to_save):
         os.makedirs(path_to_save)
@@ -61,8 +65,7 @@ def generate_json_results(classifier, path_json):
 
 
 def save_json_result_file(dict_json, file_name):
-    date = f'{datetime.now():%d%m%y}'
-    path_json_results = os.path.join(emotion_detection_system_folder, 'json_results', date,
+    path_json_results = os.path.join(emotion_detection_system_folder, 'json_results', folder_to_save_name,
                                      dict_json['Annotation_Type'])
 
     if not os.path.exists(path_json_results):
@@ -76,11 +79,11 @@ def save_json_result_file(dict_json, file_name):
 
 if __name__ == '__main__':
     # if using shell script
-    # json_file = sys.argv[1]
+    json_file = sys.argv[1]
     # If using local run
     # json_file = 'example_annotation_specialist.json'
     # json_file = 'example_balance_dataset.json'
-    json_file = 'example_rfe.json'
+    # json_file = 'example_rfe.json'
     # json_file = 'example.json'
 
     script_entry(json_file)
