@@ -13,3 +13,6 @@ dataset_legacy/*
 /emotion_detection_system/testing.py
 /emotion_detection_system/trained_models/
 /.env
+/emotion_detection_system/processing_results/notebooks/.ipynb_checkpoints/Class Weight Results-checkpoint.ipynb
+/emotion_detection_system/processing_results/notebooks/.ipynb_checkpoints/Oversampling Results-checkpoint.ipynb
+/emotion_detection_system/processing_results/notebooks/.ipynb_checkpoints/Undersampling Results-checkpoint.ipynb
