@@ -4,7 +4,7 @@
   "session_number": 2,
   "all_participant_data": false,
   "dataset_split_type": "non_sequential",
-  "annotation_type": "specialist",
+  "annotation_type": "parents",
   "person_independent_model": false,
   "modalities": [
     "video",
@@ -52,6 +52,10 @@
     "early_fusion_model": "SVM"
   },
   "fusion_type": "late_fusion",
-  "balanced_dataset": true,
-  "balance_dataset_technique": "oversampling"
+  "balanced_dataset": false,
+  "balance_dataset_technique": "oversampling",
+  "recursive_feature_elimination": true,
+  "RFE_algorithm": "random_forest",
+  "grid_search": false,
+  "load_trained_model": false
 }
