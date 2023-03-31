@@ -7,7 +7,7 @@ import pickle
 import sys
 
 from emotion_detection_system.ed_classifier import EmotionDetectionClassifier
-from emotion_detection_system.scripts.process_results import get_scenario
+from emotion_detection_system.processing_results.process_results import get_scenario
 from conf import emotion_detection_system_folder, TRAINED_MODELS_FOLDER, DATA_EXPERIMENT_SLUG
 
 folder_to_save = DATA_EXPERIMENT_SLUG.split('_')[:-2]
@@ -79,11 +79,11 @@ def save_json_result_file(dict_json, file_name):
 
 if __name__ == '__main__':
     # if using shell script
-    json_file = sys.argv[1]
+    # json_file = sys.argv[1]
     # If using local run
     # json_file = 'example_annotation_specialist.json'
     # json_file = 'example_balance_dataset.json'
-    # json_file = 'example_rfe.json'
+    json_file = 'example_rfe.json'
     # json_file = 'example.json'
 
     script_entry(json_file)
