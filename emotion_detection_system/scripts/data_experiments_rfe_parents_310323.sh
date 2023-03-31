@@ -8,13 +8,13 @@ INPUT_FOLDER="parents_rfe"
 OUTPUT_FOLDER="results/${SLUG}/parents"
 mkdir -p ${OUTPUT_FOLDER}
 
-# Normalised data using linear normalisation (values vary from 0 to 1)
+# Normalised data using RobustScaler()
 # Features included:
 # audio: all
-# video: AU, gaze, head_movement, 2d_eye_landmark, face_2d_landmarks
+# video: AU, gaze, head_movement
 # SVM model & Late Fusion
 # Annotation: Parents
-# Dataset balanced: over-sampling:random
+# Recursive Feature Elimination: RandomForest()
 
 
 #MULTIMODAL

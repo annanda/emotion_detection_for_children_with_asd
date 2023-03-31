@@ -8,14 +8,13 @@ INPUT_FOLDER="specialist_rfe"
 OUTPUT_FOLDER="results/${SLUG}/specialist"
 mkdir -p ${OUTPUT_FOLDER}
 
-
-# Normalised data using linear normalisation (values vary from 0 to 1)
+# Normalised data using RobustScaler()
 # Features included:
 # audio: all
 # video: AU, gaze, head_movement
 # SVM model & Late Fusion
 # Annotation: Specialist
-# Dataset balanced: over-sampling: random
+# Recursive Feature Elimination: RandomForest()
 
 
 #MULTIMODAL
