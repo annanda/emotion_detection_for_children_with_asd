@@ -616,7 +616,7 @@ class EmotionDetectionClassifier:
 
         # Pipeline with Recursive Features Elimination
         if self.configuration.rfe:
-            if self.configuration.rfe_algorithm == 'svm_linear':
+            if self.configuration.rfe_algorithm in ['svm_linear', 'random_forest']:
                 # rfe_algorithm = RFECV(estimator=RandomForestClassifier(), scoring='accuracy', cv=3, verbose=1)
                 rfe_algorithm = RFECV(estimator=svm.SVC(kernel='linear'), scoring='accuracy', cv=3, verbose=0)
                 # rfe_algorithm = RFE(estimator=svm.SVC(kernel='linear'), verbose=1, n_features_to_select=0.6)
