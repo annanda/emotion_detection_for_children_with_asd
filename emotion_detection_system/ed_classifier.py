@@ -9,7 +9,7 @@ from sklearn import svm
 from sklearn.metrics import confusion_matrix, accuracy_score, balanced_accuracy_score, recall_score, \
     precision_score, precision_recall_fscore_support, classification_report, multilabel_confusion_matrix
 from imblearn.over_sampling import RandomOverSampler, SMOTE, ADASYN
-from sklearn.feature_selection import RFECV
+from sklearn.feature_selection import RFECV, RFE
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression, Perceptron
@@ -68,7 +68,7 @@ class EmotionDetectionConfiguration:
         else:
             self.fusion_type = None
         self.annotation_type = self.configuration.get('annotation_type', 'parents')
-        self.normaliser = {'default': RobustScaler(), 'audio': RobustScaler(), 'video': RobustScaler()}
+        self.normaliser = {'default': MinMaxScaler(), 'audio': MinMaxScaler(), 'video': MinMaxScaler()}
         self.rfe = self.configuration.get('recursive_feature_elimination', False)
         if self.rfe:
             self.rfe_algorithm = self.configuration.get('RFE_algorithm', 'random_forest')
@@ -396,8 +396,8 @@ class PrepareDataset:
         return CLASSES_NAME_TO_NUMBERS_DICT[emotion]
 
     def get_class_name(self, df_row):
-        emotion_numerber = df_row['emotion_zone']
-        return CLASSES_NUMBERS_TO_NAMES_DICT[emotion_numerber]
+        emotion_number = df_row['emotion_zone']
+        return CLASSES_NUMBERS_TO_NAMES_DICT[emotion_number]
 
     def _prepare_dataset_video_modality(self):
         folder_modality = os.path.join(self.dataset_path,
@@ -566,8 +566,8 @@ class EmotionDetectionClassifier:
 
     def _train_model_produce_predictions_basic(self, dataset=None):
         """
-        :param dataset: Can be x_video, x_audio or None (default)
-        :return: The prediction probabilities for the current model + dataset
+        :param: dataset: Can be x_video, x_audio or None (default).
+        :return: The prediction probabilities for the current model + dataset.
         """
         x, y, x_dev, y_dev, x_test = self.set_x_y_to_train(dataset)
 
@@ -616,8 +616,10 @@ class EmotionDetectionClassifier:
 
         # Pipeline with Recursive Features Elimination
         if self.configuration.rfe:
-            if self.configuration.rfe_algorithm == 'random_forest':
-                rfe_algorithm = RFECV(estimator=RandomForestClassifier(), scoring='accuracy', cv=3)
+            if self.configuration.rfe_algorithm == 'svm_linear':
+                # rfe_algorithm = RFECV(estimator=RandomForestClassifier(), scoring='accuracy', cv=3, verbose=1)
+                rfe_algorithm = RFECV(estimator=svm.SVC(kernel='linear'), scoring='accuracy', cv=3, verbose=0)
+                # rfe_algorithm = RFE(estimator=svm.SVC(kernel='linear'), verbose=1, n_features_to_select=0.6)
             steps = [('normalise', self.configuration.normaliser[modality]), ('rfe', rfe_algorithm),
                      ('model', self.classifier_model[modality])]
 
@@ -688,7 +690,7 @@ class EmotionDetectionClassifier:
         self.accuracy = accuracy_score(self.dataset.y_test, self._prediction_labels)
 
     def _calculate_balanced_accuracy(self):
-        """"
+        """
         average of recall obtained on each class, only count the classes the model predicted.
         """
         self.balanced_accuracy = balanced_accuracy_score(self.dataset.y_test, self._prediction_labels)
@@ -745,10 +747,10 @@ class EmotionDetectionClassifier:
                                                                        labels=self.emotion_from_classifier)
 
     def format_json_results(self):
-        header_csv = ['Data_Included_Slug', 'Scenario', 'Annotation_Type', 'Accuracy', 'Accuracy_Balanced',
-                      'Precision_Blue', 'Precision_Green', 'Precision_Red', 'Precision_Yellow', 'Recall_Blue',
-                      'Recall_Green', 'Recall_Red', 'Recall_Yellow', 'F1score_Blue',
-                      'F1score_Green', 'F1score_Red', 'F1score_Yellow']
+        # header_csv = ['Data_Included_Slug', 'Scenario', 'Annotation_Type', 'Accuracy', 'Accuracy_Balanced',
+        #               'Precision_Blue', 'Precision_Green', 'Precision_Red', 'Precision_Yellow', 'Recall_Blue',
+        #               'Recall_Green', 'Recall_Red', 'Recall_Yellow', 'F1score_Blue',
+        #               'F1score_Green', 'F1score_Red', 'F1score_Yellow']
 
         self.json_results_information = {
             'Data_Included_Slug': '',

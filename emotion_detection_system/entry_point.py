@@ -30,7 +30,7 @@ def script_entry(json_file):
     # If want to generate structured json files with the results
     generate_json_results(classifier, path_json)
 
-    save_model(classifier, file_name)
+    # save_model(classifier, file_name)
 
 
 def save_model(classifier, file_name):
@@ -84,7 +84,7 @@ if __name__ == '__main__':
     # json_file = 'example_annotation_specialist.json'
     # json_file = 'example_balance_dataset.json'
     # json_file = 'example_rfe.json'
-    # json_file = 'example.json'
+    # json_file = 'specialist_rfe/session_01_01_v.json'
 
     script_entry(json_file)
 
