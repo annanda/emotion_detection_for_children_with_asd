@@ -1,20 +1,20 @@
 #!/bin/bash
 # to organise results by date and folders
 
-DATE="31-03-23"
+DATE="03-04-23"
 SLUG="data_experiments_rfe_310323"
 INPUT_FOLDER="parents_rfe"
 
 OUTPUT_FOLDER="results/${SLUG}/parents"
 mkdir -p ${OUTPUT_FOLDER}
 
-# Normalised data using RobustScaler()
+# Normalised data using MinMAxScaler()
 # Features included:
 # audio: all
 # video: AU, gaze, head_movement
 # SVM model & Late Fusion
 # Annotation: Parents
-# Recursive Feature Elimination: RandomForest()
+# Recursive Feature Elimination: SVM()
 
 
 #MULTIMODAL
