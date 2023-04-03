@@ -71,7 +71,7 @@ class EmotionDetectionConfiguration:
         self.normaliser = {'default': MinMaxScaler(), 'audio': MinMaxScaler(), 'video': MinMaxScaler()}
         self.rfe = self.configuration.get('recursive_feature_elimination', False)
         if self.rfe:
-            self.rfe_algorithm = self.configuration.get('RFE_algorithm', 'random_forest')
+            self.rfe_algorithm = self.configuration.get('RFE_algorithm', 'svm_linear')
         else:
             self.rfe_algorithm = None
         self.grid_search = self.configuration.get('grid_search', False)
