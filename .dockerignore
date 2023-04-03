@@ -3,3 +3,6 @@ dataset/*
 dataset_legacy/*
 jupyter_notebooks/*
 data_statistics/*
+/emotion_detection_system/trained_models/*
+/emotion_detection_system/json_results/*
+/emotion_detection_system/results/*
