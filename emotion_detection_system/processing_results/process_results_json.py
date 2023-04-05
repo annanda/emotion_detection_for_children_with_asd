@@ -7,7 +7,7 @@ import json
 from emotion_detection_system.conf import emotion_detection_system_folder
 
 results_path = os.path.join(emotion_detection_system_folder, 'json_results', 'data_experiments_rfe_030423')
-batch_data_experiments = 'rfe'
+batch_data_experiments = 'rfe_030423'
 csv_path = os.path.join(results_path, f'{batch_data_experiments}_results.csv')
 
 

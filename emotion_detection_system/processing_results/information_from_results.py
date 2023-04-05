@@ -19,8 +19,12 @@ rfe_data_results = pd.read_csv(
     os.path.join(main_folder, 'emotion_detection_system', 'json_results', 'data_experiments_rfe_030423',
                  'rfe_results.csv'))
 
+# BASELINE_DATA = pd.read_csv(
+#     os.path.join(main_folder, 'emotion_detection_system', 'json_results', 'baselines_results_added_columns.csv'))
+
 BASELINE_DATA = pd.read_csv(
-    os.path.join(main_folder, 'emotion_detection_system', 'json_results', 'baselines_results_added_columns.csv'))
+    os.path.join(main_folder, 'emotion_detection_system', 'json_results', 'data_experiments_baseline_040423',
+                 'baseline_040423_results.csv'))
 
 
 def calculate_difference_percentage(value_current, value_baseline):
