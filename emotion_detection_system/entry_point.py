@@ -35,6 +35,7 @@ def script_entry(json_file):
 
 def save_model(classifier, file_name):
     file_name = file_name.split('.json')[0]
+    file_name = f"{DATA_EXPERIMENT_SLUG}_{file_name}"
     path_to_save = os.path.join(TRAINED_MODELS_FOLDER, folder_to_save_name, classifier.configuration.annotation_type)
 
     if not os.path.exists(path_to_save):
@@ -71,6 +72,8 @@ def save_json_result_file(dict_json, file_name):
     if not os.path.exists(path_json_results):
         os.makedirs(path_json_results)
 
+    file_name = f"{DATA_EXPERIMENT_SLUG}_{file_name}"
+
     output_json_path = os.path.join(path_json_results, file_name)
 
     with open(output_json_path, 'w') as json_to_write:
@@ -84,7 +87,6 @@ if __name__ == '__main__':
     # json_file = 'example_annotation_specialist.json'
     # json_file = 'example_balance_dataset.json'
     # json_file = 'example_rfe.json'
-    # json_file = 'parents_rfe/session_01_01_v.json'
     # json_file = 'specialist_oversampling_random/session_02_01_v.json'
 
     script_entry(json_file)
