@@ -21,12 +21,12 @@ mkdir -p ${OUTPUT_FOLDER}
 #MULTIMODAL
 # Late Fusion
 # All participants separately - Video&Audio: features (above) - Late fusion
-echo "Starting new Data Experiment Configuration: participant_01_va_late_fusion.json"
-python entry_point.py ${INPUT_FOLDER}/participant_01_va_late_fusion.json> ${OUTPUT_FOLDER}/${SLUG}_${ANNOTATION}_${SLUG}_${ANNOTATION}_participant_01_va_late_fusion_${DATE}.txt
-echo "Starting new Data Experiment Configuration: participant_02_va_late_fusion.json"
-python entry_point.py ${INPUT_FOLDER}/participant_02_va_late_fusion.json> ${OUTPUT_FOLDER}/${SLUG}_${ANNOTATION}_participant_02_va_late_fusion_${DATE}.txt
-echo "Starting new Data Experiment Configuration: participant_03_va_late_fusion"
-python entry_point.py ${INPUT_FOLDER}/participant_03_va_late_fusion.json> ${OUTPUT_FOLDER}/${SLUG}_${ANNOTATION}_participant_03_va_late_fusion_${DATE}.txt
+#echo "Starting new Data Experiment Configuration: participant_01_va_late_fusion.json"
+#python entry_point.py ${INPUT_FOLDER}/participant_01_va_late_fusion.json> ${OUTPUT_FOLDER}/${SLUG}_${ANNOTATION}_participant_01_va_late_fusion_${DATE}.txt
+#echo "Starting new Data Experiment Configuration: participant_02_va_late_fusion.json"
+#python entry_point.py ${INPUT_FOLDER}/participant_02_va_late_fusion.json> ${OUTPUT_FOLDER}/${SLUG}_${ANNOTATION}_participant_02_va_late_fusion_${DATE}.txt
+#echo "Starting new Data Experiment Configuration: participant_03_va_late_fusion"
+#python entry_point.py ${INPUT_FOLDER}/participant_03_va_late_fusion.json> ${OUTPUT_FOLDER}/${SLUG}_${ANNOTATION}_participant_03_va_late_fusion_${DATE}.txt
 echo "Starting new Data Experiment Configuration: participant_04_va_late_fusion"
 python entry_point.py ${INPUT_FOLDER}/participant_04_va_late_fusion.json> ${OUTPUT_FOLDER}/${SLUG}_${ANNOTATION}_participant_04_va_late_fusion_${DATE}.txt
 #
@@ -183,4 +183,3 @@ python entry_point.py ${INPUT_FOLDER}/all_data_va_late_fusion.json> ${OUTPUT_FOL
 ## All participants together - Video&Audio:  features (above) - Early fusion
 echo "Starting new Data Experiment Configuration: all_data_va_early_fusion"
 python entry_point.py ${INPUT_FOLDER}/all_data_va_early_fusion.json> ${OUTPUT_FOLDER}/${SLUG}_${ANNOTATION}_all_data_va_early_fusion_${DATE}.txt
-#

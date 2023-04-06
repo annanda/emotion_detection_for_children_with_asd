@@ -11,9 +11,9 @@ from emotion_detection_system.conf import main_folder
 #     os.path.join(main_folder, 'emotion_detection_system', 'json_results', '060323',
 #                  'class_weight_results.csv'))
 
-# oversampling_data_results = pd.read_csv(
-#     os.path.join(main_folder, 'emotion_detection_system', 'json_results', '090323',
-#                  'oversampling_results.csv'))
+oversampling_data_results = pd.read_csv(
+    os.path.join(main_folder, 'emotion_detection_system', 'json_results', 'data_experiments_oversampling_random_050423',
+                 'oversampling_random_050423_results.csv'))
 
 rfe_data_results = pd.read_csv(
     os.path.join(main_folder, 'emotion_detection_system', 'json_results', 'data_experiments_rfe_030423',
@@ -283,4 +283,4 @@ if __name__ == '__main__':
     # compare_against_baseline(scenario=['a'], annotation_type=['parents', 'specialist'])
     # compare_against_baseline(scenario=['a'], annotation_type=['specialist'])
     # compare_against_baseline(scenario=['a'], annotation_type=['parents'])
-    compare_against_baseline(class_weight_data_results, scenario=['a'], annotation_type=['specialist'])
+    compare_against_baseline(oversampling_data_results, scenario=['a'], annotation_type=['specialist'])
