@@ -26,6 +26,16 @@ BASELINE_DATA = pd.read_csv(
     os.path.join(main_folder, 'emotion_detection_system', 'json_results', 'data_experiments_baseline_040423',
                  'baseline_040423_results.csv'))
 
+sessions_list = ['Session_01_01',
+                 'Session_02_01',
+                 'Session_02_02',
+                 'Session_03_01',
+                 'Session_03_02',
+                 'Session_04_01',
+                 'Session_04_02']
+
+participants_list = ['Participant_01', 'Participant_02', 'Participant_03', 'Participant_04']
+
 
 def calculate_difference_percentage(value_current, value_baseline):
     # print(f'> {comp_name}: {value_current}')
@@ -49,25 +59,24 @@ def compare_against_baseline_sessions(data_to_apply, scenario, annotation_type):
     :param metric: string or None: f1score, precision, recall if None: calculates values for acc and b_acc
     :return:  None (it prints a message)
     """
-    sessions_list = ['']
 
     resulting_df = data_to_apply.query(
-        f"Participant != 'All data' & Scenario in {scenario} & Annotation_Type in {annotation_type}")
+        f"Session in {sessions_list} & Scenario in {scenario} & Annotation_Type in {annotation_type}")
     baseline_df = BASELINE_DATA.query(
-        f"Participant != 'All data' & Scenario in {scenario} & Annotation_Type in {annotation_type}")
+        f"Session in {sessions_list} & Scenario in {scenario} & Annotation_Type in {annotation_type}")
 
     avg_acc = resulting_df[['Accuracy']].mean()
     std_acc = resulting_df[['Accuracy']].std()
     avg_acc_bl = baseline_df[['Accuracy']].mean()
 
-    scenario_to_print = f"{scenario}_{annotation_type}_{participant}" if participant else f"{scenario}_{annotation_type}"
+    scenario_to_print = f"{scenario}_{annotation_type}_all_sessions"
 
     diff_avg = calculate_difference_percentage(avg_acc['Accuracy'], avg_acc_bl['Accuracy'])
 
     print(
         f"Average Accuracy in {scenario_to_print} models: {avg_acc.to_string(index=False)}"
         f"(+-{std_acc.to_string(index=False)})\n"
-        f"Baseline value: {avg_acc_bl.to_string(index=False)}\n"
+        f"Baseline value in {scenario_to_print} models: {avg_acc_bl.to_string(index=False)}\n"
         f"Difference from Baseline: {diff_avg:.2f}%")
 
     avg_b_acc = resulting_df[['Accuracy_Balanced']].mean()
@@ -80,7 +89,7 @@ def compare_against_baseline_sessions(data_to_apply, scenario, annotation_type):
     print(
         f"Average Balanced Accuracy in {scenario_to_print} models: {avg_b_acc.to_string(index=False)} "
         f"(+-{std_b_acc.to_string(index=False)})\n"
-        f"Baseline value: {b_acc_avg_bl.to_string(index=False)}\n"
+        f"Baseline value in {scenario_to_print} models: {b_acc_avg_bl.to_string(index=False)}\n"
         f"Difference from Baseline: {diff_b_acc:.2f}%")
 
     # Best Results ACC & B_ACC
@@ -116,7 +125,6 @@ def compare_against_baseline_participants(data_to_apply, scenario, annotation_ty
     :param metric: string or None: f1score, precision, recall if None: calculates values for acc and b_acc
     :return:  None (it prints a message)
     """
-    participants_list = ['Participant_01', 'Participant_02', 'Participant_03', 'Participant_04']
 
     resulting_df = data_to_apply.query(
         f"Participant in {participants_list} & Scenario in {scenario} & Annotation_Type in {annotation_type}")
@@ -264,18 +272,34 @@ def calculate_best_acc(data_to_apply):
         f"Difference from Baseline: {diff_b_acc:.2f}%")
 
 
-def calculate_best_f1_score(data_to_apply):
+def calculate_best_f1_score(data_to_apply, scenario, annotation_type, subdataset_case='all_data'):
+    if subdataset_case == 'participants':
+        resulting_df = data_to_apply.query(
+            f"Participant in {participants_list} & Scenario in {scenario} & Annotation_Type in {annotation_type}")
+        baseline_df = BASELINE_DATA.query(
+            f"Participant in {participants_list} & Scenario in {scenario} & Annotation_Type in {annotation_type}")
+    elif subdataset_case == 'sessions':
+        resulting_df = data_to_apply.query(
+            f"Session in {sessions_list} & Scenario in {scenario} & Annotation_Type in {annotation_type}")
+        baseline_df = BASELINE_DATA.query(
+            f"Session in {sessions_list} & Scenario in {scenario} & Annotation_Type in {annotation_type}")
+    else:
+        resulting_df = data_to_apply.query(
+            f"Participant == 'All data' & Scenario in {scenario} & Annotation_Type in {annotation_type}")
+        baseline_df = BASELINE_DATA.query(
+            f"Participant == 'All data' & Scenario in {scenario} & Annotation_Type in {annotation_type}")
+
     # Current Batch
-    max_f1score_blue = data_to_apply.query('F1score_Blue == F1score_Blue.max()')
-    max_f1score_green = data_to_apply.query('F1score_Green == F1score_Green.max()')
-    max_f1score_red = data_to_apply.query('F1score_Red == F1score_Red.max()')
-    max_f1score_yellow = data_to_apply.query('F1score_Yellow == F1score_Yellow.max()')
+    max_f1score_blue = resulting_df.query('F1score_Blue == F1score_Blue.max()')
+    max_f1score_green = resulting_df.query('F1score_Green == F1score_Green.max()')
+    max_f1score_red = resulting_df.query('F1score_Red == F1score_Red.max()')
+    max_f1score_yellow = resulting_df.query('F1score_Yellow == F1score_Yellow.max()')
 
     # Baseline
-    max_f1score_blue_bl = BASELINE_DATA.query('F1score_Blue == F1score_Blue.max()')
-    max_f1score_green_bl = BASELINE_DATA.query('F1score_Green == F1score_Green.max()')
-    max_f1score_red_bl = BASELINE_DATA.query('F1score_Red == F1score_Red.max()')
-    max_f1score_yellow_bl = BASELINE_DATA.query('F1score_Yellow == F1score_Yellow.max()')
+    max_f1score_blue_bl = baseline_df.query('F1score_Blue == F1score_Blue.max()')
+    max_f1score_green_bl = baseline_df.query('F1score_Green == F1score_Green.max()')
+    max_f1score_red_bl = baseline_df.query('F1score_Red == F1score_Red.max()')
+    max_f1score_yellow_bl = baseline_df.query('F1score_Yellow == F1score_Yellow.max()')
 
     # Differences from the baseline
     diff_f1_blue = calculate_difference_percentage(max_f1score_blue['F1score_Blue'].iloc[0],
@@ -312,23 +336,23 @@ def calculate_best_f1_score(data_to_apply):
         f"Difference from Baseline: {diff_f1_yellow:.2f}%")
 
 
-def calculate_aggregated_f1_score(data_to_apply):
-    avg_f1_blue = data_to_apply[["F1score_Blue"]].mean()
-    std_f1_blue = data_to_apply[["F1score_Blue"]].std()
+def calculate_aggregated_f1_score(resulting_df, baseline_df):
+    avg_f1_blue = resulting_df[["F1score_Blue"]].mean()
+    std_f1_blue = resulting_df[["F1score_Blue"]].std()
 
-    avg_f1_green = data_to_apply[["F1score_Green"]].mean()
-    std_f1_green = data_to_apply[["F1score_Green"]].std()
+    avg_f1_green = resulting_df[["F1score_Green"]].mean()
+    std_f1_green = resulting_df[["F1score_Green"]].std()
 
-    avg_f1_red = data_to_apply[["F1score_Red"]].mean()
-    std_f1_red = data_to_apply[["F1score_Red"]].std()
+    avg_f1_red = resulting_df[["F1score_Red"]].mean()
+    std_f1_red = resulting_df[["F1score_Red"]].std()
 
-    avg_f1_yellow = data_to_apply[["F1score_Yellow"]].mean()
-    std_f1_yellow = data_to_apply[["F1score_Yellow"]].std()
+    avg_f1_yellow = resulting_df[["F1score_Yellow"]].mean()
+    std_f1_yellow = resulting_df[["F1score_Yellow"]].std()
 
-    avg_f1_blue_bl = BASELINE_DATA[["F1score_Blue"]].mean()
-    avg_f1_green_bl = BASELINE_DATA[["F1score_Green"]].mean()
-    avg_f1_red_bl = BASELINE_DATA[["F1score_Red"]].mean()
-    avg_f1_yellow_bl = BASELINE_DATA[["F1score_Yellow"]].mean()
+    avg_f1_blue_bl = baseline_df[["F1score_Blue"]].mean()
+    avg_f1_green_bl = baseline_df[["F1score_Green"]].mean()
+    avg_f1_red_bl = baseline_df[["F1score_Red"]].mean()
+    avg_f1_yellow_bl = baseline_df[["F1score_Yellow"]].mean()
 
     diff_f1_blue = calculate_difference_percentage(avg_f1_blue['F1score_Blue'],
                                                    avg_f1_blue_bl['F1score_Blue'])
@@ -368,6 +392,26 @@ def calculate_aggregated_f1_score(data_to_apply):
         f"(+-{std_f1_yellow.to_string(index=False)})\n"
         f"Baseline value: {avg_f1_yellow_bl.to_string(index=False)}\n"
         f"Difference from Baseline: {diff_f1_yellow:.2f}%")
+
+
+def get_subset_data(data_to_apply, scenario, annotation_type, subdataset_case):
+    if subdataset_case == 'participants':
+        resulting_df = data_to_apply.query(
+            f"Participant in {participants_list} & Scenario in {scenario} & Annotation_Type in {annotation_type}")
+        baseline_df = BASELINE_DATA.query(
+            f"Participant in {participants_list} & Scenario in {scenario} & Annotation_Type in {annotation_type}")
+    elif subdataset_case == 'sessions':
+        resulting_df = data_to_apply.query(
+            f"Session in {sessions_list} & Scenario in {scenario} & Annotation_Type in {annotation_type}")
+        baseline_df = BASELINE_DATA.query(
+            f"Session in {sessions_list} & Scenario in {scenario} & Annotation_Type in {annotation_type}")
+    elif subdataset_case == 'all_data':
+        resulting_df = data_to_apply.query(
+            f"Participant == 'All data' & Scenario in {scenario} & Annotation_Type in {annotation_type}")
+        baseline_df = BASELINE_DATA.query(
+            f"Participant == 'All data' & Scenario in {scenario} & Annotation_Type in {annotation_type}")
+
+    return resulting_df, baseline_df
 
 
 if __name__ == '__main__':
