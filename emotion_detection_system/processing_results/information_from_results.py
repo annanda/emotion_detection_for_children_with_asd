@@ -97,21 +97,63 @@ def compare_against_baseline(resulting_df, baseline_df, scenario, annotation_typ
 
     print("..........")
     print("Best Values for the current Scenario:")
+    print("..........")
+    max_acc_value = max_acc['Accuracy'].to_string(index=False)
+    max_acc_data_included_slug = max_acc['Data_Included_Slug'].to_string(index=False)
+    max_acc_annotation_type = max_acc['Annotation_Type'].to_string(index=False)
+    acc_result_baseline = get_information(baseline_df, max_acc_data_included_slug, max_acc_annotation_type)
+
+    max_acc_value_bl = max_acc_bl['Accuracy'].to_string(index=False)
+    max_acc_bl_data_included_slug = max_acc_bl['Data_Included_Slug'].to_string(index=False)
+    max_acc_bl_annotation_type = max_acc_bl['Annotation_Type'].to_string(index=False)
+    acc_result_scenario = get_information(resulting_df, max_acc_bl_data_included_slug, max_acc_bl_annotation_type)
+
     print(
-        f"Best Accuracy: {max_acc['Accuracy'].to_string(index=False)} ({max_acc['Data_Included_Slug'].to_string(index=False)}_{max_acc['Annotation_Type'].to_string(index=False)})\n"
-        f"Compared to baseline: {max_acc_bl['Accuracy'].to_string(index=False)} ({max_acc_bl['Data_Included_Slug'].to_string(index=False)}_{max_acc_bl['Annotation_Type'].to_string(index=False)})\n"
-        f"Difference from Baseline: {diff_max_acc:.2f}%")
+        f"Best Accuracy: {max_acc_value} ({max_acc_data_included_slug}_{max_acc_annotation_type})\n"
+        f"Accuracy of the best model in baseline: {acc_result_baseline['Accuracy'].to_string(index=False)} "
+        f"({acc_result_baseline['Data_Included_Slug'].to_string(index=False)}_{acc_result_baseline['Annotation_Type'].to_string(index=False)})\n")
+    print(
+        f"Best Accuracy (baseline): {max_acc_value_bl} "
+        f"({max_acc_bl_data_included_slug}_{max_acc_bl_annotation_type})\n"
+        f"Accuracy of the best baseline model in this scenario: {acc_result_scenario['Accuracy'].to_string(index=False)} "
+        f"({acc_result_scenario['Data_Included_Slug'].to_string(index=False)}_{acc_result_scenario['Annotation_Type'].to_string(index=False)})\n")
+    print(f"Difference of Best Acc Value between Scenario and Baseline: {diff_max_acc:.2f}%")
 
     max_b_acc = resulting_df.query('Accuracy_Balanced == Accuracy_Balanced.max()')
     max_b_acc_bl = baseline_df.query('Accuracy_Balanced == Accuracy_Balanced.max()')
     diff_max_b_acc = calculate_difference_percentage(max_b_acc['Accuracy_Balanced'].iloc[0],
                                                      max_b_acc_bl['Accuracy_Balanced'].iloc[0])
 
+    max_b_acc_value = max_b_acc['Accuracy_Balanced'].to_string(index=False)
+    max_b_acc_data_included_slug = max_b_acc['Data_Included_Slug'].to_string(index=False)
+    max_b_acc_annotation_type = max_b_acc['Annotation_Type'].to_string(index=False)
+    b_acc_result_baseline = get_information(baseline_df, max_b_acc_data_included_slug, max_b_acc_annotation_type)
+
+    max_b_acc_value_bl = max_b_acc_bl['Accuracy_Balanced'].to_string(index=False)
+    max_b_acc_bl_data_included_slug = max_b_acc_bl['Data_Included_Slug'].to_string(index=False)
+    max_b_acc_bl_annotation_type = max_b_acc_bl['Annotation_Type'].to_string(index=False)
+    b_acc_result_scenario = get_information(resulting_df, max_b_acc_bl_data_included_slug, max_b_acc_bl_annotation_type)
+
     print("..........")
     print(
-        f"Best Balanced Accuracy: {max_b_acc['Accuracy_Balanced'].to_string(index=False)} ({max_b_acc['Data_Included_Slug'].to_string(index=False)}_{max_b_acc['Annotation_Type'].to_string(index=False)})\n"
-        f"Compared to baseline: {max_b_acc_bl['Accuracy_Balanced'].to_string(index=False)} ({max_b_acc_bl['Data_Included_Slug'].to_string(index=False)}_{max_b_acc_bl['Annotation_Type'].to_string(index=False)})\n"
-        f"Difference from Baseline: {diff_max_b_acc:.2f}%")
+        f"Best Balanced Accuracy: {max_b_acc_value} ({max_b_acc_data_included_slug}_{max_b_acc_annotation_type})\n"
+        f"Balanced Accuracy of the best model in baseline: {b_acc_result_baseline['Accuracy_Balanced'].to_string(index=False)} "
+        f"({b_acc_result_baseline['Data_Included_Slug'].to_string(index=False)}_{b_acc_result_baseline['Annotation_Type'].to_string(index=False)})\n"
+    )
+
+    print(f"Best Balanced Accuracy (baseline): {max_b_acc_value_bl} "
+          f"({max_b_acc_bl_data_included_slug}_{max_b_acc_bl_annotation_type})\n"
+          f"Best Accuracy of the best baseline model in this scenario: {b_acc_result_scenario['Accuracy_Balanced'].to_string(index=False)} "
+          f"({b_acc_result_scenario['Data_Included_Slug'].to_string(index=False)}_{b_acc_result_scenario['Annotation_Type'].to_string(index=False)})\n"
+          )
+
+    print(f"Difference of Best Balanced Acc Values between Scenario and Baseline: {diff_max_b_acc:.2f}%")
+
+
+def get_information(data_to_look, data_included_slug, annotation_type):
+    result = data_to_look.query(
+        f"Data_Included_Slug == '{data_included_slug}' & Annotation_Type == '{annotation_type}'")
+    return result
 
 
 def calculate_best_f1_score(resulting_df, baseline_df):
@@ -284,8 +326,8 @@ if __name__ == '__main__':
                                                 annotation_type=annotation_type, subdataset_case=subset_data)
 
     compare_against_baseline(resulting_df, baseline_df, scenario, annotation_type, subset_data)
-    calculate_aggregated_f1_score(resulting_df, baseline_df)
-    calculate_best_f1_score(resulting_df, baseline_df)
+    # calculate_aggregated_f1_score(resulting_df, baseline_df)
+    # calculate_best_f1_score(resulting_df, baseline_df)
     # print('hello!')
 
     # compare_against_baseline_sessions(oversampling_data_results, scenario=['v'],
