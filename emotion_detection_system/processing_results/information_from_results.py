@@ -51,28 +51,25 @@ def calculate_difference_percentage(value_current, value_baseline):
     return diff_perc
 
 
-def compare_against_baseline_sessions(data_to_apply, scenario, annotation_type):
+def compare_against_baseline(resulting_df, baseline_df, scenario, annotation_type, data_included):
     """
     Takes the current dataset and compare it with the baseline results
+    :param resulting_df: dataframe with the interested data already filtered by a query.
+    :param baseline_df: baseline dataframe with the interested data already filtered by a query.
     :param scenario: list of scenarios (strings) with any of the possible scenarios
     :param annotation_type: list of strings: parents and/or specialist
-    :param metric: string or None: f1score, precision, recall if None: calculates values for acc and b_acc
+    :param data_included: string: 'participants', 'sessions' or 'all_data'
     :return:  None (it prints a message)
     """
-
-    resulting_df = data_to_apply.query(
-        f"Session in {sessions_list} & Scenario in {scenario} & Annotation_Type in {annotation_type}")
-    baseline_df = BASELINE_DATA.query(
-        f"Session in {sessions_list} & Scenario in {scenario} & Annotation_Type in {annotation_type}")
+    scenario_to_print = f"{data_included}_{scenario}_{annotation_type}"
 
     avg_acc = resulting_df[['Accuracy']].mean()
     std_acc = resulting_df[['Accuracy']].std()
     avg_acc_bl = baseline_df[['Accuracy']].mean()
 
-    scenario_to_print = f"{scenario}_{annotation_type}_all_sessions"
-
     diff_avg = calculate_difference_percentage(avg_acc['Accuracy'], avg_acc_bl['Accuracy'])
 
+    print("..........")
     print(
         f"Average Accuracy in {scenario_to_print} models: {avg_acc.to_string(index=False)}"
         f"(+-{std_acc.to_string(index=False)})\n"
@@ -85,7 +82,7 @@ def compare_against_baseline_sessions(data_to_apply, scenario, annotation_type):
 
     diff_b_acc = calculate_difference_percentage(avg_b_acc['Accuracy_Balanced'],
                                                  b_acc_avg_bl['Accuracy_Balanced'])
-    print("..........\n")
+    print("..........")
     print(
         f"Average Balanced Accuracy in {scenario_to_print} models: {avg_b_acc.to_string(index=False)} "
         f"(+-{std_b_acc.to_string(index=False)})\n"
@@ -98,7 +95,7 @@ def compare_against_baseline_sessions(data_to_apply, scenario, annotation_type):
     max_acc_bl = baseline_df.query('Accuracy == Accuracy.max()')
     diff_max_acc = calculate_difference_percentage(max_acc['Accuracy'].iloc[0], max_acc_bl['Accuracy'].iloc[0])
 
-    print("..........\n")
+    print("..........")
     print("Best Values for the current Scenario:")
     print(
         f"Best Accuracy: {max_acc['Accuracy'].to_string(index=False)} ({max_acc['Data_Included_Slug'].to_string(index=False)}_{max_acc['Annotation_Type'].to_string(index=False)})\n"
@@ -110,185 +107,14 @@ def compare_against_baseline_sessions(data_to_apply, scenario, annotation_type):
     diff_max_b_acc = calculate_difference_percentage(max_b_acc['Accuracy_Balanced'].iloc[0],
                                                      max_b_acc_bl['Accuracy_Balanced'].iloc[0])
 
-    print("..........\n")
+    print("..........")
     print(
         f"Best Balanced Accuracy: {max_b_acc['Accuracy_Balanced'].to_string(index=False)} ({max_b_acc['Data_Included_Slug'].to_string(index=False)}_{max_b_acc['Annotation_Type'].to_string(index=False)})\n"
         f"Compared to baseline: {max_b_acc_bl['Accuracy_Balanced'].to_string(index=False)} ({max_b_acc_bl['Data_Included_Slug'].to_string(index=False)}_{max_b_acc_bl['Annotation_Type'].to_string(index=False)})\n"
         f"Difference from Baseline: {diff_max_b_acc:.2f}%")
 
 
-def compare_against_baseline_participants(data_to_apply, scenario, annotation_type):
-    """
-    Takes the current dataset and compare it with the baseline results
-    :param scenario: list of scenarios (strings) with any of the possible scenarios
-    :param annotation_type: list of strings: parents and/or specialist
-    :param metric: string or None: f1score, precision, recall if None: calculates values for acc and b_acc
-    :return:  None (it prints a message)
-    """
-
-    resulting_df = data_to_apply.query(
-        f"Participant in {participants_list} & Scenario in {scenario} & Annotation_Type in {annotation_type}")
-    baseline_df = BASELINE_DATA.query(
-        f"Participant in {participants_list} & Scenario in {scenario} & Annotation_Type in {annotation_type}")
-
-    avg_acc = resulting_df[['Accuracy']].mean()
-    std_acc = resulting_df[['Accuracy']].std()
-    avg_acc_bl = baseline_df[['Accuracy']].mean()
-
-    scenario_to_print = f"{participants_list}_{scenario}_{annotation_type}"
-
-    diff_avg = calculate_difference_percentage(avg_acc['Accuracy'], avg_acc_bl['Accuracy'])
-
-    print(
-        f"Average Accuracy in {scenario_to_print} models: {avg_acc.to_string(index=False)}"
-        f"(+-{std_acc.to_string(index=False)})\n"
-        f"Baseline value: {avg_acc_bl.to_string(index=False)}\n"
-        f"Difference from Baseline: {diff_avg:.2f}%")
-
-    avg_b_acc = resulting_df[['Accuracy_Balanced']].mean()
-    std_b_acc = resulting_df[['Accuracy_Balanced']].std()
-    b_acc_avg_bl = baseline_df[['Accuracy_Balanced']].mean()
-
-    diff_b_acc = calculate_difference_percentage(avg_b_acc['Accuracy_Balanced'],
-                                                 b_acc_avg_bl['Accuracy_Balanced'])
-    print("..........\n")
-    print(
-        f"Average Balanced Accuracy in {scenario_to_print} models: {avg_b_acc.to_string(index=False)} "
-        f"(+-{std_b_acc.to_string(index=False)})\n"
-        f"Baseline value: {b_acc_avg_bl.to_string(index=False)}\n"
-        f"Difference from Baseline: {diff_b_acc:.2f}%")
-
-    # Best Results ACC & B_ACC
-
-    max_acc = resulting_df.query('Accuracy == Accuracy.max()')
-    max_acc_bl = baseline_df.query('Accuracy == Accuracy.max()')
-    diff_max_acc = calculate_difference_percentage(max_acc['Accuracy'].iloc[0], max_acc_bl['Accuracy'].iloc[0])
-
-    print("..........\n")
-    print("Best Values for the current Scenario:")
-    print(
-        f"Best Accuracy: {max_acc['Accuracy'].to_string(index=False)} ({max_acc['Data_Included_Slug'].to_string(index=False)}_{max_acc['Annotation_Type'].to_string(index=False)})\n"
-        f"Compared to baseline: {max_acc_bl['Accuracy'].to_string(index=False)} ({max_acc_bl['Data_Included_Slug'].to_string(index=False)}_{max_acc_bl['Annotation_Type'].to_string(index=False)})\n"
-        f"Difference from Baseline: {diff_max_acc:.2f}%")
-
-    max_b_acc = resulting_df.query('Accuracy_Balanced == Accuracy_Balanced.max()')
-    max_b_acc_bl = baseline_df.query('Accuracy_Balanced == Accuracy_Balanced.max()')
-    diff_max_b_acc = calculate_difference_percentage(max_b_acc['Accuracy_Balanced'].iloc[0],
-                                                     max_b_acc_bl['Accuracy_Balanced'].iloc[0])
-
-    print("..........\n")
-    print(
-        f"Best Balanced Accuracy: {max_b_acc['Accuracy_Balanced'].to_string(index=False)} ({max_b_acc['Data_Included_Slug'].to_string(index=False)}_{max_b_acc['Annotation_Type'].to_string(index=False)})\n"
-        f"Compared to baseline: {max_b_acc_bl['Accuracy_Balanced'].to_string(index=False)} ({max_b_acc_bl['Data_Included_Slug'].to_string(index=False)}_{max_b_acc_bl['Annotation_Type'].to_string(index=False)})\n"
-        f"Difference from Baseline: {diff_max_b_acc:.2f}%")
-
-
-def compare_against_baseline_all_data(data_to_apply, scenario, annotation_type):
-    """
-    Takes the current dataset and compare it with the baseline results - for the eight cases using the whole dataset
-    :param data_to_apply:
-    :param scenario: list of scenarios (strings) with any of the possible scenarios
-    :param annotation_type: list of strings: parents and/or specialist
-    :return:  None (it prints a message)
-    """
-
-    resulting_df = data_to_apply.query(
-        f"Participant == 'All data' & Scenario in {scenario} & Annotation_Type in {annotation_type}")
-    baseline_df = BASELINE_DATA.query(
-        f"Participant == 'All data' & Scenario in {scenario} & Annotation_Type in {annotation_type}")
-
-    #
-    avg_acc = resulting_df[['Accuracy']].mean()
-    std_acc = resulting_df[['Accuracy']].std()
-    avg_acc_bl = baseline_df[['Accuracy']].mean()
-
-    scenario_to_print = f"{scenario}_{annotation_type}_all_data"
-
-    diff_avg = calculate_difference_percentage(avg_acc['Accuracy'], avg_acc_bl['Accuracy'])
-
-    print(
-        f"Average Accuracy in {scenario_to_print} models: {avg_acc.to_string(index=False)}"
-        f"(+-{std_acc.to_string(index=False)})\n"
-        f"Baseline value: {avg_acc_bl.to_string(index=False)}\n"
-        f"Difference from Baseline: {diff_avg:.2f}%")
-
-    avg_b_acc = resulting_df[['Accuracy_Balanced']].mean()
-    std_b_acc = resulting_df[['Accuracy_Balanced']].std()
-    b_acc_avg_bl = baseline_df[['Accuracy_Balanced']].mean()
-
-    diff_b_acc = calculate_difference_percentage(avg_b_acc['Accuracy_Balanced'],
-                                                 b_acc_avg_bl['Accuracy_Balanced'])
-    print("..........\n")
-    print(
-        f"Average Balanced Accuracy in {scenario_to_print} models: {avg_b_acc.to_string(index=False)}"
-        f"(+-{std_b_acc.to_string(index=False)})\n"
-        f"Baseline value: {b_acc_avg_bl.to_string(index=False)}\n"
-        f"Difference from Baseline: {diff_b_acc:.2f}%")
-
-    # Best Results ACC & B_ACC
-
-    max_acc = resulting_df.query('Accuracy == Accuracy.max()')
-    max_acc_bl = baseline_df.query('Accuracy == Accuracy.max()')
-    diff_max_acc = calculate_difference_percentage(max_acc['Accuracy'].iloc[0], max_acc_bl['Accuracy'].iloc[0])
-
-    print("..........\n")
-    print("Best Values for the current Scenario:")
-    print(
-        f"Best Accuracy: {max_acc['Accuracy'].to_string(index=False)} ({max_acc['Data_Included_Slug'].to_string(index=False)}_{max_acc['Annotation_Type'].to_string(index=False)})\n"
-        f"Compared to baseline: {max_acc_bl['Accuracy'].to_string(index=False)} ({max_acc_bl['Data_Included_Slug'].to_string(index=False)}_{max_acc_bl['Annotation_Type'].to_string(index=False)})\n"
-        f"Difference from Baseline: {diff_max_acc:.2f}%")
-
-    max_b_acc = resulting_df.query('Accuracy_Balanced == Accuracy_Balanced.max()')
-    max_b_acc_bl = baseline_df.query('Accuracy_Balanced == Accuracy_Balanced.max()')
-    diff_max_b_acc = calculate_difference_percentage(max_b_acc['Accuracy_Balanced'].iloc[0],
-                                                     max_b_acc_bl['Accuracy_Balanced'].iloc[0])
-
-    print("..........\n")
-    print(
-        f"Best Balanced Accuracy: {max_b_acc['Accuracy_Balanced'].to_string(index=False)} ({max_b_acc['Data_Included_Slug'].to_string(index=False)}_{max_b_acc['Annotation_Type'].to_string(index=False)})\n"
-        f"Compared to baseline: {max_b_acc_bl['Accuracy_Balanced'].to_string(index=False)} ({max_b_acc_bl['Data_Included_Slug'].to_string(index=False)}_{max_b_acc_bl['Annotation_Type'].to_string(index=False)})\n"
-        f"Difference from Baseline: {diff_max_b_acc:.2f}%")
-
-
-def calculate_best_acc(data_to_apply):
-    max_acc = data_to_apply.query('Accuracy == Accuracy.max()')
-    max_acc_bl = BASELINE_DATA.query('Accuracy == Accuracy.max()')
-    diff = calculate_difference_percentage(max_acc['Accuracy'].iloc[0], max_acc_bl['Accuracy'].iloc[0])
-
-    max_b_acc = data_to_apply.query('Accuracy_Balanced == Accuracy_Balanced.max()')
-    max_b_acc_bl = BASELINE_DATA.query('Accuracy_Balanced == Accuracy_Balanced.max()')
-    diff_b_acc = calculate_difference_percentage(max_b_acc['Accuracy_Balanced'].iloc[0],
-                                                 max_b_acc_bl['Accuracy_Balanced'].iloc[0])
-    print("Best Values for the Data Experiment Batch:")
-    print(
-        f"Best Accuracy: {max_acc['Accuracy'].to_string(index=False)} ({max_acc['Data_Included_Slug'].to_string(index=False)}_{max_acc['Annotation_Type'].to_string(index=False)})\n"
-        f"Compared to baseline: {max_acc_bl['Accuracy'].to_string(index=False)} ({max_acc_bl['Data_Included_Slug'].to_string(index=False)}_{max_acc_bl['Annotation_Type'].to_string(index=False)})\n"
-        f"Difference from Baseline: {diff:.2f}%")
-
-    print("..........\n")
-    print(
-        f"Best Balanced Accuracy: {max_b_acc['Accuracy_Balanced'].to_string(index=False)} ({max_b_acc['Data_Included_Slug'].to_string(index=False)}_{max_b_acc['Annotation_Type'].to_string(index=False)})\n"
-        f"Compared to baseline: {max_b_acc_bl['Accuracy_Balanced'].to_string(index=False)} ({max_b_acc_bl['Data_Included_Slug'].to_string(index=False)}_{max_b_acc_bl['Annotation_Type'].to_string(index=False)})\n"
-        f"Difference from Baseline: {diff_b_acc:.2f}%")
-
-
-def calculate_best_f1_score(data_to_apply, scenario, annotation_type, subdataset_case='all_data'):
-    if subdataset_case == 'participants':
-        resulting_df = data_to_apply.query(
-            f"Participant in {participants_list} & Scenario in {scenario} & Annotation_Type in {annotation_type}")
-        baseline_df = BASELINE_DATA.query(
-            f"Participant in {participants_list} & Scenario in {scenario} & Annotation_Type in {annotation_type}")
-    elif subdataset_case == 'sessions':
-        resulting_df = data_to_apply.query(
-            f"Session in {sessions_list} & Scenario in {scenario} & Annotation_Type in {annotation_type}")
-        baseline_df = BASELINE_DATA.query(
-            f"Session in {sessions_list} & Scenario in {scenario} & Annotation_Type in {annotation_type}")
-    else:
-        resulting_df = data_to_apply.query(
-            f"Participant == 'All data' & Scenario in {scenario} & Annotation_Type in {annotation_type}")
-        baseline_df = BASELINE_DATA.query(
-            f"Participant == 'All data' & Scenario in {scenario} & Annotation_Type in {annotation_type}")
-
+def calculate_best_f1_score(resulting_df, baseline_df):
     # Current Batch
     max_f1score_blue = resulting_df.query('F1score_Blue == F1score_Blue.max()')
     max_f1score_green = resulting_df.query('F1score_Green == F1score_Green.max()')
@@ -314,6 +140,8 @@ def calculate_best_f1_score(data_to_apply, scenario, annotation_type, subdataset
     diff_f1_yellow = calculate_difference_percentage(max_f1score_yellow['F1score_Yellow'].iloc[0],
                                                      max_f1score_yellow_bl['F1score_Yellow'].iloc[0])
 
+    print("..........")
+    print("..........")
     print("Best Values of F1Score:")
     print(
         f"Best F1Score (Blue): {max_f1score_blue['F1score_Blue'].to_string(index=False)} ({max_f1score_blue['Data_Included_Slug'].to_string(index=False)}_{max_f1score_blue['Annotation_Type'].to_string(index=False)})\n"
@@ -366,27 +194,29 @@ def calculate_aggregated_f1_score(resulting_df, baseline_df):
     diff_f1_yellow = calculate_difference_percentage(avg_f1_yellow['F1score_Yellow'],
                                                      avg_f1_yellow_bl['F1score_Yellow'])
 
+    print("..........")
+    print("..........")
     print(
         f"Average F1score (blue) models: {avg_f1_blue.to_string(index=False)} "
         f"(+-{std_f1_blue.to_string(index=False)})\n"
         f"Baseline value: {avg_f1_blue_bl.to_string(index=False)}\n"
         f"Difference from Baseline: {diff_f1_blue:.2f}%")
 
-    print("..........\n")
+    print("..........")
     print(
         f"Average F1score (green) models: {avg_f1_green.to_string(index=False)} "
         f"(+-{std_f1_green.to_string(index=False)})\n"
         f"Baseline value: {avg_f1_green_bl.to_string(index=False)}\n"
         f"Difference from Baseline: {diff_f1_green:.2f}%")
 
-    print("..........\n")
+    print("..........")
     print(
         f"Average F1score (red) models: {avg_f1_red.to_string(index=False)} "
         f"(+-{std_f1_red.to_string(index=False)})\n"
         f"Baseline value: {avg_f1_red_bl.to_string(index=False)}\n"
         f"Difference from Baseline: {diff_f1_red:.2f}%")
 
-    print("..........\n")
+    print("..........")
     print(
         f"Average F1score (yellow) models: {avg_f1_yellow.to_string(index=False)} "
         f"(+-{std_f1_yellow.to_string(index=False)})\n"
@@ -395,6 +225,14 @@ def calculate_aggregated_f1_score(resulting_df, baseline_df):
 
 
 def get_subset_data(data_to_apply, scenario, annotation_type, subdataset_case):
+    """
+
+    :param data_to_apply:
+    :param scenario:
+    :param annotation_type:
+    :param subdataset_case:
+    :return:
+    """
     if subdataset_case == 'participants':
         resulting_df = data_to_apply.query(
             f"Participant in {participants_list} & Scenario in {scenario} & Annotation_Type in {annotation_type}")
@@ -414,14 +252,43 @@ def get_subset_data(data_to_apply, scenario, annotation_type, subdataset_case):
     return resulting_df, baseline_df
 
 
+def calculate_best_acc(data_to_apply):
+    max_acc = data_to_apply.query('Accuracy == Accuracy.max()')
+    max_acc_bl = BASELINE_DATA.query('Accuracy == Accuracy.max()')
+    diff = calculate_difference_percentage(max_acc['Accuracy'].iloc[0], max_acc_bl['Accuracy'].iloc[0])
+
+    max_b_acc = data_to_apply.query('Accuracy_Balanced == Accuracy_Balanced.max()')
+    max_b_acc_bl = BASELINE_DATA.query('Accuracy_Balanced == Accuracy_Balanced.max()')
+    diff_b_acc = calculate_difference_percentage(max_b_acc['Accuracy_Balanced'].iloc[0],
+                                                 max_b_acc_bl['Accuracy_Balanced'].iloc[0])
+    print("Best Values for the Data Experiment Batch:")
+    print(
+        f"Best Accuracy: {max_acc['Accuracy'].to_string(index=False)} ({max_acc['Data_Included_Slug'].to_string(index=False)}_{max_acc['Annotation_Type'].to_string(index=False)})\n"
+        f"Compared to baseline: {max_acc_bl['Accuracy'].to_string(index=False)} ({max_acc_bl['Data_Included_Slug'].to_string(index=False)}_{max_acc_bl['Annotation_Type'].to_string(index=False)})\n"
+        f"Difference from Baseline: {diff:.2f}%")
+
+    print("..........\n")
+    print(
+        f"Best Balanced Accuracy: {max_b_acc['Accuracy_Balanced'].to_string(index=False)} ({max_b_acc['Data_Included_Slug'].to_string(index=False)}_{max_b_acc['Annotation_Type'].to_string(index=False)})\n"
+        f"Compared to baseline: {max_b_acc_bl['Accuracy_Balanced'].to_string(index=False)} ({max_b_acc_bl['Data_Included_Slug'].to_string(index=False)}_{max_b_acc_bl['Annotation_Type'].to_string(index=False)})\n"
+        f"Difference from Baseline: {diff_b_acc:.2f}%")
+
+
 if __name__ == '__main__':
     # Example of configuration values
-    # scenario = ['va_late_fusion', 'va_early_fusion']
-    # annotation_type = ['parents', 'specialist']
-    # participant = ['All data']
-    # session = None
+    scenario = ['va_late_fusion', 'va_early_fusion']
+    annotation_type = ['parents', 'specialist']
+    subset_data = 'participants'
 
-    compare_against_baseline_sessions(oversampling_data_results, scenario=['v'],
-                                      annotation_type=['parents', 'specialist'])
+    resulting_df, baseline_df = get_subset_data(oversampling_data_results, scenario=scenario,
+                                                annotation_type=annotation_type, subdataset_case=subset_data)
+
+    compare_against_baseline(resulting_df, baseline_df, scenario, annotation_type, subset_data)
+    calculate_aggregated_f1_score(resulting_df, baseline_df)
+    calculate_best_f1_score(resulting_df, baseline_df)
+    # print('hello!')
+
+    # compare_against_baseline_sessions(oversampling_data_results, scenario=['v'],
+    #                                   annotation_type=['parents', 'specialist'])
     # compare_against_baseline_participants(oversampling_data_results, scenario=['v'],
     #                                       annotation_type=['parents', 'specialist'])
