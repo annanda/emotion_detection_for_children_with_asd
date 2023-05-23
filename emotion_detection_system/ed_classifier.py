@@ -586,7 +586,9 @@ class EmotionDetectionClassifier:
             executor = pipeline
 
         if self.configuration.load_trained_model:
-            print('Using saved model!')
+            print(
+                f'Using saved model! {self.configuration.model_to_load_experiment} : '
+                f'{self.configuration.model_to_load_config}')
             model_path = self.get_model_path(dataset)
             executor = pickle.load(open(
                 model_path,

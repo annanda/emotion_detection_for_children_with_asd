@@ -30,7 +30,8 @@ def script_entry(json_file):
     # If want to generate structured json files with the results
     generate_json_results(classifier, path_json)
 
-    save_model(classifier, file_name)
+    if not classifier.configuration.load_trained_model:
+        save_model(classifier, file_name)
 
 
 def save_model(classifier, file_name):
