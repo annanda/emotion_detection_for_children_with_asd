@@ -315,19 +315,20 @@ class PrepareDataset:
 
         # Balance Dataset (x_train) - undersampling
         # case of single modalities
-        if self.configuration.balance_dataset and self.configuration.balance_dataset_technique in ['undersampling',
-                                                                                                   'oversampling']:
-            if self.configuration.is_multimodal:
-                if modality == 'early_fusion' or self.configuration.fusion_type == 'late_fusion':
+        if not self.configuration.load_trained_model:
+            if self.configuration.balance_dataset and self.configuration.balance_dataset_technique in ['undersampling',
+                                                                                                       'oversampling']:
+                if self.configuration.is_multimodal:
+                    if modality == 'early_fusion' or self.configuration.fusion_type == 'late_fusion':
+                        df = self.apply_balance(df)
+                        # Balance x_dev if it will be used as part of training data
+                        if self.configuration.x_and_x_validation_for_training:
+                            df_dev = self.apply_balance(df_dev)
+                else:
                     df = self.apply_balance(df)
                     # Balance x_dev if it will be used as part of training data
                     if self.configuration.x_and_x_validation_for_training:
                         df_dev = self.apply_balance(df_dev)
-            else:
-                df = self.apply_balance(df)
-                # Balance x_dev if it will be used as part of training data
-                if self.configuration.x_and_x_validation_for_training:
-                    df_dev = self.apply_balance(df_dev)
 
         if modality == 'video':
             self.y_video = df['emotion_zone']
@@ -586,9 +587,9 @@ class EmotionDetectionClassifier:
             executor = pipeline
 
         if self.configuration.load_trained_model:
-            print(
-                f'Using saved model! {self.configuration.model_to_load_experiment} : '
-                f'{self.configuration.model_to_load_config}')
+            # print(
+            #     f'Using saved model! {self.configuration.model_to_load_experiment} : '
+            #     f'{self.configuration.model_to_load_config}')
             model_path = self.get_model_path(dataset)
             executor = pickle.load(open(
                 model_path,
@@ -895,6 +896,8 @@ class EmotionDetectionClassifier:
                f'Fusion type: {self.configuration.fusion_type}\n' \
                f'Data used for Training: {self.train_data_description}\n' \
                f'Loaded Trained model: {self.configuration.load_trained_model}\n' \
+               f'Trained model experiment: {self.configuration.model_to_load_experiment}\n' \
+               f'Trained model config: {self.configuration.model_to_load_config}\n' \
                f'Balanced Dataset: {self.configuration.balance_dataset}\n' \
                f'Balanced Dataset Technique: {self.configuration.balance_dataset_technique}\n' \
                f'Oversampling Method: {self.configuration.oversampling_method}\n' \
