@@ -18,7 +18,7 @@ from sklearn.preprocessing import RobustScaler, MinMaxScaler, StandardScaler, No
 from sklearn.model_selection import GridSearchCV
 
 from emotion_detection_system.conf import DATASET_FOLDER, ORDER_EMOTIONS, TOTAL_SESSIONS, PARTICIPANT_NUMBERS, \
-    LLD_PARAMETER_GROUP, PARAMETER_GRID_SEARCH
+    LLD_PARAMETER_GROUP, PARAMETER_GRID_SEARCH, TRAINED_MODELS_FOLDER
 
 CLASSES_NAME_TO_NUMBERS_DICT = {
     'blue': 0,
@@ -76,7 +76,9 @@ class EmotionDetectionConfiguration:
             self.rfe_algorithm = None
         self.grid_search = self.configuration.get('grid_search', False)
         self.load_trained_model = self.configuration.get('load_trained_model', False)
-
+        if self.load_trained_model:
+            self.model_to_load_experiment = self.configuration.get('model_to_load_experiment', False)
+            self.model_to_load_config = self.configuration.get("model_to_load_config", False)
         # To define the path for person-independent model or individuals model
         self.person_independent_folder = 'cross-individuals' if self.configuration[
             'person_independent_model'] else 'individuals'
@@ -584,11 +586,12 @@ class EmotionDetectionClassifier:
             executor = pipeline
 
         if self.configuration.load_trained_model:
+            print('Using saved model!')
+            model_path = self.get_model_path(dataset)
             executor = pickle.load(open(
-                '/Users/annanda/PycharmProjects/emotion_detection_system/emotion_detection_system/trained_models/300323/specialist/example_rfe.pickle',
+                model_path,
                 'rb')
             )
-            print('using saved model!')
         else:
             executor.fit(x, y)
 
@@ -609,6 +612,22 @@ class EmotionDetectionClassifier:
             self.executor = executor
 
         return prediction_probability
+
+    def get_model_path(self, dataset):
+        """
+        :param dataset: x_video, x_audio or None
+        :return: string with the path to load the trained model.
+        """
+        model_experiment = self.configuration.model_to_load_experiment
+        model_config = self.configuration.model_to_load_config
+        trained_models_folder = TRAINED_MODELS_FOLDER
+        modality = self.get_modality(dataset)
+        experiment = model_experiment.split('_')[:-1]
+        experiment = '_'.join(experiment)
+        annotation_type = 'specialist' if 'specialist' in model_config else 'parents'
+        model_name = f"{experiment}_{model_config}_{modality}.pickle"
+        path = os.path.join(trained_models_folder, model_experiment, annotation_type, model_name)
+        return path
 
     def create_pipeline(self, modality):
         # basic pipeline (with just normaliser)

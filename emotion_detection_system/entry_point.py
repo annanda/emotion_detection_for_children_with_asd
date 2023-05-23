@@ -82,11 +82,11 @@ def save_json_result_file(dict_json, file_name):
 
 if __name__ == '__main__':
     # if using shell script
-    json_file = sys.argv[1]
+    # json_file = sys.argv[1]
     # If using local run
     # json_file = 'example_annotation_specialist.json'
     # json_file = 'example_balance_dataset.json'
-    # json_file = 'example_rfe.json'
+    json_file = 'example_3.json'
     # json_file = 'specialist_oversampling_random/session_02_01_v.json'
 
     script_entry(json_file)
