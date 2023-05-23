@@ -39,7 +39,7 @@ participants_list = ['Participant_01', 'Participant_02', 'Participant_03', 'Part
 
 def calculate_difference_percentage(value_current, value_baseline):
     # print(f'> {comp_name}: {value_current}')
-    perc = ((value_current / value_baseline)) * 100
+    # perc = ((value_current / value_baseline)) * 100
     # print(f'{perc} %')
 
     # print(f'diff = {value_baseline - value_current}')
@@ -91,21 +91,21 @@ def compare_against_baseline(resulting_df, baseline_df, scenario, annotation_typ
 
     # Best Results ACC & B_ACC
 
-    max_acc = resulting_df.query('Accuracy == Accuracy.max()')
-    max_acc_bl = baseline_df.query('Accuracy == Accuracy.max()')
-    diff_max_acc = calculate_difference_percentage(max_acc['Accuracy'].iloc[0], max_acc_bl['Accuracy'].iloc[0])
+    max_acc = resulting_df.query('Accuracy == Accuracy.max()').iloc[0]
+    max_acc_bl = baseline_df.query('Accuracy == Accuracy.max()').iloc[0]
+    diff_max_acc = calculate_difference_percentage(max_acc['Accuracy'], max_acc_bl['Accuracy'])
 
     print("..........")
     print("Best Values for the current Scenario:")
     print("..........")
-    max_acc_value = max_acc['Accuracy'].to_string(index=False)
-    max_acc_data_included_slug = max_acc['Data_Included_Slug'].to_string(index=False)
-    max_acc_annotation_type = max_acc['Annotation_Type'].to_string(index=False)
+    max_acc_value = max_acc['Accuracy']
+    max_acc_data_included_slug = max_acc['Data_Included_Slug']
+    max_acc_annotation_type = max_acc['Annotation_Type']
     acc_result_baseline = get_information(baseline_df, max_acc_data_included_slug, max_acc_annotation_type)
 
-    max_acc_value_bl = max_acc_bl['Accuracy'].to_string(index=False)
-    max_acc_bl_data_included_slug = max_acc_bl['Data_Included_Slug'].to_string(index=False)
-    max_acc_bl_annotation_type = max_acc_bl['Annotation_Type'].to_string(index=False)
+    max_acc_value_bl = max_acc_bl['Accuracy']
+    max_acc_bl_data_included_slug = max_acc_bl['Data_Included_Slug']
+    max_acc_bl_annotation_type = max_acc_bl['Annotation_Type']
     acc_result_scenario = get_information(resulting_df, max_acc_bl_data_included_slug, max_acc_bl_annotation_type)
 
     print(
@@ -319,12 +319,12 @@ def calculate_best_acc(data_to_apply):
 if __name__ == '__main__':
     # Example of configuration values
     scenario = ['va_late_fusion', 'va_early_fusion']
-    annotation_type = ['parents', 'specialist']
-    subset_data = 'participants'
-
-    resulting_df, baseline_df = get_subset_data(oversampling_data_results, scenario=scenario,
-                                                annotation_type=annotation_type, subdataset_case=subset_data)
-
+    annotation_type = ['parents']
+    subset_data = 'sessions'
+    resulting_df, baseline_df = get_subset_data(oversampling_data_results,
+                                                scenario=scenario,
+                                                annotation_type=annotation_type,
+                                                subdataset_case=subset_data)
     compare_against_baseline(resulting_df, baseline_df, scenario, annotation_type, subset_data)
     # calculate_aggregated_f1_score(resulting_df, baseline_df)
     # calculate_best_f1_score(resulting_df, baseline_df)
