@@ -625,7 +625,10 @@ class EmotionDetectionClassifier:
         experiment = model_experiment.split('_')[:-1]
         experiment = '_'.join(experiment)
         annotation_type = 'specialist' if 'specialist' in model_config else 'parents'
-        model_name = f"{experiment}_{model_config}_{modality}.pickle"
+        if self.configuration.fusion_type == 'late_fusion':
+            model_name = f"{experiment}_{model_config}_{modality}.pickle"
+        else:
+            model_name = f"{experiment}_{model_config}.pickle"
         path = os.path.join(trained_models_folder, model_experiment, annotation_type, model_name)
         return path
 
