@@ -2,7 +2,7 @@
 # to organise results by date and folders
 
 DATE="25-05-23"
-SLUG="data_experiments_trained_models_250523.sh"
+SLUG="data_experiments_trained_models_250523"
 ANNOTATION="parents"
 INPUT_FOLDER="parents_trained_models"
 
