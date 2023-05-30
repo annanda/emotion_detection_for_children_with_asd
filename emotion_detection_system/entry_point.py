@@ -87,7 +87,7 @@ if __name__ == '__main__':
     # If using local run
     # json_file = 'example_annotation_specialist.json'
     # json_file = 'example_balance_dataset.json'
-    json_file = 'nn_example.json'
+    json_file = 'nn_example_2.json'
     # json_file = 'specialist_oversampling_random/session_02_01_v.json'
 
     script_entry(json_file)

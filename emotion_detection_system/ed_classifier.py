@@ -694,23 +694,27 @@ class EmotionDetectionClassifier:
         self._calculate_multilabel_confusion_matrix()
 
     def _set_classifier_model(self):
-        # simplest case
         if self.configuration.balance_dataset and self.configuration.balance_dataset_technique == 'class_weight':
             class_weight_setup = "balanced"
         else:
             class_weight_setup = None
 
-        self.classifier_model['early_fusion'] = self.get_model_constructor(self.configuration.models['early_fusion'],
-                                                                           class_weight_setup)
-        # self.classifier_model['default'] = svm.SVC(probability=True, class_weight=class_weight_setup)
-        self.classifier_model['audio'] = self.get_model_constructor(self.configuration.models['audio'],
-                                                                    class_weight_setup)
-        self.classifier_model['video'] = self.get_model_constructor(self.configuration.models['video'],
-                                                                    class_weight_setup)
+        if self.configuration.fusion_type == 'early_fusion':
+            self.classifier_model['early_fusion'] = self.get_model_map(self.configuration.models['early_fusion'],
+                                                                       class_weight_setup)
+        elif self.configuration.fusion_type == 'late_fusion':
+            self.classifier_model['audio'] = self.get_model_map(self.configuration.models['audio'],
+                                                                class_weight_setup)
+            self.classifier_model['video'] = self.get_model_map(self.configuration.models['video'],
+                                                                class_weight_setup)
+        else:
+            modality = self.configuration.modalities[0]
+            self.classifier_model[modality] = self.get_model_map(self.configuration.models[modality],
+                                                                 class_weight_setup)
 
         # self._current_model = 'SVM'
 
-    def get_model_constructor(self, config, class_weight_setup):
+    def get_model_map(self, config, class_weight_setup):
         dict_models = {
             'SVM': svm.SVC(probability=True, class_weight=class_weight_setup),
             'NN': MLPClassifier(alpha=1e-5, random_state=1, max_iter=500),
