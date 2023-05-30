@@ -695,8 +695,6 @@ class EmotionDetectionClassifier:
 
     def _set_classifier_model(self):
         # simplest case
-        # todo elaborate the selection and definition of models.
-
         if self.configuration.balance_dataset and self.configuration.balance_dataset_technique == 'class_weight':
             class_weight_setup = "balanced"
         else:
@@ -715,7 +713,8 @@ class EmotionDetectionClassifier:
     def get_model_constructor(self, config, class_weight_setup):
         dict_models = {
             'SVM': svm.SVC(probability=True, class_weight=class_weight_setup),
-            'NN': MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 4), random_state=1, max_iter=300)
+            'NN': MLPClassifier(alpha=1e-5, random_state=1, max_iter=500),
+            # 'NN': MLPClassifier(solver='lbfgs', alpha=1e-5, random_state=1, max_iter=500)
         }
         return dict_models[config]
 
