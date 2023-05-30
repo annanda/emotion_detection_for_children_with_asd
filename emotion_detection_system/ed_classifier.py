@@ -684,12 +684,15 @@ class EmotionDetectionClassifier:
     def _set_classifier_model(self):
         # simplest case
         # todo elaborate the selection and definition of models.
+
+        # if classifier type if SVM
         if self.configuration.balance_dataset and self.configuration.balance_dataset_technique == 'class_weight':
-            self.classifier_model = svm.SVC(probability=True, class_weight="balanced")
+            class_weight_setup = "balanced"
         else:
-            self.classifier_model['default'] = svm.SVC(probability=True)
-            self.classifier_model['audio'] = svm.SVC(probability=True)
-            self.classifier_model['video'] = svm.SVC(probability=True)
+            class_weight_setup = None
+        self.classifier_model['default'] = svm.SVC(probability=True, class_weight=class_weight_setup)
+        self.classifier_model['audio'] = svm.SVC(probability=True)
+        self.classifier_model['video'] = svm.SVC(probability=True)
         self._current_model = 'SVM'
 
     def _get_final_label_prediction_array(self):
