@@ -46,10 +46,10 @@
     }
   },
   "classifier_model": {
-    "all_modalities": "SVM",
+    "all_modalities": "NN",
     "audio": "",
     "video": "",
-    "early_fusion_model": "SVM"
+    "early_fusion_model": "NN"
   },
   "fusion_type": "late_fusion",
   "balanced_dataset": true,
