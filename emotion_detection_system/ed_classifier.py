@@ -15,6 +15,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression, Perceptron
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.preprocessing import RobustScaler, MinMaxScaler, StandardScaler, Normalizer
+from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import GridSearchCV
 
 from emotion_detection_system.conf import DATASET_FOLDER, ORDER_EMOTIONS, TOTAL_SESSIONS, PARTICIPANT_NUMBERS, \
@@ -68,7 +69,8 @@ class EmotionDetectionConfiguration:
         else:
             self.fusion_type = None
         self.annotation_type = self.configuration.get('annotation_type', 'parents')
-        self.normaliser = {'default': MinMaxScaler(), 'audio': MinMaxScaler(), 'video': MinMaxScaler()}
+        self.normaliser = {'default': MinMaxScaler(), 'audio': MinMaxScaler(), 'video': MinMaxScaler(),
+                           'early_fusion': MinMaxScaler()}
         self.rfe = self.configuration.get('recursive_feature_elimination', False)
         if self.rfe:
             self.rfe_algorithm = self.configuration.get('RFE_algorithm', 'svm_linear')
@@ -89,6 +91,10 @@ class EmotionDetectionConfiguration:
 
         self.x_and_x_validation_for_training = self.configuration.get('x_and_x_validation_for_training', False)
         # self.x_dev_balanced = self.configuration.get('x_dev_balanced', False)
+
+        # self.models_to_create = {
+        #     'SVM':
+        # }
 
     def _setup_modalities_features_type_values(self):
         """
@@ -140,8 +146,8 @@ class EmotionDetectionConfiguration:
                 models[modality] = self.configuration['classifier_model']['all_modalities']
             else:
                 models[modality] = self.configuration['classifier_model'][modality]
-            if self.configuration['classifier_model'].get('early_fusion_model', False):
-                models['early_fusion_model'] = self.configuration['classifier_model']['early_fusion_model']
+        if self.configuration['classifier_model'].get('early_fusion_model', False):
+            models['early_fusion'] = self.configuration['classifier_model']['early_fusion_model']
         self.models = models
 
     def _setup_sessions_to_consider(self):
@@ -525,12 +531,14 @@ class EmotionDetectionClassifier:
         To train the model and get predictions for x_test
         """
 
+        # for the cases of unimodality or early fusion
         if not self.configuration.is_multimodal or self.configuration.fusion_type == 'early_fusion':
             indexes_test = list(self.dataset.y_test.index)
             prediction_probability = self._train_model_produce_predictions_basic()
             self._prediction_probabilities = pd.DataFrame(prediction_probability,
                                                           columns=self.emotion_from_classifier,
                                                           index=indexes_test)
+        # for the case of late fusion multimodality
         else:
             self._train_model_produce_predictions_late_fusion()
         self._produce_final_predictions()
@@ -560,8 +568,12 @@ class EmotionDetectionClassifier:
         return x, y, x_dev, y_dev, x_test
 
     def get_modality(self, dataset):
+        # for unimodality or early_fusion case
         if not dataset:
-            return "default"
+            if self.configuration.is_multimodal:
+                return 'early_fusion'
+            return self.configuration.modalities[0]
+        # for a late fusion case
         elif dataset == 'x_video':
             return "video"
         elif dataset == 'x_audio':
@@ -685,15 +697,27 @@ class EmotionDetectionClassifier:
         # simplest case
         # todo elaborate the selection and definition of models.
 
-        # if classifier type if SVM
         if self.configuration.balance_dataset and self.configuration.balance_dataset_technique == 'class_weight':
             class_weight_setup = "balanced"
         else:
             class_weight_setup = None
-        self.classifier_model['default'] = svm.SVC(probability=True, class_weight=class_weight_setup)
-        self.classifier_model['audio'] = svm.SVC(probability=True)
-        self.classifier_model['video'] = svm.SVC(probability=True)
-        self._current_model = 'SVM'
+
+        self.classifier_model['early_fusion'] = self.get_model_constructor(self.configuration.models['early_fusion'],
+                                                                           class_weight_setup)
+        # self.classifier_model['default'] = svm.SVC(probability=True, class_weight=class_weight_setup)
+        self.classifier_model['audio'] = self.get_model_constructor(self.configuration.models['audio'],
+                                                                    class_weight_setup)
+        self.classifier_model['video'] = self.get_model_constructor(self.configuration.models['video'],
+                                                                    class_weight_setup)
+
+        # self._current_model = 'SVM'
+
+    def get_model_constructor(self, config, class_weight_setup):
+        dict_models = {
+            'SVM': svm.SVC(probability=True, class_weight=class_weight_setup),
+            'NN': MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 4), random_state=1, max_iter=300)
+        }
+        return dict_models[config]
 
     def _get_final_label_prediction_array(self):
         """
@@ -899,8 +923,8 @@ class EmotionDetectionClassifier:
                f'Fusion type: {self.configuration.fusion_type}\n' \
                f'Data used for Training: {self.train_data_description}\n' \
                f'Loaded Trained model: {self.configuration.load_trained_model}\n' \
-               f'Trained model experiment: {self.configuration.model_to_load_experiment}\n' \
-               f'Trained model config: {self.configuration.model_to_load_config}\n' \
+               f'Trained model experiment: {self.configuration.model_to_load_experiment if self.configuration.load_trained_model else None}\n' \
+               f'Trained model config: {self.configuration.model_to_load_config if self.configuration.load_trained_model else None}\n' \
                f'Balanced Dataset: {self.configuration.balance_dataset}\n' \
                f'Balanced Dataset Technique: {self.configuration.balance_dataset_technique}\n' \
                f'Oversampling Method: {self.configuration.oversampling_method}\n' \

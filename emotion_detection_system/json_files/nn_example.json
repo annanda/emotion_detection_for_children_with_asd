@@ -50,7 +50,7 @@
     "video": "",
     "early_fusion_model": "NN"
   },
-  "fusion_type": "late_fusion",
+  "fusion_type": "early_fusion",
   "balanced_dataset": false,
   "balance_dataset_technique": "oversampling",
   "recursive_feature_elimination": false,
