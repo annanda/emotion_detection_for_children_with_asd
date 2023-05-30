@@ -6,8 +6,8 @@ import json
 
 from emotion_detection_system.conf import emotion_detection_system_folder
 
-results_path = os.path.join(emotion_detection_system_folder, 'json_results', 'data_experiments_oversampling_random_050423')
-batch_data_experiments = 'oversampling_random_050423'
+results_path = os.path.join(emotion_detection_system_folder, 'json_results', 'data_experiments_nn_algorithm_300523')
+batch_data_experiments = 'nn_algorithm_300523'
 csv_path = os.path.join(results_path, f'{batch_data_experiments}_results.csv')
 
 

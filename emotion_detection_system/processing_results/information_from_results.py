@@ -19,6 +19,10 @@ rfe_data_results = pd.read_csv(
     os.path.join(main_folder, 'emotion_detection_system', 'json_results', 'data_experiments_rfe_030423',
                  'rfe_030423_results.csv'))
 
+nn_oversampling_data_results = pd.read_csv(
+    os.path.join(main_folder, 'emotion_detection_system', 'json_results', 'data_experiments_nn_algorithm_300523',
+                 'nn_algorithm_300523_results.csv'))
+
 # BASELINE_DATA = pd.read_csv(
 #     os.path.join(main_folder, 'emotion_detection_system', 'json_results', 'baselines_results_added_columns.csv'))
 
