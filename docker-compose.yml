@@ -11,4 +11,6 @@ services:
     restart: unless-stopped
     working_dir: /app/emotion_detection_system
     entrypoint: sh -c "/app/emotion_detection_system/scripts/${DATA_EXPERIMENT_SLUG}.sh"
+    environment:
+      - DATA_EXPERIMENT_SLUG=${DATA_EXPERIMENT_SLUG}
 #    entrypoint: /bin/sh -c

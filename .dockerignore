@@ -7,3 +7,4 @@ data_statistics/*
 /emotion_detection_system/json_results/*
 /emotion_detection_system/results/*
 /emotion_detection_system/legacy/*
+.env
