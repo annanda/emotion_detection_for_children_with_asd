@@ -47,7 +47,12 @@ AUDIO_FEATURES_LEVELS = ['llds', 'functionals', 'llds_deltas']
 # norm_parameters = [MinMaxScaler(), RobustScaler(), Normalizer(), StandardScaler()]
 
 PARAMETER_GRID_SEARCH = {
-    'rfe__estimator': [RandomForestClassifier(), Perceptron(), DecisionTreeClassifier()]}
+    # 'rfe__estimator': [RandomForestClassifier(), Perceptron(), DecisionTreeClassifier()],
+    'model__activation': ['relu', 'logistic'],
+    'model__solver': ['adam', 'lbfgs', 'sgd'],
+    'model__learning_rate': ['adaptive', 'constant'],
+    'model__hidden_layer_sizes': [(100,), (50,), (25,)]
+    }
 
 TRAINED_MODELS_FOLDER = config('TRAINED_MODELS_FOLDER',
                                default=os.path.join(emotion_detection_system_folder, 'trained_models'))
