@@ -717,7 +717,7 @@ class EmotionDetectionClassifier:
     def get_model_map(self, config, class_weight_setup):
         dict_models = {
             'SVM': svm.SVC(probability=True, class_weight=class_weight_setup),
-            'NN': MLPClassifier(verbose=True, max_iter=500),
+            'NN': MLPClassifier(verbose=True, max_iter=500, random_state=1),
             # 'NN': MLPClassifier(alpha=1e-5, random_state=1, max_iter=500),
             # 'NN': MLPClassifier(solver='lbfgs', alpha=1e-5, random_state=1, max_iter=500)
         }
