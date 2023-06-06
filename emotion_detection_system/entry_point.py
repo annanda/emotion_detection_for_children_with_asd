@@ -7,6 +7,7 @@ import pickle
 import sys
 
 from emotion_detection_system.ed_classifier import EmotionDetectionClassifier
+from emotion_detection_system.ensemble_classifier import EmotionDetectionEnsemble
 from emotion_detection_system.processing_results.process_results import get_scenario
 from conf import emotion_detection_system_folder, TRAINED_MODELS_FOLDER, DATA_EXPERIMENT_SLUG
 
@@ -23,15 +24,22 @@ def script_entry(json_file):
     f = open(path_json)
     configure_data = json.load(f)
 
-    classifier = EmotionDetectionClassifier(configure_data)
-    classifier.train_model_produce_predictions()
+    if configure_data['ensemble_model']:
+        classifier = EmotionDetectionEnsemble(configure_data)
+        classifier.produce_predictions()
+    else:
+        classifier = EmotionDetectionClassifier(configure_data)
+        classifier.train_model_produce_predictions()
+
+    classifier.produce_final_predictions()
     classifier.show_results()
 
     # If want to generate structured json files with the results
     generate_json_results(classifier, path_json)
 
     if not classifier.configuration.load_trained_model:
-        save_model(classifier, file_name)
+        if not classifier.configuration.ensemble_model:
+            save_model(classifier, file_name)
 
 
 def save_model(classifier, file_name):
@@ -86,7 +94,7 @@ if __name__ == '__main__':
     json_file = sys.argv[1]
     # If using local run
     # json_file = 'example_annotation_specialist.json'
-    # json_file = 'example_balance_dataset.json'
+    # json_file = 'nn_example_ensemble.json'
     # json_file = 'all_data_va_late_fusion.json'
     # json_file = 'specialist_nn_tuning/all_data_va_late_fusion_02.json'
     # json_file = 'specialist_oversampling_random/session_02_01_v.json'

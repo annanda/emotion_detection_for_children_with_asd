@@ -81,6 +81,9 @@ class EmotionDetectionConfiguration:
         if self.load_trained_model:
             self.model_to_load_experiment = self.configuration.get('model_to_load_experiment', False)
             self.model_to_load_config = self.configuration.get("model_to_load_config", False)
+        self.ensemble_model = self.configuration.get('ensemble_model', False)
+        if self.ensemble_model:
+            self.ensemble_config = self.configuration.get('ensemble_config', [])
         # To define the path for person-independent model or individuals model
         self.person_independent_folder = 'cross-individuals' if self.configuration[
             'person_independent_model'] else 'individuals'
@@ -541,7 +544,8 @@ class EmotionDetectionClassifier:
         # for the case of late fusion multimodality
         else:
             self._train_model_produce_predictions_late_fusion()
-        self._produce_final_predictions()
+
+        # self.produce_final_predictions()
 
     def set_x_y_to_train(self, dataset):
         if dataset:
@@ -628,13 +632,16 @@ class EmotionDetectionClassifier:
 
         return prediction_probability
 
-    def get_model_path(self, dataset):
+    def get_model_path(self, dataset, model_experiment=None, model_config=None):
         """
         :param dataset: x_video, x_audio or None
+        :param model_experiment:
+        :param model_config:
         :return: string with the path to load the trained model.
         """
-        model_experiment = self.configuration.model_to_load_experiment
-        model_config = self.configuration.model_to_load_config
+        if not model_experiment and model_config:
+            model_experiment = self.configuration.model_to_load_experiment
+            model_config = self.configuration.model_to_load_config
         trained_models_folder = TRAINED_MODELS_FOLDER
         modality = self.get_modality(dataset)
         experiment = model_experiment.split('_')[:-1]
@@ -682,7 +689,7 @@ class EmotionDetectionClassifier:
                                                       columns=self.emotion_from_classifier,
                                                       index=indexes_test)
 
-    def _produce_final_predictions(self):
+    def produce_final_predictions(self):
         self._prediction_labels = self._get_final_label_prediction_array()
         self._calculate_accuracy()
         self._calculate_balanced_accuracy()
@@ -932,5 +939,7 @@ class EmotionDetectionClassifier:
                f'Balanced Dataset: {self.configuration.balance_dataset}\n' \
                f'Balanced Dataset Technique: {self.configuration.balance_dataset_technique}\n' \
                f'Oversampling Method: {self.configuration.oversampling_method}\n' \
+               f'Ensemble model: {self.configuration.ensemble_model}\n' \
+               f'Ensemble model config: {self.configuration.ensemble_config if self.configuration.ensemble_model else None}\n' \
                f'RFE: {self.configuration.rfe}\n' \
                f'RFE algorithm: {self.configuration.rfe_algorithm}'
