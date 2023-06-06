@@ -88,7 +88,7 @@ if __name__ == '__main__':
     # json_file = 'example_annotation_specialist.json'
     # json_file = 'example_balance_dataset.json'
     # json_file = 'all_data_va_late_fusion.json'
-    # json_file = 'specialist_nn_algorithm/all_data_va_late_fusion.json'
+    # json_file = 'specialist_nn_tuning/all_data_va_late_fusion_02.json'
     # json_file = 'specialist_oversampling_random/session_02_01_v.json'
 
     script_entry(json_file)

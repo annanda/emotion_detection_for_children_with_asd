@@ -1,6 +1,7 @@
 import pathlib
 import os.path
 from datetime import datetime
+import numpy as np
 
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.tree import DecisionTreeClassifier
@@ -48,11 +49,14 @@ AUDIO_FEATURES_LEVELS = ['llds', 'functionals', 'llds_deltas']
 
 PARAMETER_GRID_SEARCH = {
     # 'rfe__estimator': [RandomForestClassifier(), Perceptron(), DecisionTreeClassifier()],
-    'model__activation': ['relu', 'logistic'],
-    'model__solver': ['adam', 'lbfgs'],
-    'model__learning_rate': ['adaptive', 'constant'],
+    # 'model__activation': ['relu', 'logistic'],
+    # 'model__solver': ['adam', 'lbfgs'],
+    # 'model__learning_rate': ['adaptive', 'constant'],
+    # 'model__max_iter': [200, 500, 1000, 1500],
+    # 'model__alpha': 10.0 ** -np.arange(5, 10)
+    'model__random_state': [0, 1, 2, 3, 4, 5]
     # 'model__hidden_layer_sizes': [(100,), (50,), (25,)]
-    }
+}
 
 TRAINED_MODELS_FOLDER = config('TRAINED_MODELS_FOLDER',
                                default=os.path.join(emotion_detection_system_folder, 'trained_models'))

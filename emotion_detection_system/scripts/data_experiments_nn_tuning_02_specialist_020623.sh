@@ -17,6 +17,7 @@ mkdir -p ${OUTPUT_FOLDER}
 # NN model
 # Annotation: Parents
 # Dataset balanced: over-sampling:random
+# MLP(verbose=True, random_state=1)
 #'model__activation': ['relu', 'logistic'],
     # 'model__solver': ['adam', 'lbfgs'],
     # 'model__learning_rate': ['adaptive', 'constant'],
@@ -27,14 +28,7 @@ mkdir -p ${OUTPUT_FOLDER}
 
 #MULTIMODAL
 
-echo "Starting new Data Experiment Configuration: participant_03_va_late_fusion"
-python entry_point.py ${INPUT_FOLDER}/participant_03_va_late_fusion.json> ${OUTPUT_FOLDER}/${SLUG}_${ANNOTATION}_participant_03_va_late_fusion_${DATE}.txt
-
-
-echo "Starting new Data Experiment Configuration: session_03_01_va_late_fusion.json"
-python entry_point.py ${INPUT_FOLDER}/session_03_01_va_late_fusion.json> ${OUTPUT_FOLDER}/${SLUG}_${ANNOTATION}_session_03_01_va_late_fusion_${DATE}.txt
-
 ## All participants together - Video&Audio:  features (above) - Late fusion
-echo "Starting new Data Experiment Configuration: all_data_va_late_fusion"
-python entry_point.py ${INPUT_FOLDER}/all_data_va_late_fusion.json> ${OUTPUT_FOLDER}/${SLUG}_${ANNOTATION}_all_data_va_late_fusion_${DATE}.txt
+echo "Starting new Data Experiment Configuration: all_data_va_late_fusion_02.json"
+python entry_point.py ${INPUT_FOLDER}/all_data_va_late_fusion_02.json> ${OUTPUT_FOLDER}/${SLUG}_${ANNOTATION}_all_data_va_late_fusion_02_${DATE}.txt
 #
