@@ -9,6 +9,9 @@ model_to_load_config_03 = 'specialist_030623_all_data_va_late_fusion_03'
 
 
 class EmotionDetectionEnsemble:
+    """
+    Only Implemented for late fusion models
+    """
     def __init__(self, configure_data):
         self.classifier_basic = EmotionDetectionClassifier(configure_data)
         self.configuration = self.classifier_basic.configuration
@@ -28,10 +31,10 @@ class EmotionDetectionEnsemble:
         for model in models_ensemble:
             model_prediction = self.get_model_prediction(model, [x_test_video, x_test_audio])
             prediction_from_models_list.append(model_prediction)
-        _prediction_probabilities = self.compute_average_predictions(prediction_from_models_list)
+        prediction_probabilities = self.compute_average_predictions(prediction_from_models_list)
 
         indexes_test = list(self.classifier_basic.dataset.y_test_video.index)
-        self.classifier_basic._prediction_probabilities = pd.DataFrame(_prediction_probabilities,
+        self.classifier_basic._prediction_probabilities = pd.DataFrame(prediction_probabilities,
                                                                        columns=self.classifier_basic.emotion_from_classifier,
                                                                        index=indexes_test)
 
@@ -75,10 +78,6 @@ class EmotionDetectionEnsemble:
     def compute_average_predictions(self, prediction_from_models_list):
         prediction = np.mean(np.array(prediction_from_models_list), axis=0)
         return prediction
-
-    def get_models_ensemble(self, ensemble_config):
-        models_list = []
-        return models_list
 
     def produce_final_predictions(self):
         self.classifier_basic.produce_final_predictions()
