@@ -24,7 +24,7 @@ def script_entry(json_file):
     f = open(path_json)
     configure_data = json.load(f)
 
-    if configure_data['ensemble_model']:
+    if configure_data.get('ensemble_model', False):
         classifier = EmotionDetectionEnsemble(configure_data)
         classifier.produce_predictions()
     else:
@@ -96,7 +96,7 @@ if __name__ == '__main__':
     # json_file = 'example_annotation_specialist.json'
     # json_file = 'nn_example_ensemble.json'
     # json_file = 'all_data_va_late_fusion.json'
-    # json_file = 'specialist_nn_tuning/all_data_va_late_fusion_02.json'
+    # json_file = 'specialist_nn_trained_models/SM_all_data_va_late_fusion.json'
     # json_file = 'specialist_oversampling_random/session_02_01_v.json'
 
     script_entry(json_file)

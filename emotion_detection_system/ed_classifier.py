@@ -632,14 +632,14 @@ class EmotionDetectionClassifier:
 
         return prediction_probability
 
-    def get_model_path(self, dataset, model_experiment=None, model_config=None):
+    def get_model_path(self, dataset, model_experiment=False, model_config=False):
         """
         :param dataset: x_video, x_audio or None
         :param model_experiment:
         :param model_config:
         :return: string with the path to load the trained model.
         """
-        if not model_experiment and model_config:
+        if not (model_experiment and model_config):
             model_experiment = self.configuration.model_to_load_experiment
             model_config = self.configuration.model_to_load_config
         trained_models_folder = TRAINED_MODELS_FOLDER
