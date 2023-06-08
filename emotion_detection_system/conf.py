@@ -54,8 +54,8 @@ PARAMETER_GRID_SEARCH = {
     # 'model__learning_rate': ['adaptive', 'constant'],
     # 'model__max_iter': [200, 500, 1000, 1500],
     # 'model__alpha': 10.0 ** -np.arange(5, 10)
-    'model__random_state': [0, 1, 2, 3, 4, 5]
-    # 'model__hidden_layer_sizes': [(100,), (50,), (25,)]
+    # 'model__random_state': [0, 1, 2, 3, 4, 5],
+    'model__hidden_layer_sizes': [(200, 100), (100, 50), (100, 25), (100, 50, 25)]
 }
 
 TRAINED_MODELS_FOLDER = config('TRAINED_MODELS_FOLDER',
