@@ -51,7 +51,7 @@
     "video": "",
     "early_fusion_model": "NN"
   },
-  "fusion_type": "late_fusion",
+  "fusion_type": "early_fusion",
   "balanced_dataset": true,
   "balance_dataset_technique": "oversampling",
   "recursive_feature_elimination": false,
@@ -59,5 +59,5 @@
   "grid_search": false,
   "load_trained_model": true,
   "model_to_load_experiment": "data_experiments_nn_algorithm_300523",
-  "model_to_load_config": "parents_300523_session_03_01_va_late_fusion"
+  "model_to_load_config": "parents_300523_session_03_01_va_early_fusion"
 }

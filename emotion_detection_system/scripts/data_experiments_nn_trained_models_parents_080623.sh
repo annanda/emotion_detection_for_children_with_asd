@@ -16,7 +16,7 @@ mkdir -p ${OUTPUT_FOLDER}
 
 #FOR PARENTS ANNOTATION
 # Best SM: participant_03_va_late_fusion_parents
-# Best HSM: session_03_01_va_late_fusion_parents
+# Best HSM: session_03_01_va_early_fusion_parents
 
 # Normalised data using MinMAxScaler()
 # Features included:
@@ -28,9 +28,9 @@ mkdir -p ${OUTPUT_FOLDER}
 
 
 # ALL DATA
-echo "Starting new Data Experiment Configuration: all_data_va_late_fusion"
+echo "Starting new Data Experiment Configuration: SM_all_data_va_late_fusion"
 python entry_point.py ${INPUT_FOLDER}/SM_all_data_va_late_fusion.json> ${OUTPUT_FOLDER}/${SLUG}_${ANNOTATION}_SM_all_data_va_late_fusion_${DATE}.txt
 
 
-echo "Starting new Data Experiment Configuration: all_data_va_late_fusion"
-python entry_point.py ${INPUT_FOLDER}/HSM_all_data_va_late_fusion.json> ${OUTPUT_FOLDER}/${SLUG}_${ANNOTATION}_HSM_all_data_va_late_fusion_${DATE}.txt
+echo "Starting new Data Experiment Configuration: HSM_all_data_va_early_fusion"
+python entry_point.py ${INPUT_FOLDER}/HSM_all_data_va_early_fusion.json> ${OUTPUT_FOLDER}/${SLUG}_${ANNOTATION}_HSM_all_data_va_early_fusion_${DATE}.txt
