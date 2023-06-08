@@ -22,7 +22,7 @@ mkdir -p ${OUTPUT_FOLDER}
 # Features included:
 # audio: all
 # video: AU, gaze, head_movement
-# SVM model
+# NN model
 # Annotation: Parents
 # Dataset balanced: over-sampling:random
 
