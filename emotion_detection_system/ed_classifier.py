@@ -252,7 +252,7 @@ class PrepareDataset:
 
     def _organise_multimodal_late_fusion_test_datasets(self):
         """
-        It only gets here is the model is multimodal and late fusion type.
+        It only gets here if the model is multimodal and late fusion type.
         Make the test set consistent. Keeping only the values that are present in both video and audio test datasets.
         :return: None
         """
@@ -287,7 +287,8 @@ class PrepareDataset:
         dfs = [self.x_video, self.x_audio]
         dfs_dev = [self.x_dev_video, self.x_dev_audio]
         dfs_test = [self.x_test_video, self.x_test_audio]
-        self.merge_dfs_columns(dfs, dfs_dev, dfs_test, 'early_fusion')
+        dfs_merged = self.merge_dfs_columns(dfs, dfs_dev, dfs_test)
+        self.set_dataset_values(dfs_merged, 'early_fusion')
 
     def concatenate_dfs_rows(self, folders_to_concat_df):
         df, df_dev, df_test = ([], [], [])
@@ -325,13 +326,13 @@ class PrepareDataset:
         return dfs_merged
         # self.set_dataset_values(dfs_merged, modality)
 
-    def get_test_dataset(self, modality):
-        if modality == 'video':
-            self._prepare_dataset_video_modality(testset=True)
-        elif modality == 'audio':
-            pass
-        df_test = []
-        return df_test
+    # def get_test_dataset(self, modality):
+    #     if modality == 'video':
+    #         self._prepare_dataset_video_modality(testset=True)
+    #     elif modality == 'audio':
+    #         pass
+    #     df_test = []
+    #     return df_test
 
     def set_dataset_values(self, dfs_merged, modality):
         """
@@ -438,22 +439,6 @@ class PrepareDataset:
                                        'video',
                                        self.configuration.person_independent_folder,
                                        self.configuration.dataset_split_type)
-
-        # df_concatenate_columns = []
-        # df_dev_concatenate_columns = []
-        # df_test_concatenate_columns = []
-        #
-        # for feature in self.configuration.video_features_types:
-        #     folders_read = self._prepare_dataset_path_video_modality_one_feature(folder_modality, feature)
-        #     df, df_dev, df_test = self.concatenate_dfs_rows(folders_read)
-        #
-        #     df_concatenate_columns.append(df)
-        #     df_dev_concatenate_columns.append(df_dev)
-        #     df_test_concatenate_columns.append(df_test)
-        #
-        # dfs_merged = self.merge_dfs_columns(df_concatenate_columns,
-        #                                     df_dev_concatenate_columns,
-        #                                     df_test_concatenate_columns)
         dfs_merged = self.combine_video_features(folder_modality)
 
         if self.configuration.sessions_test:
@@ -482,6 +467,26 @@ class PrepareDataset:
                                             df_test_concatenate_columns)
         return dfs_merged
 
+    def combine_audio_features(self, folder_modality, testset=False):
+        df_concatenate_columns = []
+        df_dev_concatenate_columns = []
+        df_test_concatenate_columns = []
+
+        for group in self.configuration.audio_features_groups:
+            for feature in self.configuration.audio_features_types[group]:
+                folders_to_read = self._prepare_dataset_path_audio_modality_one_feature(folder_modality, group, feature, testset)
+                df, df_dev, df_test = self.concatenate_dfs_rows(folders_to_read)
+
+                df_concatenate_columns.append(df)
+                df_dev_concatenate_columns.append(df_dev)
+                df_test_concatenate_columns.append(df_test)
+
+        dfs_merged = self.merge_dfs_columns(df_concatenate_columns,
+                                            df_dev_concatenate_columns,
+                                            df_test_concatenate_columns)
+
+        return dfs_merged
+
     def _prepare_dataset_audio_modality(self):
         folder_modality = os.path.join(self.dataset_path,
                                        'audio',
@@ -489,22 +494,16 @@ class PrepareDataset:
                                        self.configuration.dataset_split_type,
                                        self.configuration.audio_features_level)
 
-        df_concatenate_columns = []
-        df_dev_concatenate_columns = []
-        df_test_concatenate_columns = []
+        dfs_merged = self.combine_audio_features(folder_modality)
 
-        for group in self.configuration.audio_features_groups:
-            for feature in self.configuration.audio_features_types[group]:
-                folders_to_read = self._prepare_dataset_path_audio_modality_one_feature(folder_modality, group, feature)
-                df, df_dev, df_test = self.concatenate_dfs_rows(folders_to_read)
+        if self.configuration.sessions_test:
+            df_test_merged = self.combine_audio_features(folder_modality, testset=True)
+            df_test = pd.concat(df_test_merged)
+            df = pd.concat(dfs_merged)
+            dfs_merged[0] = df
+            dfs_merged[2] = df_test
 
-                df_concatenate_columns.append(df)
-                df_dev_concatenate_columns.append(df_dev)
-                df_test_concatenate_columns.append(df_test)
-
-        self.merge_dfs_columns(df_concatenate_columns,
-                               df_dev_concatenate_columns,
-                               df_test_concatenate_columns, 'audio')
+        self.set_dataset_values(dfs_merged, 'audio')
 
     def _prepare_dataset_path_video_modality_one_feature(self, folder_read_modality, feature, testset):
         folders_one_modality_one_feature = []
@@ -519,9 +518,13 @@ class PrepareDataset:
                 session))
         return folders_one_modality_one_feature
 
-    def _prepare_dataset_path_audio_modality_one_feature(self, folder_modality, group, feature):
+    def _prepare_dataset_path_audio_modality_one_feature(self, folder_modality, group, feature, testset):
         folders_one_modality_one_feature = []
-        for session in self.configuration.sessions_to_consider:
+        if testset:
+            session_to_look = self.configuration.sessions_test
+        else:
+            session_to_look = self.configuration.sessions_to_consider
+        for session in session_to_look:
             folders_one_modality_one_feature.append(os.path.join(
                 folder_modality,
                 group,

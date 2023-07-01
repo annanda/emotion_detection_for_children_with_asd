@@ -15,7 +15,7 @@
   ],
   "all_participant_data": false,
   "dataset_split_type": "non_sequential",
-  "annotation_type": "parents",
+  "annotation_type": "specialist",
   "person_independent_model": false,
   "modalities": [
     "video",
@@ -36,9 +36,9 @@
     "audio": {
       "feature_group": {
         "frequency": true,
-        "energy_amplitude": true,
-        "spectral_balance": true,
-        "temporal_features": true
+        "energy_amplitude": false,
+        "spectral_balance": false,
+        "temporal_features": false
       },
       "all_features_from_group": true,
       "features_type": {
