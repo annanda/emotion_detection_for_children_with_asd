@@ -43,6 +43,8 @@ class EmotionDetectionConfiguration:
         self.session_number = str(self.configuration['session_number'])
         self.all_participant_data = self.configuration['all_participant_data']
         self.sessions_to_consider = []
+        self.sessions_train = self.configuration.get('sessions_train', [])
+        self.sessions_test = self.configuration.get('sessions_test', [])
         self.dataset_split_type = self.configuration['dataset_split_type']
         self.person_independent_model = self.configuration['person_independent_model']
 
@@ -169,6 +171,9 @@ class EmotionDetectionConfiguration:
         else:
             self.sessions_to_consider.append(f'session_0{self.participant_number}_0{self.session_number}')
 
+        if self.sessions_train:
+            self.sessions_to_consider = self.sessions_train
+
     def _check_and_set_participant_number(self):
         if self.configuration['participant_number'] in PARTICIPANT_NUMBERS:
             self.participant_number = self.configuration['participant_number']
@@ -216,7 +221,6 @@ class PrepareDataset:
             return os.path.join(DATASET_FOLDER, 'specialist')
 
     def prepare_dataset(self):
-        # print('Preparing the dataset....')
         if 'video' in self.configuration.modalities:
             self._prepare_dataset_video_modality()
         if 'audio' in self.configuration.modalities:
@@ -301,7 +305,7 @@ class PrepareDataset:
 
     def merge_dfs_columns(self, df_concatenate_columns,
                           df_dev_concatenate_columns,
-                          df_test_concatenate_columns, modality):
+                          df_test_concatenate_columns):
         dfs = [df_concatenate_columns, df_dev_concatenate_columns, df_test_concatenate_columns]
         dfs_merged = []
 
@@ -315,9 +319,27 @@ class PrepareDataset:
                                df_to_merge)
             dfs_merged.append(df_merged)
 
-        self.set_dataset_values(dfs_merged, modality)
+        # if self.configuration.sessions_train:
+        #     return dfs_merged
+
+        return dfs_merged
+        # self.set_dataset_values(dfs_merged, modality)
+
+    def get_test_dataset(self, modality):
+        if modality == 'video':
+            self._prepare_dataset_video_modality(testset=True)
+        elif modality == 'audio':
+            pass
+        df_test = []
+        return df_test
 
     def set_dataset_values(self, dfs_merged, modality):
+        """
+        The last method before setting dataset types.
+        :param dfs_merged:
+        :param modality:
+        :return:
+        """
         df = dfs_merged[0].fillna(0)
         df_dev = dfs_merged[1].fillna(0)
         df_test = dfs_merged[2].fillna(0)
@@ -417,21 +439,48 @@ class PrepareDataset:
                                        self.configuration.person_independent_folder,
                                        self.configuration.dataset_split_type)
 
+        # df_concatenate_columns = []
+        # df_dev_concatenate_columns = []
+        # df_test_concatenate_columns = []
+        #
+        # for feature in self.configuration.video_features_types:
+        #     folders_read = self._prepare_dataset_path_video_modality_one_feature(folder_modality, feature)
+        #     df, df_dev, df_test = self.concatenate_dfs_rows(folders_read)
+        #
+        #     df_concatenate_columns.append(df)
+        #     df_dev_concatenate_columns.append(df_dev)
+        #     df_test_concatenate_columns.append(df_test)
+        #
+        # dfs_merged = self.merge_dfs_columns(df_concatenate_columns,
+        #                                     df_dev_concatenate_columns,
+        #                                     df_test_concatenate_columns)
+        dfs_merged = self.combine_video_features(folder_modality)
+
+        if self.configuration.sessions_test:
+            df_test_merged = self.combine_video_features(folder_modality, testset=True)
+            df_test = pd.concat(df_test_merged)
+            df = pd.concat(dfs_merged)
+            dfs_merged[0] = df
+            dfs_merged[2] = df_test
+
+        self.set_dataset_values(dfs_merged, 'video')
+
+    def combine_video_features(self, folder_modality, testset=False):
         df_concatenate_columns = []
         df_dev_concatenate_columns = []
         df_test_concatenate_columns = []
 
         for feature in self.configuration.video_features_types:
-            folders_read = self._prepare_dataset_path_video_modality_one_feature(folder_modality, feature)
+            folders_read = self._prepare_dataset_path_video_modality_one_feature(folder_modality, feature, testset)
             df, df_dev, df_test = self.concatenate_dfs_rows(folders_read)
 
             df_concatenate_columns.append(df)
             df_dev_concatenate_columns.append(df_dev)
             df_test_concatenate_columns.append(df_test)
-
-        self.merge_dfs_columns(df_concatenate_columns,
-                               df_dev_concatenate_columns,
-                               df_test_concatenate_columns, 'video')
+        dfs_merged = self.merge_dfs_columns(df_concatenate_columns,
+                                            df_dev_concatenate_columns,
+                                            df_test_concatenate_columns)
+        return dfs_merged
 
     def _prepare_dataset_audio_modality(self):
         folder_modality = os.path.join(self.dataset_path,
@@ -457,9 +506,13 @@ class PrepareDataset:
                                df_dev_concatenate_columns,
                                df_test_concatenate_columns, 'audio')
 
-    def _prepare_dataset_path_video_modality_one_feature(self, folder_read_modality, feature):
+    def _prepare_dataset_path_video_modality_one_feature(self, folder_read_modality, feature, testset):
         folders_one_modality_one_feature = []
-        for session in self.configuration.sessions_to_consider:
+        if testset:
+            session_to_look = self.configuration.sessions_test
+        else:
+            session_to_look = self.configuration.sessions_to_consider
+        for session in session_to_look:
             folders_one_modality_one_feature.append(os.path.join(
                 folder_read_modality,
                 feature,
@@ -922,6 +975,8 @@ class EmotionDetectionClassifier:
                f'Session number: 0{self.configuration.session_number}\n' \
                f'All participant data: {self.configuration.all_participant_data}\n' \
                f'Sessions to consider: {self.configuration.sessions_to_consider}\n' \
+               f'Sessions train: {self.configuration.sessions_train}\n' \
+               f'Sessions test: {self.configuration.sessions_test}\n' \
                f'Dataset split type: {self.configuration.dataset_split_type}\n' \
                f'Annotation type: {self.configuration.annotation_type}\n' \
                f'Person-Independent model: {self.configuration.person_independent_model}\n' \
