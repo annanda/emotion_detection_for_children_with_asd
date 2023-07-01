@@ -45,6 +45,7 @@ class EmotionDetectionConfiguration:
         self.sessions_to_consider = []
         self.sessions_train = self.configuration.get('sessions_train', [])
         self.sessions_test = self.configuration.get('sessions_test', [])
+        self.intersection_train_test = self.configuration.get('intersection_train_test', False)
         self.dataset_split_type = self.configuration['dataset_split_type']
         self.person_independent_model = self.configuration['person_independent_model']
 
@@ -444,9 +445,15 @@ class PrepareDataset:
         if self.configuration.sessions_test:
             df_test_merged = self.combine_video_features(folder_modality, testset=True)
             df_test = pd.concat(df_test_merged)
-            df = pd.concat(dfs_merged)
-            dfs_merged[0] = df
-            dfs_merged[2] = df_test
+            # if there is subjects present in train and test sets
+            if self.configuration.intersection_train_test:
+                df_test = pd.concat([dfs_merged[2], df_test])
+                dfs_merged[2] = df_test
+            else:
+                # if there is not subjects present in both train and test sets
+                df = pd.concat(dfs_merged)
+                dfs_merged[0] = df
+                dfs_merged[2] = df_test
 
         self.set_dataset_values(dfs_merged, 'video')
 
@@ -474,7 +481,8 @@ class PrepareDataset:
 
         for group in self.configuration.audio_features_groups:
             for feature in self.configuration.audio_features_types[group]:
-                folders_to_read = self._prepare_dataset_path_audio_modality_one_feature(folder_modality, group, feature, testset)
+                folders_to_read = self._prepare_dataset_path_audio_modality_one_feature(folder_modality, group, feature,
+                                                                                        testset)
                 df, df_dev, df_test = self.concatenate_dfs_rows(folders_to_read)
 
                 df_concatenate_columns.append(df)
@@ -499,9 +507,15 @@ class PrepareDataset:
         if self.configuration.sessions_test:
             df_test_merged = self.combine_audio_features(folder_modality, testset=True)
             df_test = pd.concat(df_test_merged)
-            df = pd.concat(dfs_merged)
-            dfs_merged[0] = df
-            dfs_merged[2] = df_test
+            # if there is subjects present in train and test sets
+            if self.configuration.intersection_train_test:
+                df_test = pd.concat([dfs_merged[2], df_test])
+                dfs_merged[2] = df_test
+            else:
+                # if there is no subjects present in both train and test sets
+                df = pd.concat(dfs_merged)
+                dfs_merged[0] = df
+                dfs_merged[2] = df_test
 
         self.set_dataset_values(dfs_merged, 'audio')
 

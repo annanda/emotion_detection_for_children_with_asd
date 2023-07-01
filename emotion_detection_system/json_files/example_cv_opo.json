@@ -13,6 +13,7 @@
     "session_04_01",
     "session_04_02"
   ],
+  "intersection_train_test": true,
   "all_participant_data": false,
   "dataset_split_type": "non_sequential",
   "annotation_type": "specialist",
@@ -62,7 +63,7 @@
     "video": "",
     "early_fusion_model": "NN"
   },
-  "fusion_type": "early_fusion",
+  "fusion_type": "late_fusion",
   "balanced_dataset": true,
   "balance_dataset_technique": "oversampling",
   "recursive_feature_elimination": false,
