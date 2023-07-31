@@ -97,7 +97,7 @@ if __name__ == '__main__':
     # json_file = 'example_cv_opo.json'
     # json_file = 'all_data_va_late_fusion.json'
     # json_file = 'specialist_nn_tuning/all_data_va_late_fusion_04.json'
-    # json_file = 'specialist_nn_algorithm/participant_03_va_late_fusion.json'
+    # json_file = 'specialist_nn_algorithm_bl/participant_03_va_late_fusion.json'
 
     script_entry(json_file)
 
