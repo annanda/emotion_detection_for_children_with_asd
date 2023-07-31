@@ -91,13 +91,13 @@ def save_json_result_file(dict_json, file_name):
 
 if __name__ == '__main__':
     # if using shell script
-    # json_file = sys.argv[1]
+    json_file = sys.argv[1]
     # If using local run
     # json_file = 'example_annotation_specialist.json'
-    json_file = 'example_cv_opo.json'
+    # json_file = 'example_cv_opo.json'
     # json_file = 'all_data_va_late_fusion.json'
     # json_file = 'specialist_nn_tuning/all_data_va_late_fusion_04.json'
-    # json_file = 'specialist_oversampling_random/session_02_01_v.json'
+    # json_file = 'specialist_nn_algorithm/participant_03_va_late_fusion.json'
 
     script_entry(json_file)
 
