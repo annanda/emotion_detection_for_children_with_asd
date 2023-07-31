@@ -52,6 +52,6 @@
     "early_fusion_model": "NN"
   },
   "fusion_type": "late_fusion",
-  "balanced_dataset": true,
+  "balanced_dataset": false,
   "balance_dataset_technique": "oversampling"
 }
