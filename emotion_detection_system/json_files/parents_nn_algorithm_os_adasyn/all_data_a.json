@@ -52,5 +52,7 @@
   },
   "fusion_type": "early_fusion",
   "balanced_dataset": true,
-  "balance_dataset_technique": "oversampling"
+  "balance_dataset_technique": "oversampling",
+  "oversampling_method": "adasyn"
+
 }
