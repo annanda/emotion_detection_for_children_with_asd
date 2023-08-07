@@ -27,6 +27,14 @@ nn_bl_data_results = pd.read_csv(
     os.path.join(main_folder, 'emotion_detection_system', 'json_results', 'data_experiments_nn_algorithm_bl_310723',
                  'nn_algorithm_bl_310723_results.csv'))
 
+svm_undersampling_data_results = pd.read_csv(
+    os.path.join(main_folder, 'emotion_detection_system', 'json_results', 'data_experiments_svm_undersampling_010823',
+                 'svm_undersampling_010823_results.csv'))
+
+nn_undersampling_data_results = pd.read_csv(
+    os.path.join(main_folder, 'emotion_detection_system', 'json_results', 'data_experiments_nn_undersampling_010823',
+                 'nn_undersampling_010823_results.csv'))
+
 # BASELINE_DATA = pd.read_csv(
 #     os.path.join(main_folder, 'emotion_detection_system', 'json_results', 'baselines_results_added_columns.csv'))
 
@@ -324,6 +332,15 @@ def calculate_best_acc(data_to_apply):
         f"Difference from Baseline: {diff_b_acc:.2f}%")
 
 
+def get_model_group(row):
+    if row['Participant'] == 'All data':
+        return 'GM'
+    elif 'Participant' in str(row['Participant']):
+        return 'PSM'
+    elif 'Session' in str(row['Session']):
+        return 'SSM'
+
+
 if __name__ == '__main__':
     # Example of configuration values
     scenario = ['va_late_fusion', 'va_early_fusion']
@@ -336,9 +353,11 @@ if __name__ == '__main__':
     compare_against_baseline(resulting_df, baseline_df, scenario, annotation_type, subset_data)
     # calculate_aggregated_f1_score(resulting_df, baseline_df)
     # calculate_best_f1_score(resulting_df, baseline_df)
-    # print('hello!')
 
     # compare_against_baseline_sessions(oversampling_data_results, scenario=['v'],
     #                                   annotation_type=['parents', 'specialist'])
     # compare_against_baseline_participants(oversampling_data_results, scenario=['v'],
     #                                       annotation_type=['parents', 'specialist'])
+
+    # nn_bl_data_results['model_group'] = nn_bl_data_results.apply(lambda row: get_model_group(row), axis=1)
+    # print('hi')
