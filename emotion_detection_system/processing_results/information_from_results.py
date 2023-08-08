@@ -27,6 +27,10 @@ nn_oversampling_data_results = pd.read_csv(
     os.path.join(main_folder, 'emotion_detection_system', 'json_results', 'data_experiments_nn_algorithm_070723',
                  'nn_algorithm_070723_results.csv'))
 
+nn_oversampling_adasyn = pd.read_csv(
+    os.path.join(main_folder, 'emotion_detection_system', 'json_results', 'data_experiments_nn_algorithm_os_adasyn_070823',
+                 'nn_algorithm_os_adasyn_070823_results.csv'))
+
 nn_bl_data_results = pd.read_csv(
     os.path.join(main_folder, 'emotion_detection_system', 'json_results', 'data_experiments_nn_algorithm_bl_310723',
                  'nn_algorithm_bl_310723_results.csv'))
