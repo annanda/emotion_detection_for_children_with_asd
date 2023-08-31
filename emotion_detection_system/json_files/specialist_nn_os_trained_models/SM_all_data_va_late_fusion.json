@@ -46,10 +46,10 @@
     }
   },
   "classifier_model": {
-    "all_modalities": "SVM",
+    "all_modalities": "NN",
     "audio": "",
     "video": "",
-    "early_fusion_model": "SVM"
+    "early_fusion_model": "NN"
   },
   "fusion_type": "late_fusion",
   "balanced_dataset": true,
@@ -58,6 +58,6 @@
   "RFE_algorithm": "svm_linear",
   "grid_search": false,
   "load_trained_model": true,
-  "model_to_load_experiment": "data_experiments_oversampling_random_050423",
-  "model_to_load_config": "specialist_050423_participant_03_va_late_fusion"
+  "model_to_load_experiment": "data_experiments_nn_algorithm_070723",
+  "model_to_load_config": "specialist_070723_participant_03_va_late_fusion"
 }

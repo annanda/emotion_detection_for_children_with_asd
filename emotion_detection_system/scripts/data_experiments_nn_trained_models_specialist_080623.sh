@@ -39,4 +39,3 @@ python entry_point.py ${INPUT_FOLDER}/SM_02_all_data_va_early_fusion.json> ${OUT
 
 echo "Starting new Data Experiment Configuration: HSM_02_all_data_va_late_fusion"
 python entry_point.py ${INPUT_FOLDER}/HSM_02_all_data_va_late_fusion.json> ${OUTPUT_FOLDER}/${SLUG}_${ANNOTATION}_HSM_02_all_data_va_late_fusion_${DATE}.txt
-
