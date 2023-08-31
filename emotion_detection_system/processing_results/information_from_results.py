@@ -28,7 +28,8 @@ nn_oversampling_data_results = pd.read_csv(
                  'nn_algorithm_070723_results.csv'))
 
 nn_oversampling_adasyn = pd.read_csv(
-    os.path.join(main_folder, 'emotion_detection_system', 'json_results', 'data_experiments_nn_algorithm_os_adasyn_070823',
+    os.path.join(main_folder, 'emotion_detection_system', 'json_results',
+                 'data_experiments_nn_algorithm_os_adasyn_070823',
                  'nn_algorithm_os_adasyn_070823_results.csv'))
 
 nn_bl_data_results = pd.read_csv(
@@ -349,16 +350,23 @@ def get_model_group(row):
         return 'SSM'
 
 
+def get_modality(row):
+    if row['Scenario'] == 'va_late_fusion' or row['Scenario'] == 'va_early_fusion':
+        return 'Multimodal'
+    else:
+        return row['Scenario']
+
+
 if __name__ == '__main__':
     # Example of configuration values
-    scenario = ['va_late_fusion', 'va_early_fusion']
+    scenario = ['va_late_fusion', 'va_early_fusion', 'a', 'v']
     annotation_type = ['parents']
     subset_data = 'sessions'
     resulting_df, baseline_df = get_subset_data(oversampling_data_results,
                                                 scenario=scenario,
                                                 annotation_type=annotation_type,
                                                 subdataset_case=subset_data)
-    compare_against_baseline(resulting_df, baseline_df, scenario, annotation_type, subset_data)
+    # compare_against_baseline(resulting_df, baseline_df, scenario, annotation_type, subset_data)
     # calculate_aggregated_f1_score(resulting_df, baseline_df)
     # calculate_best_f1_score(resulting_df, baseline_df)
 
@@ -368,4 +376,7 @@ if __name__ == '__main__':
     #                                       annotation_type=['parents', 'specialist'])
 
     # nn_bl_data_results['model_group'] = nn_bl_data_results.apply(lambda row: get_model_group(row), axis=1)
+    new_column = pd.DataFrame(columns=['Modality'])
+    new_column['Modality'] = resulting_df.apply(lambda row: get_modality(row), axis=1)
+    resulting_df = pd.concat([resulting_df, new_column], axis=1)
     # print('hi')
