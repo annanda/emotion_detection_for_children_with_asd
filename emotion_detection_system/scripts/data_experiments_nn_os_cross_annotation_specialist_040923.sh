@@ -35,8 +35,5 @@ echo "Starting new Data Experiment Configuration: SM_participant_03_va_late_fusi
 python entry_point.py ${INPUT_FOLDER}/SM_participant_03_va_late_fusion.json> ${OUTPUT_FOLDER}/${SLUG}_${ANNOTATION}_SM_participant_03_va_late_fusion_${DATE}.txt
 
 
-echo "Starting new Data Experiment Configuration: HSM_session_03_01_va_late_fusion_specialist"
-python entry_point.py ${INPUT_FOLDER}/HSM_session_03_01_va_late_fusion.json> ${OUTPUT_FOLDER}/${SLUG}_${ANNOTATION}_HSM_session_03_01_va_late_fusion_${DATE}.txt
-
-echo "Starting new Data Experiment Configuration: HSM_session_02_01_va_late_fusion_specialist"
-python entry_point.py ${INPUT_FOLDER}/HSM_session_02_01_va_late_fusion.json> ${OUTPUT_FOLDER}/${SLUG}_${ANNOTATION}_HSM_session_02_01_va_late_fusion_${DATE}.txt
+echo "Starting new Data Experiment Configuration: HSM_session_04_01_va_late_fusion_specialist"
+python entry_point.py ${INPUT_FOLDER}/HSM_session_04_01_va_late_fusion.json> ${OUTPUT_FOLDER}/${SLUG}_${ANNOTATION}_HSM_session_04_01_va_late_fusion_${DATE}.txt
