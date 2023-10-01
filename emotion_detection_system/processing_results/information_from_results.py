@@ -359,24 +359,34 @@ def get_modality(row):
 
 if __name__ == '__main__':
     # Example of configuration values
-    scenario = ['va_late_fusion', 'va_early_fusion', 'a', 'v']
-    annotation_type = ['parents']
-    subset_data = 'sessions'
-    resulting_df, baseline_df = get_subset_data(oversampling_data_results,
-                                                scenario=scenario,
-                                                annotation_type=annotation_type,
-                                                subdataset_case=subset_data)
-    # compare_against_baseline(resulting_df, baseline_df, scenario, annotation_type, subset_data)
-    # calculate_aggregated_f1_score(resulting_df, baseline_df)
-    # calculate_best_f1_score(resulting_df, baseline_df)
+    # scenario = ['va_late_fusion', 'va_early_fusion', 'a', 'v']
+    # annotation_type = ['parents']
+    # subset_data = 'sessions'
+    # resulting_df, baseline_df = get_subset_data(oversampling_data_results,
+    #                                             scenario=scenario,
+    #                                             annotation_type=annotation_type,
+    #                                             subdataset_case=subset_data)
+    # # compare_against_baseline(resulting_df, baseline_df, scenario, annotation_type, subset_data)
+    # # calculate_aggregated_f1_score(resulting_df, baseline_df)
+    # # calculate_best_f1_score(resulting_df, baseline_df)
+    #
+    # # compare_against_baseline_sessions(oversampling_data_results, scenario=['v'],
+    # #                                   annotation_type=['parents', 'specialist'])
+    # # compare_against_baseline_participants(oversampling_data_results, scenario=['v'],
+    # #                                       annotation_type=['parents', 'specialist'])
+    #
+    # # nn_bl_data_results['model_group'] = nn_bl_data_results.apply(lambda row: get_model_group(row), axis=1)
+    # new_column = pd.DataFrame(columns=['Modality'])
+    # new_column['Modality'] = resulting_df.apply(lambda row: get_modality(row), axis=1)
+    # resulting_df = pd.concat([resulting_df, new_column], axis=1)
+    # # print('hi')
 
-    # compare_against_baseline_sessions(oversampling_data_results, scenario=['v'],
-    #                                   annotation_type=['parents', 'specialist'])
-    # compare_against_baseline_participants(oversampling_data_results, scenario=['v'],
-    #                                       annotation_type=['parents', 'specialist'])
-
-    # nn_bl_data_results['model_group'] = nn_bl_data_results.apply(lambda row: get_model_group(row), axis=1)
-    new_column = pd.DataFrame(columns=['Modality'])
-    new_column['Modality'] = resulting_df.apply(lambda row: get_modality(row), axis=1)
-    resulting_df = pd.concat([resulting_df, new_column], axis=1)
-    # print('hi')
+    current_data = BASELINE_DATA
+    scenario = ['va_late_fusion', 'va_early_fusion']
+    annotation_type = ['parents', 'specialist']
+    subset_data = 'all_data'
+    bl_all, _ = get_subset_data(current_data,
+                                scenario=scenario,
+                                annotation_type=annotation_type,
+                                subdataset_case='all data')
+    print(bl_all)
