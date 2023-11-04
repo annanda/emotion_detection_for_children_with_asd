@@ -6,8 +6,6 @@ SLUG="data_experiments_nn_algorithm_bl_non_tuned_041123"
 ANNOTATION="specialist"
 INPUT_FOLDER="specialist_nn_algorithm_bl"
 
-data_experiments_nn_algorithm_bl_non_tuned_specialist_041123.sh
-
 OUTPUT_FOLDER="results/${SLUG}/specialist"
 mkdir -p ${OUTPUT_FOLDER}
 

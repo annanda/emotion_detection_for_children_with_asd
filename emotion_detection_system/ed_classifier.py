@@ -795,8 +795,8 @@ class EmotionDetectionClassifier:
         dict_models = {
             'SVM': svm.SVC(probability=True, class_weight=class_weight_setup),
             # Best Hyper-parameters
-            # 'NN': MLPClassifier(verbose=True, random_state=1, max_iter=500, alpha=1e-9, hidden_layer_sizes=(200, 100)),
-            'NN': MLPClassifier(verbose=True),
+            'NN': MLPClassifier(verbose=True, random_state=1, max_iter=500, alpha=1e-9, hidden_layer_sizes=(200, 100)),
+            # 'NN': MLPClassifier(verbose=True),
             # 'NN': MLPClassifier(alpha=1e-5, random_state=1, max_iter=500),
             # 'NN': MLPClassifier(solver='lbfgs', alpha=1e-5, random_state=1, max_iter=500)
         }
