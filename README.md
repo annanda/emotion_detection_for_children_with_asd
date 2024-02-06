@@ -1,11 +1,17 @@
 # Multimodal Emotion Detection System
 
-An end-to-end multimodal system to classify emotion zones. It supports two different type of input modalities, i.e.
+An end-to-end multimodal system to an end-to-end system to support the creation, evaluation, and analysis of
+uni/multimodal ED models for children with autism pre-configured to use the CALMED dataset. 
+It supports two different type of input modalities, i.e.
 video and audio.
 
-This system does not extract features from raw files, the user needs to provide a dataset of extracted features. The
-other system ```features extraction``` does the part of extracting features, generating an output to be used as input by
-this system.
+This system has the following features: 
+- Highly customisable configuration;
+- Automated setup for training and testing large numbers of models;
+- Recording of results, saving of trained models to later re-use;
+- Support for the creation of ensemble ED models;
+- Support for grouping, analysing and visualising results by querying over the evaluation metrics; 
+- Pre-configured to use the CALMED dataset, allowing a quick and easy start.
 
 The system supports any combination of features and inputs described in
 the [CALMED dataset paper](https://link.springer.com/chapter/10.1007/978-3-031-35681-0_43).
