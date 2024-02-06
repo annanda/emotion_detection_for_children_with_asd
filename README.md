@@ -1,54 +1,36 @@
 # Multimodal Emotion Detection System
 
-An end-to-end multimodal system to classify emotion zones. It supports three different type of input modalities, i.e.
-video, audio and physiological signals.
+An end-to-end multimodal system to classify emotion zones. It supports two different type of input modalities, i.e.
+video and audio.
 
 This system does not extract features from raw files, the user needs to provide a dataset of extracted features. The
 other system ```features extraction``` does the part of extracting features, generating an output to be used as input by
 this system.
 
-The system supports any combination of features and inputs listed below.
-
-### Modalities of input
-
-- video
-- audio
-
-### Visual features list
-
-- AU
-- appearance
-- BoVW
-- geometric
-- gaze
-- 2d_eye_landmark
-- 3d_eye_landmark
-- head_pose
-
-### Audio features list
-
-- BoAW
-- DeepSpectrum
-- eGeMAPSfunct
-
+The system supports any combination of features and inputs described in
+the [CALMED dataset paper](https://link.springer.com/chapter/10.1007/978-3-031-35681-0_43).
 
 ## Pre-requisites
-- Python 3.8 
+
+- Python 3.8
 - Docker
 
 ## Installation
+
 ### Development
+
 1. Prepare the virtual environment (Create and activate virtual environment with venv).
 
 `python -m venv ./venv`
 
 `source ./venv/bin/activate`
 
-2. Run the script 
+2. Run the script
 
 `python app.py`
 
 ### Deployment with Docker
+
 1. Build the images
 
 `docker compose build`
@@ -76,8 +58,8 @@ The system supports any combination of features and inputs listed below.
   method, or in case of just one modality.
 - model (within modality): the classifier model for the specific modality, usually used together with late fusion type.
 
+### Run data experiments script
 
-### Run data experiments script 
 Run the script from the main folder /emotion_detection_system
 
 * If you select a modality, you need to select at least one features type.
