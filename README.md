@@ -82,6 +82,14 @@ licence.
 
 Please refer to [LICENSE.md](LICENSE.md) file for details on the licence.
 
+## Citation
+
+If you use any of the resources provided on this repository in any of your publications we ask you to cite the following
+work:
+
+Sousa, Annanda, et al. "**Introducing CALMED: Multimodal Annotated Dataset for Emotion Detection in Children with Autism**."
+International Conference on Human-Computer Interaction. Cham: Springer Nature Switzerland, 2023.
+
 ----
 
 Author: Annanda Sousa
